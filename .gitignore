@@ -14,6 +14,7 @@ build/
 
 # AI tools 
 /.opencode
+/.specify
 
 # Log files
 *.log 

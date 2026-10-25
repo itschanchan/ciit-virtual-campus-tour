@@ -52,7 +52,7 @@ The CIIT Virtual Campus Tour follows the MVC Architecture: Model-View-Controller
 - Inside the root project folder, the `apps\` is the parent folder of `backend\` and `frontend\` folders.
 - The `backend\` folder contains all of the business logic and database management. The `.env` file and `.rest` file also in this folder and should excluded in the GitHub repository (`.gitignore`).
 - The `frontend\` folder contains all of the UI design and assets in the project.
-- Integration: Migrate the Marzipano API folders and files inside the `frontend\` folder. Convert it from JavaScript (`.js`) to ReactJS (`.jsx`) compatible.
+- Marzipano API Integration: If there is a `app-files` folder, then move the Marzipano API sub-folders and files inside the `frontend\` folder. Convert it from JavaScript (`.js`) to ReactJS (`.jsx`) compatible.
 
 ```
 
