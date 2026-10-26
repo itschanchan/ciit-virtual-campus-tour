@@ -1,0 +1,92 @@
+.sidebar {
+  display: none;
+  width: 20rem;
+  flex: 0 0 20rem;
+  padding: 1.25rem;
+  border-right: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.86);
+  overflow-y: auto;
+}
+
+.sidebar.is-open {
+  display: block;
+}
+
+.sidebar-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sidebar-heading h2 {
+  margin-bottom: 0;
+  font-size: 1.25rem;
+}
+
+.location-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location-button {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: rgba(30, 41, 59, 0.5);
+  color: var(--text);
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.location-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(30, 41, 59, 0.9);
+  transform: translateX(2px);
+}
+
+.location-button.is-current {
+  border-color: var(--accent);
+  background: rgba(56, 189, 248, 0.16);
+}
+
+.location-name {
+  font-weight: 700;
+}
+
+.location-description {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.location-button.is-current .location-description {
+  color: #bae6fd;
+}
+
+.sidebar-empty {
+  color: var(--muted);
+}
+
+@media (max-width: 1023px) {
+  .sidebar {
+    position: fixed;
+    top: 4rem;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    width: min(20rem, 86vw);
+    border-right-color: var(--border);
+    box-shadow: 1.5rem 0 4rem rgba(0, 0, 0, 0.35);
+  }
+}

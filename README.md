@@ -1,93 +1,122 @@
 # CIIT Virtual Campus Tour
 
-A web-based virtual campus where CIITzens can explore the newly built Glitch Tower virtually!
+A web-based virtual campus where CIITzens can explore the newly built Glitch Tower virtually.
 
-## Core MVP Features:
+## Core MVP Features
 
-- A 360° draggable panoramic view of featured locations in CIIT Glitch Tower Campus.
-- Side bar menu for quick and easy navigation across the campus.
-- Available in desktop and mobile!
+- A 360-degree draggable panoramic view of featured locations in the CIIT Glitch Tower campus.
+- A sidebar for quick navigation across campus locations.
+- Room galleries and narrated descriptions with transcripts.
+- Responsive, keyboard-accessible controls for desktop and mobile.
 
----
+## Tech Stack
 
-## Dev Setups
+- MongoDB, Mongoose, Express 5, and Node.js on the backend.
+- React 19, Vite 8, and Marzipano on the frontend.
+- Vitest for automated tests.
+- JavaScript ES modules throughout.
 
-This section contains instructions how to set up tools in the codebase.
+## Prerequisites
 
-### Clone GitHub Repository
+- Node.js 24.x (minimum 22.12) and npm.
+- Git.
+- A modern browser with JavaScript and WebGL enabled.
+- MongoDB is optional for viewing the tour. The backend health check reports unavailable when
+  MongoDB is not connected.
 
-There are two methods in cloning a repo which is using the VS Code UI (easy) and via terminal (faster but need to learn):
+## Install
 
-#### METHOD 1: VS Code GUI
+From the repository root:
 
-1. Launch **VS Code**.
-2. Enter `Ctrl + Shift + P` to open **Command Palette**.
-3. Search "**Git: Clone**"
-4. Select "**Clone from GitHub**"
-5. Paste this URL `https://github.com/itschanchan/ciit-virtual-campus-tour.git` and then open the repository.
-6. Choose a destination folder where you want to work the CIIT Virtual Campus Tour locally in your PC.
-7. Open the project and tadaaa! Happy coding :3
-
-#### METHOD 2: via Terminal
-
-You can clone this repository using the terminal in any OS that you are currently using.
-
-1. Open the terminal in VS Code.
-2. Go to your file path using the `cd` command.
-
-Examples:
-
-**Windows**
-
-```bash
-C:\user\my-projects\ciit-virtual-campus-tour>
+```powershell
+npm install
+npm run setup
+Copy-Item apps/backend/.env.example apps/backend/.env
 ```
 
-**Linux**
+On macOS or Linux, use:
 
 ```bash
-user@linux-os: /my-projects/ciit-virtual-campus-tour>
+npm install
+npm run setup
+cp apps/backend/.env.example apps/backend/.env
 ```
 
-3. Paste this command: `git clone https://github.com/itschanchan/ciit-virtual-campus-tour.git`
-4. Open the folder and you're good to go! :3
+`npm run setup` installs backend runtime dependencies and frontend dependencies. Backend test
+tooling and `cookie-parser` are intentionally deferred until the maintainer approves them.
 
----
+## Run
 
-### NodeJS Installation
-
-To install NodeJS, you must run the following commmands in your terminal:
-
-```bash
-nvm install --lts
+```powershell
+npm run dev
 ```
 
-Activate that version:
+This starts the Express API and the Vite frontend together. Open the Vite URL shown in the
+terminal. The tour content is bundled with the frontend, so a backend outage does not block the
+panorama, sidebar, gallery, or narration.
 
-```bash
-nvm use --lts
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run setup` | Install backend runtime and frontend dependencies. |
+| `npm run dev` | Run the backend and frontend together. |
+| `npm run test` | Run backend and frontend tests. Requires approved test tooling. |
+| `npm run lint` | Run ESLint for the frontend. |
+| `npm run build` | Build the frontend for production. |
+| `npm run verify:content` | Validate the catalog against its schema and check referenced assets. |
+| `npm run verify:ignore` | Verify the repository ignore policy. |
+
+## Project Structure
+
+```text
+apps/
+  backend/
+    config/        Environment and MongoDB configuration
+    controllers/   HTTP controllers
+    models/        Reserved for future user-data models
+    routes/        Express routes
+    services/      Business logic
+    tests/         Backend tests
+    utils/         Shared error and async helpers
+  frontend/
+    public/
+      panoramas/   Panorama tiles, gallery images, and narration audio
+    src/
+      api/         Optional backend status client
+      components/  Tour UI components
+      context/     Tour state and provider
+      lib/         Catalog validation and Marzipano integration
+      tests/       Frontend tests
 ```
 
-Check the version:
+## Content
 
-```bash
-node -v
-```
+Tour content lives in `apps/frontend/src/lib/catalog.json`. Media lives under
+`apps/frontend/public/panoramas/<location-slug>/`. When an `app-files` prototype folder is
+available, migrate its images and titles into those locations and update the catalog. Run
+`npm run verify:content` after every content change.
 
-#### Installing Package Dependencies
+The current catalog contains one development placeholder location. Replace it with real Glitch
+Tower content when available.
 
-Execute this command to install dependencies in your target folder:
+## Dependencies
 
-```bash
-npm install <package_name>
-```
+Every package must be approved before installation. See `CONTRIBUTING.md` for the approval table
+and the current deferrals. Do not install a package that is not declared in the relevant
+`package.json`.
 
-#### Scan and Repair Dependencies
+## Git Workflow
 
-This command is useful in fixing dependencies on `package.json` and `package-lock.json` files:
+1. Create a short-lived branch from `main`.
+2. Keep tests and documentation in the same branch as the change.
+3. Open a pull request using the template in `.github/pull_request_template.md`.
+4. Wait for review and passing checks before merging.
+5. Never commit directly to `main`.
 
-```bash
-npm audit fix
-```
+## Tool Configuration Tracking
 
----
+Shareable `.opencode/` and `.specify/` configuration is committed. Only secrets, dependency
+caches, build output, logs, editor state, coverage, and machine-local state are ignored. The
+authoritative policy is documented in `CONTRIBUTING.md`; run `npm run verify:ignore` after changing
+ignore rules.

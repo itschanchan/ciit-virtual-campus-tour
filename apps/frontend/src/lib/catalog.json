@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "defaultLocationId": "glitch-tower-lobby",
+  "locations": [
+    {
+      "id": "glitch-tower-lobby",
+      "name": "Glitch Tower Lobby",
+      "description": "Step into the lobby of CIIT's Glitch Tower and look around the welcome area.",
+      "order": 0,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the CIIT Virtual Campus Tour title over a blue and violet horizon.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the CIIT Virtual Campus Tour. This development placeholder will be replaced by the first Glitch Tower location. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    }
+  ]
+}

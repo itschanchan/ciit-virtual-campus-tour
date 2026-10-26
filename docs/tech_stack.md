@@ -15,29 +15,36 @@ This document is used for establishing the tech stack, foundational tools, core 
 | Frontend | React + Vite          | For building the modern User Interface (UI).                  |
 | Language | JavaScript (ESModule) | The main core language for frontend and backend.              |
 | Testing  | Vitest                | For units and integration testing.                            |
+| Frontend | CSS (custom)          | Responsive, accessible tour styling without another dependency. |
 
 ## Dependencies
 
 These are the core dependencies needed in the CIIT Virtual Campus Tour web-application. Look at the `package.json` file in each folder and check if there are missed dependencies in the codebase and ask before installing:
 
-| Layer    | Dependency   | Description                                                                   |
-| :------- | :----------- | :---------------------------------------------------------------------------- |
-| Backend  | cors         | Cross-Origin Resource Sharing, a security feature for web access and request. |
-| Backend  | dotenv       | Manages API keys and other environment variables `.env` file of the project.  |
-| Backend  | express      | Handles the server-side logic.                                                |
-| Backend  | jsonwebtoken | Handles web token access, for state authentication and authorization.         |
-| Backend  | mongoose     | For storing and managing database schemas.                                    |
-| Frontend | react        | ReactJS components.                                                           |
-| Frontend | react-dom    | The Document Object Model of React.                                           |
+| Layer    | Dependency   | Approval | Description                                                                   |
+| :------- | :----------- | :------- | :---------------------------------------------------------------------------- |
+| Backend  | cookie-parser | Deferred | For managing web cookies. Install when authentication work begins. |
+| Backend  | cors         | Approved | Cross-Origin Resource Sharing with an explicit origin allowlist. |
+| Backend  | dotenv       | Approved | Manages API keys and other environment variables in `.env`. |
+| Backend  | express      | Approved | Handles the server-side logic. |
+| Backend  | jsonwebtoken | Approved | Handles web token access for future authentication and authorization. |
+| Backend  | mongoose     | Approved | Stores and manages database schemas. |
+| Frontend | marzipano    | Approved | Renders the 360-degree panorama viewer. |
+| Frontend | react        | Approved | ReactJS components. |
+| Frontend | react-dom    | Approved | The Document Object Model of React. |
 
-| Layer       | DevDependency | Description                                                              |
-| :---------- | :------------ | :----------------------------------------------------------------------- |
-| Backend     | nodemon       | NodeJS dependency.                                                       |
-| Backend     | supertest     | For testing HTTP APIs and application endpoints.                         |
-| Backend     | vitest        | For unit and intergration testing.                                       |
-| Frontend    | eslint        | For linting (checking) of programming syntax.                            |
-| Frontend    | vite          | A fast frontend managing framework for fast deployment.                  |
-| Root folder | concurrently  | Running `npm run dev` for both frontend and backend in a single command. |
+| Layer       | DevDependency | Approval | Description                                                              |
+| :---------- | :------------ | :------- | :----------------------------------------------------------------------- |
+| Backend     | nodemon       | Deferred | NodeJS development reloader. `node --watch` is used until approved. |
+| Backend     | supertest     | Deferred | For testing HTTP APIs and application endpoints. |
+| Backend     | vitest        | Deferred | For unit and integration testing. |
+| Frontend    | @testing-library/react | Deferred | Component behavior tests. |
+| Frontend    | @testing-library/jest-dom | Deferred | Accessible DOM assertions. |
+| Frontend    | @testing-library/user-event | Deferred | Keyboard and pointer interaction tests. |
+| Frontend    | jsdom         | Deferred | Browser environment for Vitest. |
+| Frontend    | eslint        | Approved | For linting programming syntax. |
+| Frontend    | vite          | Approved | Frontend build and development server. |
+| Root folder | concurrently  | Approved | Runs `npm run dev` for both frontend and backend in one command. |
 
 **OPTIONAL DEPENDENCIES**:
 
@@ -52,7 +59,9 @@ The CIIT Virtual Campus Tour follows the MVC Architecture: Model-View-Controller
 - Inside the root project folder, the `apps\` is the parent folder of `backend\` and `frontend\` folders.
 - The `backend\` folder contains all of the business logic and database management. The `.env` file and `.rest` file also in this folder and should excluded in the GitHub repository (`.gitignore`).
 - The `frontend\` folder contains all of the UI design and assets in the project.
-- Marzipano API Integration: If there is a `app-files` folder, then move the Marzipano API sub-folders and files inside the `frontend\` folder. Convert it from JavaScript (`.js`) to ReactJS (`.jsx`) compatible.
+- Marzipano API Integration: If there is an `app-files` folder, then move the Marzipano API sub-folders and files inside the `frontend\` folder. Convert it from JavaScript (`.js`) to **ReactJS (`.jsx`)** compatible.
+- Tour content lives in `apps/frontend/src/lib/catalog.json`; panorama tiles, gallery images, and narration audio live under `apps/frontend/public/panoramas/<location-slug>/`.
+- Shareable `.opencode/` and `.specify/` configuration is tracked. Only secrets, dependency caches, build output, logs, editor state, coverage, and machine-local state are ignored.
 
 ```
 
@@ -100,3 +109,12 @@ root/
 ...
 
 ```
+
+## Foundation Implementation Notes
+
+- The frontend owns the static tour catalog and all media so the tour remains usable without the backend.
+- The backend exposes `GET /api/health`, validates environment configuration, and connects to MongoDB through Mongoose.
+- CORS uses an explicit origin allowlist from `CORS_ORIGIN`.
+- Run `npm install`, `npm run setup`, and copy `apps/backend/.env.example` to `apps/backend/.env` before development.
+- Use `npm run dev`, `npm run test`, `npm run lint`, `npm run build`, `npm run verify:content`, and `npm run verify:ignore` from the repository root.
+- Backend test tooling and `cookie-parser` remain deferred until the maintainer approves them.

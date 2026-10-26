@@ -4,7 +4,19 @@ node_modules/
 /apps/frontend/node_modules
 
 # Environment files
-*.env
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.*
+credentials.*
+/apps/backend/client.rest
 
 # Build output
 dist/
@@ -12,12 +24,8 @@ build/
 /apps/backend/dist
 /apps/frontend/dist
 
-# AI tools 
-/.opencode
-/.specify
-
 # Log files
-*.log 
+*.log
 npm-debug.log*
 
 # OS files
@@ -29,9 +37,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
-# IDE - REST client
-/apps/backend/client.rest
 
 # Coverage
 coverage/

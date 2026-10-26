@@ -1,0 +1,66 @@
+.panorama-viewer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #020617;
+  touch-action: none;
+}
+
+.panorama-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.panorama-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  width: min(28rem, calc(100% - 2rem));
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-soft);
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.panorama-status-error {
+  border-color: rgba(252, 165, 165, 0.5);
+  color: var(--danger);
+}
+
+.panorama-status-error span {
+  color: var(--text);
+}
+
+.panorama-instructions {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 5;
+  max-width: min(22rem, calc(100% - 10rem));
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 23, 0.66);
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .panorama-instructions {
+    top: auto;
+    bottom: 10.5rem;
+    left: 50%;
+    max-width: calc(100% - 1.5rem);
+    text-align: center;
+    transform: translateX(-50%);
+  }
+}
