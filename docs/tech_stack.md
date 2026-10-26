@@ -15,36 +15,36 @@ This document is used for establishing the tech stack, foundational tools, core 
 | Frontend | React + Vite          | For building the modern User Interface (UI).                  |
 | Language | JavaScript (ESModule) | The main core language for frontend and backend.              |
 | Testing  | Vitest                | For units and integration testing.                            |
-| Frontend | CSS (custom)          | Responsive, accessible tour styling without another dependency. |
+| Frontend | Tailwind CSS          | Styling CSS directly in HTML files.                           |
 
 ## Dependencies
 
 These are the core dependencies needed in the CIIT Virtual Campus Tour web-application. Look at the `package.json` file in each folder and check if there are missed dependencies in the codebase and ask before installing:
 
-| Layer    | Dependency   | Approval | Description                                                                   |
-| :------- | :----------- | :------- | :---------------------------------------------------------------------------- |
-| Backend  | cookie-parser | Deferred | For managing web cookies. Install when authentication work begins. |
-| Backend  | cors         | Approved | Cross-Origin Resource Sharing with an explicit origin allowlist. |
-| Backend  | dotenv       | Approved | Manages API keys and other environment variables in `.env`. |
-| Backend  | express      | Approved | Handles the server-side logic. |
-| Backend  | jsonwebtoken | Approved | Handles web token access for future authentication and authorization. |
-| Backend  | mongoose     | Approved | Stores and manages database schemas. |
-| Frontend | marzipano    | Approved | Renders the 360-degree panorama viewer. |
-| Frontend | react        | Approved | ReactJS components. |
-| Frontend | react-dom    | Approved | The Document Object Model of React. |
+| Layer    | Dependency    | Approval | Description                                                           |
+| :------- | :------------ | :------- | :-------------------------------------------------------------------- |
+| Backend  | cookie-parser | Deferred | For managing web cookies. Install when authentication work begins.    |
+| Backend  | cors          | Approved | Cross-Origin Resource Sharing with an explicit origin allowlist.      |
+| Backend  | dotenv        | Approved | Manages API keys and other environment variables in `.env`.           |
+| Backend  | express       | Approved | Handles the server-side logic.                                        |
+| Backend  | jsonwebtoken  | Approved | Handles web token access for future authentication and authorization. |
+| Backend  | mongoose      | Approved | Stores and manages database schemas.                                  |
+| Frontend | marzipano     | Approved | Renders the 360-degree panorama viewer.                               |
+| Frontend | react         | Approved | ReactJS components.                                                   |
+| Frontend | react-dom     | Approved | The Document Object Model of React.                                   |
 
-| Layer       | DevDependency | Approval | Description                                                              |
-| :---------- | :------------ | :------- | :----------------------------------------------------------------------- |
-| Backend     | nodemon       | Deferred | NodeJS development reloader. `node --watch` is used until approved. |
-| Backend     | supertest     | Deferred | For testing HTTP APIs and application endpoints. |
-| Backend     | vitest        | Deferred | For unit and integration testing. |
-| Frontend    | @testing-library/react | Deferred | Component behavior tests. |
-| Frontend    | @testing-library/jest-dom | Deferred | Accessible DOM assertions. |
-| Frontend    | @testing-library/user-event | Deferred | Keyboard and pointer interaction tests. |
-| Frontend    | jsdom         | Deferred | Browser environment for Vitest. |
-| Frontend    | eslint        | Approved | For linting programming syntax. |
-| Frontend    | vite          | Approved | Frontend build and development server. |
-| Root folder | concurrently  | Approved | Runs `npm run dev` for both frontend and backend in one command. |
+| Layer       | DevDependency               | Approval | Description                                                         |
+| :---------- | :-------------------------- | :------- | :------------------------------------------------------------------ |
+| Backend     | nodemon                     | Deferred | NodeJS development reloader. `node --watch` is used until approved. |
+| Backend     | supertest                   | Deferred | For testing HTTP APIs and application endpoints.                    |
+| Backend     | vitest                      | Deferred | For unit and integration testing.                                   |
+| Frontend    | @testing-library/react      | Deferred | Component behavior tests.                                           |
+| Frontend    | @testing-library/jest-dom   | Deferred | Accessible DOM assertions.                                          |
+| Frontend    | @testing-library/user-event | Deferred | Keyboard and pointer interaction tests.                             |
+| Frontend    | jsdom                       | Deferred | Browser environment for Vitest.                                     |
+| Frontend    | eslint                      | Approved | For linting programming syntax.                                     |
+| Frontend    | vite                        | Approved | Frontend build and development server.                              |
+| Root folder | concurrently                | Approved | Runs `npm run dev` for both frontend and backend in one command.    |
 
 **OPTIONAL DEPENDENCIES**:
 
