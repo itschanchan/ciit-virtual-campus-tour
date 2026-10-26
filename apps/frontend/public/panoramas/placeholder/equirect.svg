@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1024" viewBox="0 0 2048 1024" role="img" aria-labelledby="title desc">
+  <title id="title">CIIT campus placeholder panorama</title>
+  <desc id="desc">A development placeholder showing a blue and violet horizon with the CIIT Virtual Campus Tour label.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="55%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="2048" height="1024" fill="url(#sky)"/>
+  <circle cx="1024" cy="512" r="300" fill="#ffffff" fill-opacity="0.08"/>
+  <text x="1024" y="490" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="96" font-weight="700">CIIT</text>
+  <text x="1024" y="570" text-anchor="middle" fill="#dbeafe" font-family="system-ui, sans-serif" font-size="38">Virtual Campus Tour</text>
+  <text x="1024" y="640" text-anchor="middle" fill="#c4b5fd" font-family="system-ui, sans-serif" font-size="28">Development placeholder panorama</text>
+</svg>

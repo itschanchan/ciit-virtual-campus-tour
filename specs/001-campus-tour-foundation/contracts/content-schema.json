@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciit.example/schemas/tour-catalog.schema.json",
+  "title": "CIIT Virtual Campus Tour Catalog",
+  "description": "Static catalog of campus tour locations and their media.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "defaultLocationId", "locations"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of the catalog format."
+    },
+    "defaultLocationId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Must match the id of one location in the locations array."
+    },
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/location" }
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description", "order", "panorama"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "Unique lowercase kebab-case identifier."
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "order": { "type": "integer", "minimum": 0 },
+        "panorama": { "$ref": "#/$defs/panoramaScene" },
+        "gallery": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/galleryImage" }
+        },
+        "narration": { "$ref": "#/$defs/narration" }
+      }
+    },
+    "panoramaScene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tileUrlTemplate", "initialView", "minFov", "maxFov"],
+      "properties": {
+        "tileUrlTemplate": {
+          "type": "string",
+          "pattern": "\\{z\\}",
+          "description": "Root-relative tile URL containing {z}, {y}, and {x} placeholders."
+        },
+        "previewUrl": { "type": "string", "minLength": 1 },
+        "initialView": { "$ref": "#/$defs/viewParameters" },
+        "minFov": { "type": "number", "exclusiveMinimum": 0 },
+        "maxFov": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "viewParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["yaw", "pitch", "fov"],
+      "properties": {
+        "yaw": { "type": "number" },
+        "pitch": { "type": "number" },
+        "fov": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "galleryImage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["src", "alt", "order"],
+      "properties": {
+        "src": { "type": "string", "minLength": 1 },
+        "alt": { "type": "string", "minLength": 1 },
+        "caption": { "type": "string" },
+        "order": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "narration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audioSrc", "transcript"],
+      "properties": {
+        "audioSrc": { "type": "string", "minLength": 1 },
+        "transcript": { "type": "string", "minLength": 1 },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}
