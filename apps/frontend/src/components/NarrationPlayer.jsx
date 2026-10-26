@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import './NarrationPlayer.css'
 
 const STATUS_LABELS = {
   idle: 'Narration ready.',
@@ -74,11 +73,14 @@ export default function NarrationPlayer({
         : 'Play narration'
 
   return (
-    <section className="narration-player" aria-label="Narration">
-      <div className="narration-controls">
+    <section
+      className="absolute bottom-4 left-1/2 z-[7] w-[min(48rem,calc(100%_-_2rem))] -translate-x-1/2 rounded-panel border border-line bg-surface/90 px-4 py-[0.9rem] shadow-narration backdrop-blur-narration narrow:bottom-0 narrow:w-full narrow:rounded-t-panel narrow:rounded-b-none narrow:border-x-0 narrow:border-b-0"
+      aria-label="Narration"
+    >
+      <div className="flex flex-wrap items-center gap-[0.6rem]">
         <button
           type="button"
-          className="primary-button"
+          className="inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent px-4 py-[0.55rem] font-bold text-accent-ink transition-colors hover:bg-accent-hover"
           onClick={playing ? handlePause : handlePlay}
           aria-label={buttonLabel}
         >
@@ -88,7 +90,7 @@ export default function NarrationPlayer({
 
         <button
           type="button"
-          className="secondary-button"
+          className="inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-line bg-surface-soft px-4 py-[0.55rem] font-bold text-ink transition-colors hover:border-accent hover:text-accent"
           aria-expanded={transcriptOpen}
           aria-controls="narration-transcript"
           onClick={() => setTranscriptOpen((current) => !current)}
@@ -97,7 +99,9 @@ export default function NarrationPlayer({
         </button>
 
         {narration.durationSeconds && (
-          <span className="narration-duration">{narration.durationSeconds}s</span>
+          <span className="ml-auto text-[0.82rem] text-muted narrow:hidden">
+            {narration.durationSeconds}s
+          </span>
         )}
       </div>
 
@@ -106,26 +110,36 @@ export default function NarrationPlayer({
       </p>
 
       {status === 'blocked' && (
-        <p className="narration-notice" role="status">
+        <p
+          className="mt-3 mb-0 rounded-[0.35rem] border-l-[3px] border-accent bg-accent-notice px-3 py-[0.6rem] text-[0.86rem] text-selected-ink"
+          role="status"
+        >
           Playback was blocked by your browser. Open the transcript to read the narration.
         </p>
       )}
 
       {status === 'error' && (
-        <p className="narration-notice" role="alert">
+        <p
+          className="mt-3 mb-0 rounded-[0.35rem] border-l-[3px] border-accent bg-accent-notice px-3 py-[0.6rem] text-[0.86rem] text-selected-ink"
+          role="alert"
+        >
           The narration could not be played. Open the transcript to read it instead.
         </p>
       )}
 
       {transcriptOpen && (
-        <div id="narration-transcript" className="narration-transcript">
-          <h3>Transcript</h3>
-          <p>{narration.transcript}</p>
+        <div
+          id="narration-transcript"
+          className="mt-[0.8rem] max-h-44 overflow-y-auto border-t border-line pt-[0.8rem]"
+        >
+          <h3 className="mb-[0.4rem] text-[0.95rem]">Transcript</h3>
+          <p className="mb-0 text-[0.9rem] leading-[1.55] text-muted">{narration.transcript}</p>
         </div>
       )}
 
       <audio
         ref={audioRef}
+        className="hidden"
         src={narration.audioSrc}
         preload="none"
         onPlaying={() => onStatusChange?.('playing')}

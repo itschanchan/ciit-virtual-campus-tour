@@ -15,7 +15,7 @@ This document is used for establishing the tech stack, foundational tools, core 
 | Frontend | React + Vite          | For building the modern User Interface (UI).                  |
 | Language | JavaScript (ESModule) | The main core language for frontend and backend.              |
 | Testing  | Vitest                | For units and integration testing.                            |
-| Frontend | Tailwind CSS          | Styling CSS directly in HTML files.                           |
+| Frontend | Tailwind CSS          | Utility-first styling for the tour interface.               |
 
 ## Dependencies
 
@@ -44,6 +44,8 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 | Frontend    | jsdom                       | Deferred | Browser environment for Vitest.                                     |
 | Frontend    | eslint                      | Approved | For linting programming syntax.                                     |
 | Frontend    | vite                        | Approved | Frontend build and development server.                              |
+| Frontend    | tailwindcss                 | Approved | Utility-first styling engine for the tour interface.                |
+| Frontend    | @tailwindcss/vite           | Approved | Official Vite integration for Tailwind CSS.                         |
 | Root folder | concurrently                | Approved | Runs `npm run dev` for both frontend and backend in one command.    |
 
 **OPTIONAL DEPENDENCIES**:
@@ -113,6 +115,7 @@ root/
 ## Foundation Implementation Notes
 
 - The frontend owns the static tour catalog and all media so the tour remains usable without the backend.
+- Tailwind CSS is the primary frontend styling approach. Design tokens live in `apps/frontend/src/index.css`, and contributor conventions live in `docs/styling.md`.
 - The backend exposes `GET /api/health`, validates environment configuration, and connects to MongoDB through Mongoose.
 - CORS uses an explicit origin allowlist from `CORS_ORIGIN`.
 - Run `npm install`, `npm run setup`, and copy `apps/backend/.env.example` to `apps/backend/.env` before development.

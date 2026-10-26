@@ -1,4 +1,3 @@
-import './App.css'
 import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import { TourProvider } from './context/TourContext'
