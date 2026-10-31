@@ -1,0 +1,19 @@
+{
+  "name": "ciit-virtual-campus-tour",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CIIT Virtual Campus Tour foundation",
+  "scripts": {
+    "setup": "npm install --omit=dev --prefix apps/backend && npm install --prefix apps/frontend",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix apps/backend run dev\" \"npm --prefix apps/frontend run dev\"",
+    "test": "npm --prefix apps/backend run test && npm --prefix apps/frontend run test",
+    "lint": "npm --prefix apps/frontend run lint",
+    "build": "npm --prefix apps/frontend run build",
+    "verify:content": "node scripts/verify-content.mjs",
+    "verify:ignore": "node scripts/verify-ignore-policy.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
