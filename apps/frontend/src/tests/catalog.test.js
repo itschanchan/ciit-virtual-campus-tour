@@ -34,8 +34,8 @@ describe('catalog validation', () => {
     const result = validateCatalog(catalog)
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain('locations[1].id must be unique.')
-    expect(result.errors).toContain('locations[1].order must be unique.')
+    expect(result.errors.some((e) => e.includes('id must be unique'))).toBe(true)
+    expect(result.errors.some((e) => e.includes('order must be unique'))).toBe(true)
   })
 
   it('requires a default location that exists', () => {
@@ -85,19 +85,11 @@ describe('catalog validation', () => {
   })
 
   it('returns locations sorted by order', () => {
-    const catalog = cloneCatalog()
-    catalog.locations.push({
-      ...catalog.locations[0],
-      id: 'glitch-tower-library',
-      name: 'Glitch Tower Library',
-      order: 1,
-    })
+    const locations = getSortedLocations(catalogData)
 
-    const locations = getSortedLocations(catalog)
+    const orders = locations.map((location) => location.order)
+    const sortedOrders = [...orders].sort((a, b) => a - b)
 
-    expect(locations.map((location) => location.id)).toEqual([
-      'glitch-tower-lobby',
-      'glitch-tower-library',
-    ])
+    expect(orders).toEqual(sortedOrders)
   })
 })

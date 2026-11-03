@@ -11,12 +11,12 @@ try {
   process.exit(1)
 }
 
-try {
-  await connectDatabase(config.mongoUri)
-  console.log('MongoDB connection established.')
-} catch (error) {
-  console.warn(`MongoDB is unavailable: ${error.message}`)
-}
+// Attempt MongoDB connection without blocking server startup.
+// The tour works from local files during the temporary phase;
+ // database is optional.
+connectDatabase(config.mongoUri)
+  .then(() => console.log('MongoDB connection established.'))
+  .catch((error) => console.warn(`MongoDB is unavailable: ${error.message}. Continuing with local tour files.`))
 
 const app = createApp({ corsOrigins: config.corsOrigins })
 
