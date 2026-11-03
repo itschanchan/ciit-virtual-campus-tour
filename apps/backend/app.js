@@ -5,6 +5,7 @@ import express from 'express'
 import { createHealthService } from './services/healthService.js'
 import { createHealthRoutes } from './routes/healthRoutes.js'
 import { createAuthRoutes } from './routes/authRoutes.js'
+import { createTourRoutes } from './routes/tourRoutes.js'
 import { errorHandler, notFoundHandler } from './utils/errors.js'
 
 dotenv.config()
@@ -33,6 +34,7 @@ export function createApp({
 
   app.use('/api/health', createHealthRoutes(healthService))
   app.use('/api/auth', createAuthRoutes())
+  app.use('/api/tour', createTourRoutes())
   app.use(notFoundHandler)
   app.use(errorHandler)
 
