@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Popover from "@mui/material/Popover";
 import { isCompactViewport } from "../lib/viewport";
 
 const FLOOR_SEQUENCE = [
@@ -77,25 +80,6 @@ function getFloorStatus(location, locked) {
   }
 
   return null;
-}
-
-function ChevronIcon({ direction }) {
-  const rotation = direction === "leftz" ? "" : "rotate-180";
-
-  return (
-    <svg
-      className={`size-4 ${rotation}`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
 }
 
 function SidebarLogo({ logoUrl }) {
@@ -199,13 +183,8 @@ export default function Sidebar({
   onOpen,
   logoUrl,
 }) {
-  const [noticeFloor, setNoticeFloor] = useState(null);
-  const noticeTimer = useRef(null);
+  const [notice, setNotice] = useState(null);
   const floorItems = buildFloorItems(locations);
-
-  useEffect(() => {
-    return () => clearTimeout(noticeTimer.current);
-  }, []);
 
   function handleToggle() {
     if (open) {
@@ -226,9 +205,11 @@ export default function Sidebar({
 
   function handleLockedFloor(floor, event) {
     shakeElement(event.currentTarget);
-    setNoticeFloor(floor);
-    clearTimeout(noticeTimer.current);
-    noticeTimer.current = setTimeout(() => setNoticeFloor(null), 2200);
+    setNotice({ floor, anchorEl: event.currentTarget });
+  }
+
+  function handleCloseNotice() {
+    setNotice(null);
   }
 
   const shellState = open ? "w-80 translate-x-0" : "w-0 -translate-x-full";
@@ -264,8 +245,6 @@ export default function Sidebar({
             onSelect={handleSelect}
             onLocked={handleLockedFloor}
           />
-
-          <Button>Share</Button>
         </div>
       </aside>
 
@@ -277,18 +256,37 @@ export default function Sidebar({
         aria-controls="location-sidebar"
         onClick={handleToggle}
       >
-        <ChevronIcon direction={open ? "right" : "left"} />
+        {open ? (
+          <ChevronLeftIcon fontSize="small" />
+        ) : (
+          <ChevronRightIcon fontSize="small" />
+        )}
       </button>
 
-      {noticeFloor && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-accent/40 bg-surface-strong px-4 py-2 text-sm font-bold text-ink shadow-sidebar"
-        >
-          {noticeFloor} is coming soon.
-        </div>
-      )}
+      <Popover
+        open={Boolean(notice)}
+        anchorEl={notice?.anchorEl ?? null}
+        onClose={handleCloseNotice}
+        anchorOrigin={{ vertical: "center", horizontal: "right" }}
+        transformOrigin={{ vertical: "center", horizontal: "left" }}
+        slotProps={{
+          paper: {
+            role: "status",
+            "aria-live": "polite",
+            sx: {
+              borderRadius: "var(--radius-location)",
+              border: "1px solid var(--color-accent)",
+              backgroundColor: "var(--color-surface-strong)",
+              color: "var(--color-ink)",
+              boxShadow: "var(--shadow-sidebar)",
+            },
+          },
+        }}
+      >
+        <p className="m-0 px-4 py-2 text-sm font-bold">
+          {notice?.floor} is coming soon.
+        </p>
+      </Popover>
     </>
   );
 }
