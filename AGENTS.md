@@ -40,6 +40,16 @@
 - **Limit Property Renaming:** Do not aggressively rename variables while destructuring unless it is absolutely necessary to avoid naming collisions (e.g., avoid `const { user_id: id } = data;` if `user_id` works fine).
 - **No Complex Default Value Chains:** Avoid heavy fallback configurations inside the destructuring block (e.g., `const { tags = ['general'], theme: { color = 'blue' } = {} } = config;`). Use explicit nullish coalescing (`??`) or guard clauses on subsequent lines instead.
 
+### TailwindCSS Simplification Rules
+
+- **Use Standard Utility Classes**: Stick to standard Tailwind design tokens. Avoid custom arbitrary values (e.g., use p-4 instead of p-[17px], bg-blue-600 instead of bg-[#2563eb]) unless strictly required by design specs.
+
+- **Avoid Over-Complicated Utility Chains**: Keep class lists simple, readable, and non-repetitive. Do not stack redundant or conflicting utilities (e.g., block flex or p-4 px-2).
+
+- **Clean Dynamic Classes**: Avoid complex string interpolation or deeply nested ternary logic inside className. Use clear boolean flags with simple helper functions like clsx or cn().
+
+- **Prefer Component Abstraction**: For complex or recurring UI elements, extract clean, reusable components instead of relying on long, unreadable utility class strings or heavy custom CSS overrides. Use a global theme file for easier class values management.
+
 ### Preferred Clean Syntax Patterns
 
 - **Explicit over Implicit:** Write clear, self-explanatory variable and function names. Do not prioritize saving keystrokes over clarity.
