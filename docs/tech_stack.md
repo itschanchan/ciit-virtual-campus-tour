@@ -16,6 +16,7 @@ This document is used for establishing the tech stack, foundational tools, core 
 | Language | JavaScript (ESModule) | The main core language for frontend and backend.              |
 | Testing  | Vitest                | For units and integration testing.                            |
 | Frontend | Tailwind CSS          | Utility-first styling for the tour interface.               |
+| Frontend | MUI (Material UI)     | Accessible React components for future interface surfaces.  |
 
 ## Dependencies
 
@@ -29,6 +30,10 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 | Backend  | express       | Approved | Handles the server-side logic.                                        |
 | Backend  | jsonwebtoken  | Approved | Handles web token access for future authentication and authorization. |
 | Backend  | mongoose      | Approved | Stores and manages database schemas.                                  |
+| Frontend | @emotion/react       | Approved | Required style-engine peer for MUI components.                        |
+| Frontend | @emotion/styled      | Approved | Required styled-component peer for MUI components.                    |
+| Frontend | @mui/icons-material  | Approved | Material icon components used with MUI controls.                      |
+| Frontend | @mui/material        | Approved | Accessible React component library for future interface surfaces.     |
 | Frontend | marzipano     | Approved | Renders the 360-degree panorama viewer.                               |
 | Frontend | react         | Approved | ReactJS components.                                                   |
 | Frontend | react-dom     | Approved | The Document Object Model of React.                                   |
@@ -116,6 +121,7 @@ root/
 
 - The frontend owns the static tour catalog and all media so the tour remains usable without the backend.
 - Tailwind CSS is the primary frontend styling approach. Design tokens live in `apps/frontend/src/index.css`, and contributor conventions live in `docs/styling.md`.
+- MUI (Material UI) is an approved additive component library. Existing tour components remain on Tailwind, MUI `CssBaseline` is not mounted globally, and Tailwind Preflight stays disabled. New MUI surfaces belong in `apps/frontend/src/components/` and follow the coexistence rules in `specs/003-add-mui-dependencies/contracts/ui-contract.md`.
 - The backend exposes `GET /api/health`, validates environment configuration, and connects to MongoDB through Mongoose.
 - CORS uses an explicit origin allowlist from `CORS_ORIGIN`.
 - Run `npm install`, `npm run setup`, and copy `apps/backend/.env.example` to `apps/backend/.env` before development.
