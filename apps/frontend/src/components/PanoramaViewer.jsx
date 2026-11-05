@@ -144,7 +144,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         </div>
       )}
 
-      <p className="pointer-events-none absolute top-4 left-4 z-[5] m-0 max-w-[min(22rem,calc(100%_-_10rem))] rounded-instruction border border-muted/25 bg-canvas/66 px-3 py-2.5 text-[0.82rem] text-instruction narrow:top-auto narrow:bottom-[10.5rem] narrow:left-1/2 narrow:max-w-[calc(100%_-_1.5rem)] narrow:-translate-x-1/2 narrow:text-center">
+      <p className="pointer-events-none absolute top-20 left-4 z-[5] m-0 max-w-[min(22rem,calc(100%_-_10rem))] rounded-instruction border border-muted/25 bg-canvas/66 px-3 py-2.5 text-[0.82rem] text-instruction narrow:top-auto narrow:bottom-[10.5rem] narrow:left-1/2 narrow:max-w-[calc(100%_-_1.5rem)] narrow:-translate-x-1/2 narrow:text-center">
         Drag to look around. Use the arrow keys to rotate and plus or minus to zoom.
       </p>
     </section>

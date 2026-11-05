@@ -1,20 +1,26 @@
-import { isCompactViewport } from '../lib/viewport'
+import { isCompactViewport } from "../lib/viewport";
 
-export default function Sidebar({ locations, currentLocationId, open, onSelect, onClose }) {
-  const sortedLocations = [...locations].sort((a, b) => a.order - b.order)
+export default function Sidebar({
+  locations,
+  currentLocationId,
+  open,
+  onSelect,
+  onClose,
+}) {
+  const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
 
   function handleSelect(locationId) {
-    onSelect(locationId)
+    onSelect(locationId);
 
     if (isCompactViewport()) {
-      onClose?.()
+      onClose?.();
     }
   }
 
   return (
     <aside
       id="location-sidebar"
-      className={`w-80 flex-none overflow-y-auto border-r border-line bg-surface/86 p-5 compact:fixed compact:top-16 compact:bottom-0 compact:left-0 compact:z-30 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${open ? 'block' : 'hidden'}`}
+      className={`w-80 flex-none overflow-y-auto border-r bg-surface/86 p-5 pt-20 compact:fixed compact:top-16 compact:bottom-0 compact:left-0 compact:z-30 compact:w-[min(20rem,86vw)] compact:pt-5 compact:shadow-sidebar ${open ? "block" : "hidden"}`}
       aria-label="Campus locations"
       aria-hidden={!open}
     >
@@ -41,8 +47,8 @@ export default function Sidebar({ locations, currentLocationId, open, onSelect, 
         <nav aria-label="Tour locations">
           <ul className="m-0 grid list-none gap-[0.6rem] p-0">
             {sortedLocations.map((location) => {
-              const available = Boolean(location.panorama)
-              const current = location.id === currentLocationId
+              const available = Boolean(location.panorama);
+              const current = location.id === currentLocationId;
 
               return (
                 <li key={location.id}>
@@ -50,28 +56,30 @@ export default function Sidebar({ locations, currentLocationId, open, onSelect, 
                     type="button"
                     className={`grid w-full gap-1 rounded-location border px-[0.9rem] py-[0.8rem] text-left text-ink transition disabled:cursor-not-allowed disabled:opacity-55 ${
                       current
-                        ? 'border-accent bg-accent-soft'
-                        : 'border-line bg-surface-strong/50 enabled:hover:translate-x-0.5 enabled:hover:border-accent enabled:hover:bg-surface-strong/90'
+                        ? "border-accent bg-accent-soft"
+                        : "border-line bg-surface-strong/50 enabled:hover:translate-x-0.5 enabled:hover:border-accent enabled:hover:bg-surface-strong/90"
                     }`}
-                    aria-current={current ? 'true' : undefined}
+                    aria-current={current ? "true" : undefined}
                     onClick={() => handleSelect(location.id)}
                     disabled={!available}
                   >
                     <span className="font-bold">{location.name}</span>
                     <span
                       className={`text-[0.82rem] leading-[1.4] ${
-                        current ? 'text-selected-ink' : 'text-muted'
+                        current ? "text-selected-ink" : "text-muted"
                       }`}
                     >
-                      {available ? location.description : 'This location is unavailable.'}
+                      {available
+                        ? location.description
+                        : "This location is unavailable."}
                     </span>
                   </button>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
       )}
     </aside>
-  )
+  );
 }
