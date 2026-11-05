@@ -1,4 +1,194 @@
+import { useEffect, useRef, useState } from "react";
 import { isCompactViewport } from "../lib/viewport";
+
+const FLOOR_SEQUENCE = [
+  "UG",
+  "LG",
+  "1F",
+  "2F",
+  "3F",
+  "4F",
+  "5F",
+  "5M",
+  "6F",
+  "7F",
+  "8F",
+  "9F",
+  "10F",
+  "11F",
+];
+
+const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
+
+function buildFloorItems(locations) {
+  const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
+  const items = FLOOR_SEQUENCE.map((floor, index) => ({
+    floor,
+    location: sortedLocations[index] ?? null,
+  }));
+
+  return items.reverse();
+}
+
+function prefersReducedMotion() {
+  if (
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
+    return false;
+  }
+
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function shakeElement(element) {
+  if (
+    !element ||
+    typeof element.animate !== "function" ||
+    prefersReducedMotion()
+  ) {
+    return;
+  }
+
+  element.animate(
+    [
+      { transform: "translateX(0)" },
+      { transform: "translateX(-4px)" },
+      { transform: "translateX(4px)" },
+      { transform: "translateX(-2px)" },
+      { transform: "translateX(2px)" },
+      { transform: "translateX(0)" },
+    ],
+    { duration: 320, easing: "ease-in-out" },
+  );
+}
+
+function getFloorStatus(location, locked) {
+  if (locked) {
+    return "Coming soon.";
+  }
+
+  if (!location) {
+    return "No panorama available yet.";
+  }
+
+  if (!location.panorama) {
+    return "This location is unavailable.";
+  }
+
+  return null;
+}
+
+function ChevronIcon({ direction }) {
+  const rotation = direction === "leftz" ? "" : "rotate-180";
+
+  return (
+    <svg
+      className={`size-4 ${rotation}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function SidebarLogo({ logoUrl }) {
+  return (
+    <div className="mb-5 flex flex-col items-center gap-2 border-b border-line pb-5 text-center">
+      {logoUrl ? (
+        <img src={logoUrl} alt="CIIT logo" className="h-16 w-auto" />
+      ) : (
+        <span className="rounded-mark bg-accent px-3 py-1 text-lg font-black tracking-[0.12em] text-accent-ink">
+          CIIT
+        </span>
+      )}
+      <p className="mb-0 text-[0.8rem] font-bold tracking-[0.12em] text-ink uppercase">
+        360 Virtual Campus Tour
+      </p>
+    </div>
+  );
+}
+
+function FloorButton({ floor, location, current, onSelect, onLocked }) {
+  const locked = LOCKED_FLOORS.has(floor);
+  const available = Boolean(location?.panorama);
+  const disabled = !locked && !available;
+  const status = getFloorStatus(location, locked);
+
+  function handleClick(event) {
+    if (locked) {
+      onLocked(floor, event);
+      return;
+    }
+
+    if (location) {
+      onSelect(location.id);
+    }
+  }
+
+  const stateClass = current
+    ? "border-accent bg-accent-soft"
+    : "border-line bg-surface-strong/50";
+  const interactionClass = locked
+    ? "bg-surface-strong/30 text-muted"
+    : "enabled:hover:translate-x-0.5 enabled:hover:border-accent enabled:hover:bg-surface-strong/90";
+  const detailClass = current ? "text-selected-ink" : "text-muted";
+
+  return (
+    <button
+      type="button"
+      className={`grid w-full gap-1 rounded-location border px-[0.9rem] py-[0.8rem] text-left text-ink transition ${stateClass} ${interactionClass}`}
+      aria-current={current ? "true" : undefined}
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      <span className="flex items-center justify-between gap-2">
+        <span className="text-[0.95rem] font-black tracking-[0.08em]">
+          {floor}
+        </span>
+        {locked && (
+          <span className="text-[0.7rem] font-bold tracking-[0.08em] uppercase">
+            Locked
+          </span>
+        )}
+      </span>
+      {location && (
+        <span className={`font-bold ${detailClass}`}>{location.name}</span>
+      )}
+      {status && (
+        <span className={`text-[0.82rem] leading-[1.4] ${detailClass}`}>
+          {status}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function FloorList({ items, currentLocationId, onSelect, onLocked }) {
+  return (
+    <nav aria-label="Campus floors">
+      <ul className="m-0 grid list-none gap-[0.6rem] p-0">
+        {items.map(({ floor, location }) => (
+          <li key={floor}>
+            <FloorButton
+              floor={floor}
+              location={location}
+              current={location?.id === currentLocationId}
+              onSelect={onSelect}
+              onLocked={onLocked}
+            />
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export default function Sidebar({
   locations,
@@ -6,8 +196,25 @@ export default function Sidebar({
   open,
   onSelect,
   onClose,
+  onOpen,
+  logoUrl,
 }) {
-  const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
+  const [noticeFloor, setNoticeFloor] = useState(null);
+  const noticeTimer = useRef(null);
+  const floorItems = buildFloorItems(locations);
+
+  useEffect(() => {
+    return () => clearTimeout(noticeTimer.current);
+  }, []);
+
+  function handleToggle() {
+    if (open) {
+      onClose?.();
+      return;
+    }
+
+    onOpen?.();
+  }
 
   function handleSelect(locationId) {
     onSelect(locationId);
@@ -17,69 +224,71 @@ export default function Sidebar({
     }
   }
 
+  function handleLockedFloor(floor, event) {
+    shakeElement(event.currentTarget);
+    setNoticeFloor(floor);
+    clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setNoticeFloor(null), 2200);
+  }
+
+  const shellState = open ? "w-80 translate-x-0" : "w-0 -translate-x-full";
+  const contentState = open ? "opacity-100" : "opacity-0";
+  const togglePosition = open
+    ? "left-80 compact:left-[min(20rem,86vw)]"
+    : "left-0";
+
   return (
-    <aside
-      id="location-sidebar"
-      className={`w-80 flex-none overflow-y-auto border-r bg-surface/86 p-5 pt-20 compact:fixed compact:top-16 compact:bottom-0 compact:left-0 compact:z-30 compact:w-[min(20rem,86vw)] compact:pt-5 compact:shadow-sidebar ${open ? "block" : "hidden"}`}
-      aria-label="Campus locations"
-      aria-hidden={!open}
-    >
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <p className="mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] text-accent uppercase">
-            Explore
-          </p>
-          <h2 className="mb-0 text-xl">Campus locations</h2>
-        </div>
-        <button
-          type="button"
-          className="inline-flex size-10 items-center justify-center gap-1.5 rounded-full border border-line bg-surface text-xl leading-none text-ink transition-colors hover:border-accent hover:text-accent"
-          aria-label="Close location menu"
-          onClick={onClose}
+    <>
+      <aside
+        id="location-sidebar"
+        className={`flex-none overflow-hidden border-r bg-surface/86 transition-all duration-300 ease-in-out compact:fixed compact:top-16 compact:bottom-0 compact:left-0 compact:z-30 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
+        aria-label="Campus floors"
+        aria-hidden={!open}
+        inert={!open}
+      >
+        <div
+          className={`flex h-full w-80 flex-col overflow-y-auto p-5 pt-20 transition-opacity duration-200 compact:w-[min(20rem,86vw)] compact:pt-5 ${contentState}`}
         >
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
+          <SidebarLogo logoUrl={logoUrl} />
 
-      {sortedLocations.length === 0 ? (
-        <p className="text-muted">No locations are available yet.</p>
-      ) : (
-        <nav aria-label="Tour locations">
-          <ul className="m-0 grid list-none gap-[0.6rem] p-0">
-            {sortedLocations.map((location) => {
-              const available = Boolean(location.panorama);
-              const current = location.id === currentLocationId;
+          <div className="mb-4">
+            <p className="mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] text-accent uppercase">
+              Explore
+            </p>
+            <h2 className="mb-0 text-xl">Campus floors</h2>
+          </div>
 
-              return (
-                <li key={location.id}>
-                  <button
-                    type="button"
-                    className={`grid w-full gap-1 rounded-location border px-[0.9rem] py-[0.8rem] text-left text-ink transition disabled:cursor-not-allowed disabled:opacity-55 ${
-                      current
-                        ? "border-accent bg-accent-soft"
-                        : "border-line bg-surface-strong/50 enabled:hover:translate-x-0.5 enabled:hover:border-accent enabled:hover:bg-surface-strong/90"
-                    }`}
-                    aria-current={current ? "true" : undefined}
-                    onClick={() => handleSelect(location.id)}
-                    disabled={!available}
-                  >
-                    <span className="font-bold">{location.name}</span>
-                    <span
-                      className={`text-[0.82rem] leading-[1.4] ${
-                        current ? "text-selected-ink" : "text-muted"
-                      }`}
-                    >
-                      {available
-                        ? location.description
-                        : "This location is unavailable."}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+          <FloorList
+            items={floorItems}
+            currentLocationId={currentLocationId}
+            onSelect={handleSelect}
+            onLocked={handleLockedFloor}
+          />
+
+          <Button>Share</Button>
+        </div>
+      </aside>
+
+      <button
+        type="button"
+        className={`fixed top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface text-ink shadow-sidebar transition-all duration-300 hover:border-accent hover:text-accent ${togglePosition}`}
+        aria-label={open ? "Collapse campus floors" : "Expand campus floors"}
+        aria-expanded={open}
+        aria-controls="location-sidebar"
+        onClick={handleToggle}
+      >
+        <ChevronIcon direction={open ? "right" : "left"} />
+      </button>
+
+      {noticeFloor && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-accent/40 bg-surface-strong px-4 py-2 text-sm font-bold text-ink shadow-sidebar"
+        >
+          {noticeFloor} is coming soon.
+        </div>
       )}
-    </aside>
+    </>
   );
 }

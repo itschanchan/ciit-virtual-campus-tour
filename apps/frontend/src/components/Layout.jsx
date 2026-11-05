@@ -95,6 +95,7 @@ export default function Layout() {
           open={sidebarOpen}
           onSelect={selectLocation}
           onClose={() => setSidebarOpen(false)}
+          onOpen={() => setSidebarOpen(true)}
         />
 
         <main
