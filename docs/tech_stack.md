@@ -32,6 +32,10 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 | Frontend | marzipano     | Approved | Renders the 360-degree panorama viewer.                               |
 | Frontend | react         | Approved | ReactJS components.                                                   |
 | Frontend | react-dom     | Approved | The Document Object Model of React.                                   |
+| Frontend | @mui/material | Approved | Material UI components such as the sidebar popover.                   |
+| Frontend | @mui/icons-material | Approved | Material UI icons for sidebar controls.                          |
+| Frontend | @emotion/react | Approved | Styling engine required by Material UI.                              |
+| Frontend | @emotion/styled | Approved | Styled engine required by Material UI.                             |
 
 | Layer       | DevDependency               | Approval | Description                                                         |
 | :---------- | :-------------------------- | :------- | :------------------------------------------------------------------ |
