@@ -15,6 +15,7 @@
 - Q: When you ask to center the buttons, which buttons should be centered and centered relative to what? → A: All floor buttons are horizontally centered within the sidebar column, not left-aligned.
 - Q: Inside the side-by-side 5F/5M row, how should the two buttons share the row width? → A: Each button sizes to its own content, and the two are centered together as one group.
 - Q: When the 5F and 5M buttons cannot both fit side by side at the narrowest viewport, how should they stay in one row and remain readable? → A: Each label wraps onto more lines inside its button so both stay in one row.
+- Q: Should the school logo in Header be hidden when the Sidebar is revealed? → A: Yes, hide the logo when the Sidebar is revealed to avoid redundancy.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -93,6 +94,7 @@ A visitor on a narrow viewport, or using a keyboard or screen reader, can still 
 - **FR-010**: The paired row MUST be horizontally centered within the sidebar column, with each floor button sized to its own content and the two buttons grouped side by side.
 - **FR-011**: Collapsing the sidebar MUST hide the paired row together with the rest of the floor list, with no change to existing collapse behaviour.
 - **FR-012**: Every floor button MUST be horizontally centered within the sidebar column rather than aligned to the left edge.
+- **FR-013**: The school logo in the Header must be hidden when the Sidebar is revealed to avoid redundancy.
 
 ### Key Entities
 
