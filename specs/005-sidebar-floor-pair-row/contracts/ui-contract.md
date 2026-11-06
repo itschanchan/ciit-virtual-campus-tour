@@ -1,60 +1,61 @@
-# UI Contract: Sidebar 5F and 5M Paired Row
+# UI Contract for Sidebar 5F/5M Paired Row
 
-**Feature**: [spec.md](../spec.md) | **Plan**: [plan.md](../plan.md) | **Data Model**: [data-model.md](../data-model.md)
+## Overview
+The sidebar must expose a **row‑based** UI contract that guarantees:
+- Correct grouping of the 5F and 5M entries.
+- Independent, accessible controls for each floor.
+- Consistent horizontal centering.
+- Responsive behavior at the minimum 320 px viewport.
 
-This contract defines how the fifth-floor pair behaves inside the campus floor list.
+## Contract Sections
 
-## Row Contract
+### 1. Row Definition
+- **Row Type**: `"single"` or `"pair"`.
+- **Pair Row**: Contains exactly two `FloorEntry` objects (`5F` and `5M`) ordered left‑to‑right as `5M` then `5F` to preserve descending list order.
+- **Single Row**: Contains one `FloorEntry`.
 
-- The floor list contains exactly one paired row.
-- The paired row contains 5M and 5F.
-- Every floor button, including each button in the pair, is horizontally centered in the sidebar column rather than aligned to the left edge.
-- The paired row groups two content-sized buttons, each sized to its own label and status content, centered together.
-- Every other floor keeps its own separate row.
-- The paired row appears in the same position the two floors occupy today, between 6F and 4F.
-- The two floors read left to right as 5M then 5F, matching the list's descending order.
-- The pair is hidden together with the rest of the list when the sidebar is collapsed.
+### 2. Button Component
+- **Label**: `FloorEntry.label` (e.g., `5F`).
+- **State Indicators**:
+  - `current` → `border-accent` + `bg-accent-soft`.
+  - `locked` → `OFF LIMITS` label, muted style.
+  - `unavailable` → disabled visual style.
+  - `disabled` → disabled attribute, muted style.
+- **Centering**: Each button is horizontally centered within the sidebar column (`flex items-center justify-center`).
+- **Grouping**: In a `"pair"` row, the two buttons are wrapped in a flex container that centers the pair as a whole.
 
-## Floor Button Contract
+### 3. Accessibility
+- **ARIA**:
+  - Sidebar element: `aria-label="Campus floors"`.
+  - Toggle button: `aria-expanded`, `aria-controls="location-sidebar"`.
+  - Each button: `aria-current="true"` when selected.
+  - Grouped pair: `role="group"` with an accessible name indicating the pair (e.g., "Fifth‑floor levels").
+- **Keyboard**: All buttons must be reachable via `Tab` and activatable via `Enter`/`Space`.
 
-- 5F and 5M remain two separate buttons with their own visible labels.
-- Each button keeps the existing floor-button styling and interaction feedback.
-- Activating 5F selects or responds for 5F only; it never activates 5M, and the reverse also holds.
-- Current, locked, unavailable, and disabled state is applied per button, not to the paired row.
-- A locked or unavailable floor keeps its existing feedback, including the locked label and the coming-soon popover.
-- Selecting either floor follows the existing selection behaviour, including closing the list on compact viewports.
+### 4. Responsiveness
+- **320 px Minimum**: Labels may wrap onto multiple lines but must stay within the same row; no horizontal scroll.
+- **Narrow Viewports**: Buttons remain centered; pair stays grouped.
 
-## Accessibility Contract
+### 5. State Persistence
+- **Current**: Highlighted visual state persists across collapse/expand.
+- **Locked/Unavailable/Disabled**: Styling reflects the per‑floor state, not the row.
 
-- Both buttons are reachable by keyboard and remain individually focusable.
-- Keyboard focus order matches the visual order: 5M then 5F.
-- The pair is exposed as a labelled group that identifies the fifth-floor levels.
-- Each button exposes its own accessible name and status; pairing does not merge or rename them.
-- The group label supplements the button labels and never replaces them.
-- Focus remains visible on each button using the existing focus styling.
-- The collapse toggle, skip link, and other sidebar controls are unaffected.
+### 6. Testability
+- **Regression Tests**: Verify row grouping, ordering, centering, independent activation, and state styling for each floor.
+- **Manual Checks**: Resize to 320 px, toggle sidebar, verify no layout shift.
 
-## Responsive Contract
+## Acceptance Criteria (derived from Requirements)
+- **FR‑001**: 5F and 5M appear side‑by‑side in one row.
+- **FR‑002**: All other floors keep separate rows.
+- **FR‑003**: Each floor remains a separate control with its own label.
+- **FR‑004**: Activating one floor does not affect the other.
+- **FR‑005**: Per‑floor state styling is shown.
+- **FR‑006**: Pair order matches descending list order.
+- **FR‑007**: Labels readable without horizontal scroll at 320 px.
+- **FR‑008**: Keyboard focus reaches each floor individually, same order as row.
+- **FR‑009**: Screen readers announce each floor separately.
+- **FR‑010**: Pair is centered; each button sized to its own content.
+- **FR‑011**: Collapsing sidebar hides the pair with the rest of the list.
+- **FR‑012**: All floor buttons are horizontally centered in the sidebar column.
 
-- The pair remains side by side on desktop and compact viewports.
-- Each button keeps its own content-sized width, and the two are centered together as a group.
-- Labels and status text may wrap inside their button but must not be clipped.
-- No horizontal scrolling is introduced at 320 CSS pixels or at the representative desktop widths already used for the sidebar.
-- The existing `compact`, `narrow`, and `tiny` variants remain the only responsive variants used; no new breakpoint is added.
-
-## Layout Contract
-
-- The pairing rule lives in the floor-list display logic, not in the tour content.
-- The change does not alter the resolved location order or the floor-to-location mapping.
-- The change does not alter the sidebar shell width, toggle position, or collapse animation.
-- The change does not add a new overlay, modal, or navigation surface.
-- The change does not alter the panorama viewer, gallery, narration, or header.
-
-## Out of Scope
-
-- Pairing any floors other than 5F and 5M.
-- Renaming, adding, removing, or reordering floors.
-- Changing the tour catalog, panorama assets, or location mapping.
-- Changing the locked-floor set or coming-soon popover behaviour.
-- Adding or upgrading dependencies.
-- Changing the backend or API.
+*All items must be satisfied for the contract to be considered fulfilled.*
