@@ -125,3 +125,8 @@
     }
   }
 }
+
+.floor-acknowledgement {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+}

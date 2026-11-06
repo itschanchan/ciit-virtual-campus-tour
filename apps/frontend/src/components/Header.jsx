@@ -20,10 +20,15 @@ export default function Header({
         </button>
 
         <div className="flex min-w-0 items-baseline gap-2.5">
-          <span className="rounded-mark bg-accent px-1.5 py-0.5 text-[0.8rem] font-black tracking-[0.12em] text-accent-ink">
+          <span
+            className={`rounded-mark bg-accent px-1.5 py-0.5 text-[0.8rem] font-black tracking-[0.12em] text-accent-ink ${sidebarOpen ? "hidden" : ""}`}
+            aria-label="CIIT"
+          >
             CIIT
           </span>
-          <span className="font-bold whitespace-nowrap compact:text-[0.92rem] tiny:hidden">
+          <span
+            className={`font-bold whitespace-nowrap compact:text-[0.92rem] tiny:hidden ${sidebarOpen ? "hidden" : ""}`}
+          >
             Virtual Campus Tour
           </span>
         </div>
