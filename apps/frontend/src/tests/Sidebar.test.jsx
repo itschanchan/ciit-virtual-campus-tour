@@ -137,7 +137,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
     expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
 
@@ -164,7 +164,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
     act(() => {
       vi.advanceTimersByTime(1000)
@@ -196,7 +196,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
     act(() => {
       vi.advanceTimersByTime(1500)
@@ -204,7 +204,13 @@ describe('Sidebar', () => {
 
     expect(screen.getByText('1F is coming soon.')).toBeInTheDocument()
 
-    fireEvent.keyDown(document, { key: 'Escape' })
+    // Escape must bubble from inside the MUI modal root to reach onClose.
+    fireEvent.keyDown(screen.getByRole('status'), { key: 'Escape' })
+
+    // Let the popover exit transition finish under fake timers.
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
 
     expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
   })
@@ -219,7 +225,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
     rerender(
       <Sidebar
@@ -248,7 +254,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    const button = screen.getByRole('button', { name: /1F OFF LIMITS/ })
+    const button = screen.getByRole('button', { name: /^1F OFF LIMITS$/ })
 
     fireEvent.click(button)
 

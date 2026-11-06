@@ -27,6 +27,20 @@ const ACKNOWLEDGEMENT_MS = 320;
 
 const PAIRED_FLOORS = [["5F", "5M"]];
 
+// Maps each floor label to its designated first scene ID from APP_DATA
+// (per spec: Marzipano API Integration -> Sidebar navigation guide).
+const FLOOR_SCENE_MAP = {
+  LG: "0-lg---1",
+  UG: "5-ug---1",
+  "4F": "10-4f---1",
+  "5F": "23-5f---1",
+  "5M": "27-5m---1",
+  "6F": "29-6f---2",
+  "7F": "39-7f---2",
+  "8F": "42-8f---2",
+  "9F": "48-9f---1",
+};
+
 function buildFloorItems(locations) {
   const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
   const items = FLOOR_SEQUENCE.map((floor, index) => ({
@@ -57,10 +71,10 @@ function buildFloorRows(items) {
       continue;
     }
 
-    const entries = pairGroup
-      .map((floor) => items.find((candidate) => candidate.floor === floor))
-      .filter(Boolean);
-
+    // Keep the descending item order so the pair renders 5M then 5F.
+    const entries = items.filter((candidate) =>
+      pairGroup.includes(candidate.floor),
+    );
     entries.forEach((entry) => grouped.add(entry.floor));
     rows.push({ kind: entries.length > 1 ? "pair" : "single", entries });
   }
@@ -157,6 +171,12 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
     if (location) {
       onSelect(location.id);
     }
+
+    // Switch the panorama viewer to this floor's designated first scene.
+    const sceneId = FLOOR_SCENE_MAP[floor];
+    if (sceneId && typeof window !== "undefined") {
+      window.__panoramaViewer?.switchToSceneId(sceneId);
+    }
   }
 
   const stateClass = current
@@ -167,10 +187,22 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
     : "enabled:hover:translate-x-0.5 enabled:hover:border-accent enabled:hover:bg-surface-strong/90";
   const detailClass = current ? "text-selected-ink" : "text-muted";
 
+  // Explicit accessible name so "1F" and "OFF LIMITS" read as separate
+  // words (nested element text is otherwise concatenated without spaces).
+  const accessibleName = [
+    floor,
+    locked ? "OFF LIMITS" : "",
+    location?.name ?? "",
+    status ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <button
       type="button"
       className={`grid items-center w-fit gap-1 rounded-full px-[0.9rem] py-[0.8rem] text-left text-ink transition ${stateClass} ${interactionClass}`}
+      aria-label={accessibleName}
       aria-current={current ? "true" : undefined}
       onClick={handleClick}
       disabled={disabled}
