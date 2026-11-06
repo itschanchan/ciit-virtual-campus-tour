@@ -65,8 +65,22 @@ describe('PanoramaViewer', () => {
     const onError = vi.fn()
     render(<PanoramaViewer location={{ ...location, panorama: undefined }} onError={onError} />)
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Panorama unavailable')
-    expect(onError).toHaveBeenCalledWith('This location is not available right now.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('No panorama available yet.')
+    expect(onError).toHaveBeenCalledWith('No panorama available yet.')
+  })
+
+  it('shows the missing panorama message when no location is selected', async () => {
+    render(<PanoramaViewer />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No panorama available yet.')
+  })
+
+  it('does not show the missing panorama message for a valid panorama', async () => {
+    render(<PanoramaViewer location={location} />)
+
+    await waitFor(() => expect(Marzipano.Viewer).toHaveBeenCalledTimes(1))
+
+    expect(screen.queryByText('No panorama available yet.')).not.toBeInTheDocument()
   })
 
   it('rotates the view with arrow keys', async () => {

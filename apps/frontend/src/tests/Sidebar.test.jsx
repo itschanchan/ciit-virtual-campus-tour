@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Sidebar from '../components/Sidebar'
 import { catalogData } from '../lib/catalog'
 
@@ -11,6 +11,15 @@ const secondLocation = {
   description: 'Browse the library shelves.',
   order: 1,
   narration: undefined,
+}
+
+function buildAvailableLocations(count) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `floor-${index}`,
+    name: `Floor ${index}`,
+    order: index,
+    panorama: {},
+  }))
 }
 
 function mockMatchMedia(matches) {
@@ -27,7 +36,13 @@ function mockMatchMedia(matches) {
 }
 
 describe('Sidebar', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
   afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
     delete window.matchMedia
   })
 
@@ -97,5 +112,265 @@ describe('Sidebar', () => {
     const button = screen.getByRole('button', { name: /Glitch Tower Library/ })
     expect(button).toBeDisabled()
     expect(screen.getByText('This location is unavailable.')).toBeInTheDocument()
+  })
+
+  it('does not show a missing panorama message for empty floors', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByText('No panorama available yet.')).not.toBeInTheDocument()
+  })
+
+  it('waits 1.5 seconds before showing a locked-floor popover', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(1499)
+    })
+
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(screen.getByText('1F is coming soon.')).toBeInTheDocument()
+  })
+
+  it('restarts the delay and shows only the latest locked floor', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /2F OFF LIMITS/ }))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(500)
+    })
+
+    expect(screen.getByText('2F is coming soon.')).toBeInTheDocument()
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+  })
+
+  it('keeps a visible popover until Escape dismisses it', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+
+    act(() => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    expect(screen.getByText('1F is coming soon.')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+  })
+
+  it('cancels a pending popover when the sidebar closes', () => {
+    const { rerender } = render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /1F OFF LIMITS/ }))
+
+    rerender(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open={false}
+        onSelect={vi.fn()}
+      />,
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+  })
+
+  it('acknowledges a locked floor without motion when reduced motion is preferred', () => {
+    mockMatchMedia(true)
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const button = screen.getByRole('button', { name: /1F OFF LIMITS/ })
+
+    fireEvent.click(button)
+
+    expect(button).toHaveClass('floor-acknowledgement')
+
+    act(() => {
+      vi.advanceTimersByTime(320)
+    })
+
+    expect(button).not.toHaveClass('floor-acknowledgement')
+  })
+
+  it('shares one row for 5M and 5F while every other floor keeps its own row', () => {
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId={null}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const fiveM = screen.getByRole('button', { name: /5M/ })
+    const fiveF = screen.getByRole('button', { name: /5F/ })
+    const fourF = screen.getByRole('button', { name: /4F/ })
+    const sixF = screen.getByRole('button', { name: /6F/ })
+
+    const pairRow = fiveM.closest('li')
+
+    expect(pairRow).toBe(fiveF.closest('li'))
+    expect(fourF.closest('li')).not.toBe(pairRow)
+    expect(sixF.closest('li')).not.toBe(pairRow)
+  })
+
+  it('orders the pair as 5M then 5F to match the descending list', () => {
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId={null}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const fiveM = screen.getByRole('button', { name: /5M/ })
+    const fiveF = screen.getByRole('button', { name: /5F/ })
+
+    expect(fiveM.compareDocumentPosition(fiveF)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+  })
+
+  it('centers every floor button within the sidebar column', () => {
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId={null}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const rows = screen.getByRole('list').querySelectorAll('li')
+
+    rows.forEach((row) => {
+      expect(row).toHaveClass('justify-center')
+    })
+  })
+
+  it('activates only the selected floor within the pair', () => {
+    const onSelect = vi.fn()
+
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId={null}
+        open
+        onSelect={onSelect}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /5F/ }))
+
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith('floor-6')
+  })
+
+  it('shows the current state on only one floor of the pair', () => {
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId="floor-7"
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /5M/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    expect(screen.getByRole('button', { name: /5F/ })).not.toHaveAttribute(
+      'aria-current',
+    )
+  })
+
+  it('exposes the pair as a labelled group with both floors in reading order', () => {
+    render(
+      <Sidebar
+        locations={buildAvailableLocations(8)}
+        currentLocationId={null}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const group = screen.getByRole('group', { name: 'Fifth-floor levels' })
+    const fiveM = within(group).getByRole('button', { name: /5M/ })
+    const fiveF = within(group).getByRole('button', { name: /5F/ })
+
+    expect(fiveM.compareDocumentPosition(fiveF)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
   })
 })

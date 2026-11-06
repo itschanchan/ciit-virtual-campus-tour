@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Popover from "@mui/material/Popover";
 import { isCompactViewport } from "../lib/viewport";
 
 const FLOOR_SEQUENCE = [
-  "UG",
   "LG",
+  "UG",
   "1F",
   "2F",
   "3F",
@@ -22,6 +22,10 @@ const FLOOR_SEQUENCE = [
 ];
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
+const POPOVER_DELAY_MS = 1500;
+const ACKNOWLEDGEMENT_MS = 320;
+
+const PAIRED_FLOORS = [["5F", "5M"]];
 
 function buildFloorItems(locations) {
   const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
@@ -31,6 +35,37 @@ function buildFloorItems(locations) {
   }));
 
   return items.reverse();
+}
+
+function getPairGroup(floor) {
+  return PAIRED_FLOORS.find((group) => group.includes(floor)) ?? null;
+}
+
+function buildFloorRows(items) {
+  const rows = [];
+  const grouped = new Set();
+
+  for (const item of items) {
+    if (grouped.has(item.floor)) {
+      continue;
+    }
+
+    const pairGroup = getPairGroup(item.floor);
+
+    if (!pairGroup) {
+      rows.push({ kind: "single", entries: [item] });
+      continue;
+    }
+
+    const entries = pairGroup
+      .map((floor) => items.find((candidate) => candidate.floor === floor))
+      .filter(Boolean);
+
+    entries.forEach((entry) => grouped.add(entry.floor));
+    rows.push({ kind: entries.length > 1 ? "pair" : "single", entries });
+  }
+
+  return rows;
 }
 
 function prefersReducedMotion() {
@@ -66,13 +101,21 @@ function shakeElement(element) {
   );
 }
 
-function getFloorStatus(location, locked) {
-  if (locked) {
-    return "Coming soon.";
+function markReducedMotionAcknowledgement(element) {
+  element.classList.add("floor-acknowledgement");
+}
+
+function clearReducedMotionAcknowledgement(element) {
+  if (!element) {
+    return;
   }
 
+  element.classList.remove("floor-acknowledgement");
+}
+
+function getFloorStatus(location) {
   if (!location) {
-    return "No panorama available yet.";
+    return null;
   }
 
   if (!location.panorama) {
@@ -93,7 +136,7 @@ function SidebarLogo({ logoUrl }) {
         </span>
       )}
       <p className="mb-0 text-[0.8rem] font-bold tracking-[0.12em] text-ink uppercase">
-        360 Virtual Campus Tour
+        360° Virtual Campus Tour
       </p>
     </div>
   );
@@ -103,7 +146,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
   const locked = LOCKED_FLOORS.has(floor);
   const available = Boolean(location?.panorama);
   const disabled = !locked && !available;
-  const status = getFloorStatus(location, locked);
+  const status = getFloorStatus(location);
 
   function handleClick(event) {
     if (locked) {
@@ -127,7 +170,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
   return (
     <button
       type="button"
-      className={`grid w-full gap-1 rounded-location border px-[0.9rem] py-[0.8rem] text-left text-ink transition ${stateClass} ${interactionClass}`}
+      className={`grid items-center w-fit gap-1 rounded-full px-[0.9rem] py-[0.8rem] text-left text-ink transition ${stateClass} ${interactionClass}`}
       aria-current={current ? "true" : undefined}
       onClick={handleClick}
       disabled={disabled}
@@ -138,7 +181,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
         </span>
         {locked && (
           <span className="text-[0.7rem] font-bold tracking-[0.08em] uppercase">
-            Locked
+            OFF LIMITS
           </span>
         )}
       </span>
@@ -154,16 +197,63 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
   );
 }
 
+function FloorPair({ entries, currentLocationId, onSelect, onLocked }) {
+  return (
+    <div
+      role="group"
+      aria-label="Fifth-floor levels"
+      className="flex max-w-full justify-center gap-[0.6rem]"
+    >
+      {entries.map(({ floor, location }) => (
+        <FloorButton
+          key={floor}
+          floor={floor}
+          location={location}
+          current={location?.id === currentLocationId}
+          onSelect={onSelect}
+          onLocked={onLocked}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FloorRow({ row, currentLocationId, onSelect, onLocked }) {
+  if (row.kind === "pair") {
+    return (
+      <FloorPair
+        entries={row.entries}
+        currentLocationId={currentLocationId}
+        onSelect={onSelect}
+        onLocked={onLocked}
+      />
+    );
+  }
+
+  const { floor, location } = row.entries[0];
+
+  return (
+    <FloorButton
+      floor={floor}
+      location={location}
+      current={location?.id === currentLocationId}
+      onSelect={onSelect}
+      onLocked={onLocked}
+    />
+  );
+}
+
 function FloorList({ items, currentLocationId, onSelect, onLocked }) {
+  const rows = buildFloorRows(items);
+
   return (
     <nav aria-label="Campus floors">
       <ul className="m-0 grid list-none gap-[0.6rem] p-0">
-        {items.map(({ floor, location }) => (
-          <li key={floor}>
-            <FloorButton
-              floor={floor}
-              location={location}
-              current={location?.id === currentLocationId}
+        {rows.map((row) => (
+          <li key={row.entries[0].floor} className="flex justify-center">
+            <FloorRow
+              row={row}
+              currentLocationId={currentLocationId}
               onSelect={onSelect}
               onLocked={onLocked}
             />
@@ -184,7 +274,73 @@ export default function Sidebar({
   logoUrl,
 }) {
   const [notice, setNotice] = useState(null);
+  const popoverTimerRef = useRef(null);
+  const acknowledgementTimerRef = useRef(null);
+  const acknowledgedElementRef = useRef(null);
   const floorItems = buildFloorItems(locations);
+
+  useEffect(() => {
+    return () => {
+      if (popoverTimerRef.current !== null) {
+        window.clearTimeout(popoverTimerRef.current);
+      }
+
+      if (acknowledgementTimerRef.current !== null) {
+        window.clearTimeout(acknowledgementTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+
+    if (popoverTimerRef.current !== null) {
+      window.clearTimeout(popoverTimerRef.current);
+      popoverTimerRef.current = null;
+    }
+  }, [open]);
+
+  function clearPendingPopover() {
+    if (popoverTimerRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(popoverTimerRef.current);
+    popoverTimerRef.current = null;
+  }
+
+  function clearAcknowledgement() {
+    if (acknowledgementTimerRef.current !== null) {
+      window.clearTimeout(acknowledgementTimerRef.current);
+      acknowledgementTimerRef.current = null;
+    }
+
+    if (acknowledgedElementRef.current) {
+      clearReducedMotionAcknowledgement(acknowledgedElementRef.current);
+      acknowledgedElementRef.current = null;
+    }
+  }
+
+  function acknowledgeActivation(element) {
+    if (!element) {
+      return;
+    }
+
+    if (!prefersReducedMotion()) {
+      shakeElement(element);
+      return;
+    }
+
+    clearAcknowledgement();
+    acknowledgedElementRef.current = element;
+    markReducedMotionAcknowledgement(element);
+    acknowledgementTimerRef.current = window.setTimeout(
+      clearAcknowledgement,
+      ACKNOWLEDGEMENT_MS,
+    );
+  }
 
   function handleToggle() {
     if (open) {
@@ -192,6 +348,7 @@ export default function Sidebar({
       return;
     }
 
+    setNotice(null);
     onOpen?.();
   }
 
@@ -204,11 +361,27 @@ export default function Sidebar({
   }
 
   function handleLockedFloor(floor, event) {
-    shakeElement(event.currentTarget);
-    setNotice({ floor, anchorEl: event.currentTarget });
+    const nextNotice = {
+      floor,
+      anchorEl: event.currentTarget,
+    };
+
+    acknowledgeActivation(event.currentTarget);
+
+    if (notice) {
+      setNotice(nextNotice);
+      return;
+    }
+
+    clearPendingPopover();
+    popoverTimerRef.current = window.setTimeout(() => {
+      popoverTimerRef.current = null;
+      setNotice(nextNotice);
+    }, POPOVER_DELAY_MS);
   }
 
   function handleCloseNotice() {
+    clearPendingPopover();
     setNotice(null);
   }
 
@@ -236,7 +409,7 @@ export default function Sidebar({
             <p className="mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] text-accent uppercase">
               Explore
             </p>
-            <h2 className="mb-0 text-xl">Campus floors</h2>
+            <h2 className="mb-0 text-xl">Campus Floors</h2>
           </div>
 
           <FloorList
@@ -264,12 +437,15 @@ export default function Sidebar({
       </button>
 
       <Popover
-        open={Boolean(notice)}
+        open={open && Boolean(notice)}
         anchorEl={notice?.anchorEl ?? null}
         onClose={handleCloseNotice}
         anchorOrigin={{ vertical: "center", horizontal: "right" }}
         transformOrigin={{ vertical: "center", horizontal: "left" }}
         slotProps={{
+          transition: {
+            onExited: handleCloseNotice,
+          },
           paper: {
             role: "status",
             "aria-live": "polite",
