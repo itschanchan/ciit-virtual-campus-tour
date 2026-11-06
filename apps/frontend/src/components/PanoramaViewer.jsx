@@ -4,6 +4,7 @@ import { createScene, createViewer, destroyViewer, switchToScene } from '../lib/
 const ROTATION_STEP = 0.08
 const ZOOM_STEP = 0.1
 const MAX_PITCH = Math.PI / 2
+const MISSING_PANORAMA_MESSAGE = 'No panorama available yet.'
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum)
@@ -31,7 +32,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
     }
 
     if (!location?.panorama) {
-      onErrorRef.current?.('This location is not available right now.')
+      onErrorRef.current?.(MISSING_PANORAMA_MESSAGE)
       return undefined
     }
 
@@ -139,7 +140,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         >
           <strong>Panorama unavailable</strong>
           <span className="text-ink">
-            {missing ? 'This location is not available right now.' : message}
+            {missing ? MISSING_PANORAMA_MESSAGE : message}
           </span>
         </div>
       )}

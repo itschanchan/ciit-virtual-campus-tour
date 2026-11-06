@@ -95,6 +95,7 @@ export default function Layout() {
           open={sidebarOpen}
           onSelect={selectLocation}
           onClose={() => setSidebarOpen(false)}
+          onOpen={() => setSidebarOpen(true)}
         />
 
         <main
@@ -140,7 +141,7 @@ export default function Layout() {
             </div>
           )}
 
-          {contentStatus === "ready" && currentLocation && (
+          {contentStatus === "ready" && (
             <>
               <Suspense
                 fallback={
@@ -162,25 +163,29 @@ export default function Layout() {
                 <PanoramaViewer location={currentLocation} />
               </Suspense>
 
-              <div className="absolute top-20 right-4 z-[8] compact:top-20 compact:right-3">
-                <button
-                  type="button"
-                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-line bg-surface-soft px-4 py-2 font-bold text-ink transition-colors hover:border-accent hover:text-accent tiny:min-h-9 tiny:px-[0.8rem] tiny:py-[0.45rem] tiny:text-[0.85rem]"
-                  aria-expanded={galleryOpen}
-                  aria-controls="room-gallery"
-                  onClick={toggleGallery}
-                >
-                  View gallery
-                </button>
-              </div>
+              {currentLocation && (
+                <>
+                  <div className="absolute top-20 right-4 z-[8] compact:top-20 compact:right-3">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-line bg-surface-soft px-4 py-2 font-bold text-ink transition-colors hover:border-accent hover:text-accent tiny:min-h-9 tiny:px-[0.8rem] tiny:py-[0.45rem] tiny:text-[0.85rem]"
+                      aria-expanded={galleryOpen}
+                      aria-controls="room-gallery"
+                      onClick={toggleGallery}
+                    >
+                      View gallery
+                    </button>
+                  </div>
 
-              <NarrationPlayer
-                narration={currentLocation.narration ?? null}
-                status={narrationStatus}
-                onPlay={playNarration}
-                onPause={pauseNarration}
-                onStatusChange={setNarrationStatus}
-              />
+                  <NarrationPlayer
+                    narration={currentLocation.narration ?? null}
+                    status={narrationStatus}
+                    onPlay={playNarration}
+                    onPause={pauseNarration}
+                    onStatusChange={setNarrationStatus}
+                  />
+                </>
+              )}
             </>
           )}
         </main>

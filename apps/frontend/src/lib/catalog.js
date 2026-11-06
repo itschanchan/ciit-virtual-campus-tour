@@ -1,7 +1,7 @@
 import catalogData from './catalog.json'
 
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/
-const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0

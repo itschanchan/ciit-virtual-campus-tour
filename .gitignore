@@ -43,6 +43,3 @@ coverage/
 
 # Vitest cache
 .vitest/
-
-# Temporary Marzipano viewer assets (exported from ciit-glitch-tour-tour)
-ciit-glitch-tower-tour/
