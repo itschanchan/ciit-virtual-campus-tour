@@ -1,12 +1,14 @@
+// `onToggleSidebar` is intentionally omitted from the props for now: the
+// Header's toggle button is commented out (the Sidebar exposes its own
+// toggle). Re-add the prop if the button is restored.
 export default function Header({
   sidebarOpen,
   currentLocation,
-  onToggleSidebar,
 }) {
   return (
     <div className="absolute inset-x-0 top-0 z-40">
       <header className="relative z-40 flex min-h-16 items-center gap-4 bg-transparent px-5 py-3 compact:px-3.5 compact:py-2.5">
-        <button
+        {/* <button
           type="button"
           className="inline-flex size-10 items-center justify-center gap-1.5 rounded-full border border-line bg-surface text-xl leading-none text-ink transition-colors hover:border-accent hover:text-accent"
           aria-label={
@@ -17,7 +19,7 @@ export default function Header({
           onClick={onToggleSidebar}
         >
           <span aria-hidden="true">{sidebarOpen ? "×" : "☰"}</span>
-        </button>
+        </button> */}
 
         <div className="flex min-w-0 items-baseline gap-2.5">
           <span
