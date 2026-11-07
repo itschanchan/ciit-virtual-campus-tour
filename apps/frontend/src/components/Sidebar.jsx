@@ -2,44 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Popover from "@mui/material/Popover";
+import {
+  FLOOR_SEQUENCE,
+  FLOOR_SCENE_MAP,
+} from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
-
-const FLOOR_SEQUENCE = [
-  "LG",
-  "UG",
-  "1F",
-  "2F",
-  "3F",
-  "4F",
-  "5F",
-  "5M",
-  "6F",
-  "7F",
-  "8F",
-  "9F",
-  "10F",
-  "11F",
-];
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
 const POPOVER_DELAY_MS = 1500;
 const ACKNOWLEDGEMENT_MS = 320;
 
 const PAIRED_FLOORS = [["5F", "5M"]];
-
-// Maps each floor label to its designated first scene ID from APP_DATA
-// (per spec: Marzipano API Integration -> Sidebar navigation guide).
-const FLOOR_SCENE_MAP = {
-  LG: "0-lg---1",
-  UG: "5-ug---1",
-  "4F": "10-4f---1",
-  "5F": "23-5f---1",
-  "5M": "27-5m---1",
-  "6F": "29-6f---2",
-  "7F": "39-7f---2",
-  "8F": "42-8f---2",
-  "9F": "48-9f---1",
-};
 
 function buildFloorItems(locations) {
   // Match each floor to its location by floor label position (order), not by
@@ -79,10 +52,10 @@ function buildFloorRows(items) {
       continue;
     }
 
-    // Keep the descending item order so the pair renders 5M then 5F.
-    const entries = items.filter((candidate) =>
-      pairGroup.includes(candidate.floor),
-    );
+    // Spec 010 FR-001: reverse so the pair renders 5F then 5M.
+    const entries = items
+      .filter((candidate) => pairGroup.includes(candidate.floor))
+      .reverse();
     entries.forEach((entry) => grouped.add(entry.floor));
     rows.push({ kind: entries.length > 1 ? "pair" : "single", entries });
   }
@@ -197,10 +170,12 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
 
   // Explicit accessible name so "1F" and "OFF LIMITS" read as separate
   // words (nested element text is otherwise concatenated without spaces).
+  // The location name is only announced when the floor is active, matching
+  // the visual display (Rule 2: location ID only on the active button).
   const accessibleName = [
     floor,
     locked ? "OFF LIMITS" : "",
-    location?.name ?? "",
+    current && location ? location.name : "",
     status ?? "",
   ]
     .filter(Boolean)
@@ -225,7 +200,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
           </span>
         )}
       </span>
-      {location && (
+      {current && location && (
         <span className={`font-bold ${detailClass}`}>{location.name}</span>
       )}
       {status && (

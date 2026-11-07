@@ -2,7 +2,7 @@
 
 **Feature**: Marzipano Panorama Viewer Integration
 **Branch**: `006-marzipano-viewer-integration`
-**Date**: 2026-11-06
+**Date**: 2026-11-06 | **Updated**: 2026-11-07 (sidebar sync clarifications)
 
 ## Entities
 
@@ -41,20 +41,39 @@ A campus level represented by a Sidebar button and a set of interconnected scene
 
 **Floors**: LG, UG, 4F, 5F, 5M, 6F, 7F, 8F, 9F
 
-**First scenes** (from spec):
+**First scenes** (authoritative ID guide: `docs/prompts/frontend-prompts/sidebar_buttons.md`; corrected 2026-11-07 — earlier drafts listed `5-ug---1`, `29-6f---2`, `39-7f---2`, `42-8f---2`, `48-9f---1`, which are valid scenes but not the designated first scenes):
 - LG: `0-lg---1`
-- UG: `5-ug---1`
+- UG: `6-ug---2`
 - 4F: `10-4f---1`
 - 5F: `23-5f---1`
 - 5M: `27-5m---1`
-- 6F: `29-6f---2`
-- 7F: `39-7f---2`
-- 8F: `42-8f---2`
-- 9F: `48-9f---1`
+- 6F: `34-6f---11`
+- 7F: `38-7f---5`
+- 8F: `46-8f---6`
+- 9F: `51-9f---5`
 
 **Validation rules**:
 - `firstSceneId` must reference a scene id in this floor's scenes
 - Floor labels must be unique
+- Every scene id in APP_DATA must resolve to one of these floors via its floor code (54/54 — see the sync mapping below)
+
+### Floor↔Scene Sync Mapping
+
+Runtime mapping used to keep the Sidebar synchronized with the displayed panorama (Integration Rule #1, FR-006). Lives in `src/lib/floorSceneMap.js`.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| FLOOR_SEQUENCE | array<string> | Yes | Sidebar display order: LG, UG, 1F, 2F, 3F, 4F, 5F, 5M, 6F, 7F, 8F, 9F, 10F, 11F |
+| FLOOR_SCENE_MAP | object | Yes | Floor label → designated first scene id (the table above) |
+| FLOOR_CODE_MAP | object | Yes | Derived: lowercased floor label → floor label (`lg` → `LG`, `5m` → `5M`) |
+| floorCode | string | Yes | The middle segment of a scene id: `16-4f---11` → `4f` |
+
+**Resolution rule**: `getFloorForSceneId(sceneId)` splits the id on `-` and maps `parts[1]` through `FLOOR_CODE_MAP`.
+
+**Validation rules**:
+- All 54 scene ids in APP_DATA resolve to a floor (covered by `src/tests/floorSceneMap.test.js`)
+- An unknown/absent floor code resolves to `null`, and the caller keeps the previously highlighted floor active (clarified 2026-11-07 — no highlight clear, no fallback floor)
+- `getSceneIdForFloor(floor)` round-trips with `getFloorForSceneId` for every designated first scene
 
 ### Link Hotspot
 
@@ -114,10 +133,11 @@ Runtime state in `PanoramaViewer.jsx` (not persisted).
 
 - APP_DATA contains many Scenes
 - A Floor references many Scenes and one first Scene
-- A Scene has many Link Hotspots (each targeting another Scene)
+- A Scene belongs to the Floor named by its id's floor code; a scene change updates the Sidebar's active floor button (Rule #1)
+- A Scene has many Link Hotspots (each targeting another Scene — cross-floor targets move the active floor to the target scene's floor)
 - A Scene has many Info Hotspots
 - Panorama Viewer displays one Scene at a time and references one Floor
-- Sidebar Floor buttons select a Floor, which sets the Panorama Viewer's current scene
+- Sidebar Floor buttons select a Floor, which sets the Panorama Viewer's current scene; the viewer's scene change flows back to the Sidebar as the active floor
 
 ## Source of Truth
 
