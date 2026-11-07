@@ -1,10 +1,7 @@
 // `onToggleSidebar` is intentionally omitted from the props for now: the
 // Header's toggle button is commented out (the Sidebar exposes its own
 // toggle). Re-add the prop if the button is restored.
-export default function Header({
-  sidebarOpen,
-  currentLocation,
-}) {
+export default function Header({ sidebarOpen, currentLocation }) {
   return (
     <div className="absolute inset-x-0 top-0 z-40">
       <header className="relative z-40 flex min-h-16 items-center gap-4 bg-transparent px-5 py-3 compact:px-3.5 compact:py-2.5">
@@ -22,17 +19,16 @@ export default function Header({
         </button> */}
 
         <div className="flex min-w-0 items-baseline gap-2.5">
-          <span
-            className={`rounded-mark bg-accent px-1.5 py-0.5 text-[0.8rem] font-black tracking-[0.12em] text-accent-ink ${sidebarOpen ? "hidden" : ""}`}
-            aria-label="CIIT"
-          >
-            CIIT
-          </span>
-          <span
+          <img
+            src="/img/CIIT_Logo_Inverse_cropped.svg"
+            alt="CIIT logo"
+            className={`h-7 w-auto ${sidebarOpen ? "hidden" : ""}`}
+          />
+          {/* <span
             className={`font-bold whitespace-nowrap compact:text-[0.92rem] tiny:hidden ${sidebarOpen ? "hidden" : ""}`}
           >
             Virtual Campus Tour
-          </span>
+          </span> */}
         </div>
 
         <p

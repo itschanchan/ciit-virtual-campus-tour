@@ -127,9 +127,9 @@ function SidebarLogo({ logoUrl }) {
           CIIT
         </span>
       )}
-      <p className="mb-0 text-[0.8rem] font-bold tracking-[0.12em] text-ink uppercase">
+      {/* <p className="mb-0 text-[0.8rem] font-bold tracking-[0.12em] text-ink uppercase">
         360° Virtual Campus Tour
-      </p>
+      </p> */}
     </div>
   );
 }

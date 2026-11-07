@@ -118,6 +118,7 @@ export default function Layout() {
           onSelect={selectLocation}
           onClose={() => setSidebarOpen(false)}
           onOpen={() => setSidebarOpen(true)}
+          logoUrl="/img/ciit_glitch_virtual_tour_logo.png"
         />
 
         <main
