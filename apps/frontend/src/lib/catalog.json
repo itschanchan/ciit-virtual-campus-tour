@@ -31,6 +31,246 @@
         "transcript": "Welcome to the CIIT Virtual Campus Tour. This development placeholder will be replaced by the first Glitch Tower location. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
         "durationSeconds": 2
       }
+    },
+    {
+      "id": "ug-ground",
+      "name": "Upperground Level",
+      "description": "Explore the upperground level of CIIT's Glitch Tower.",
+      "order": 1,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the upperground level of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the upperground level of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "fourth-floor",
+      "name": "Fourth Floor",
+      "description": "Visit the fourth floor of Glitch Tower.",
+      "order": 5,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the fourth floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the fourth floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "fifth-floor",
+      "name": "Fifth Floor",
+      "description": "Visit the fifth floor of Glitch Tower.",
+      "order": 6,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the fifth floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the fifth floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "fifth-mezzanine",
+      "name": "Fifth Floor Mezzanine",
+      "description": "Visit the fifth floor mezzanine of Glitch Tower.",
+      "order": 7,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the fifth floor mezzanine of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the fifth floor mezzanine of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "sixth-floor",
+      "name": "Sixth Floor",
+      "description": "Visit the sixth floor of Glitch Tower.",
+      "order": 8,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the sixth floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the sixth floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "seventh-floor",
+      "name": "Seventh Floor",
+      "description": "Visit the seventh floor of Glitch Tower.",
+      "order": 9,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the seventh floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the seventh floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "eighth-floor",
+      "name": "Eighth Floor",
+      "description": "Visit the eighth floor of Glitch Tower.",
+      "order": 10,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the eighth floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the eighth floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
+    },
+    {
+      "id": "ninth-floor",
+      "name": "Ninth Floor",
+      "description": "Visit the ninth floor of Glitch Tower.",
+      "order": 11,
+      "panorama": {
+        "tileUrlTemplate": "/panoramas/placeholder/{z}/{f}/{y}/{x}.svg",
+        "previewUrl": "/panoramas/placeholder/equirect.svg",
+        "initialView": {
+          "yaw": 0,
+          "pitch": 0,
+          "fov": 1.2
+        },
+        "minFov": 0.5,
+        "maxFov": 2.4
+      },
+      "gallery": [
+        {
+          "src": "/panoramas/placeholder/equirect.svg",
+          "alt": "Development placeholder showing the ninth floor of Glitch Tower.",
+          "caption": "Placeholder panorama preview",
+          "order": 0
+        }
+      ],
+      "narration": {
+        "audioSrc": "/panoramas/placeholder/narration.wav",
+        "transcript": "Welcome to the ninth floor of Glitch Tower. Use the location menu to explore, drag the panorama to look around, and open the gallery for still images.",
+        "durationSeconds": 2
+      }
     }
   ]
 }

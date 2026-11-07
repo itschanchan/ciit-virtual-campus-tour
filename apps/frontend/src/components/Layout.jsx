@@ -88,7 +88,7 @@ export default function Layout() {
         />
       )}
 
-      <div className="flex h-full min-h-0">
+      <div className="relative flex h-full w-full min-h-0 flex-col">
         <Sidebar
           locations={locations}
           currentLocationId={currentLocation?.id ?? ""}
@@ -100,7 +100,7 @@ export default function Layout() {
 
         <main
           id="tour-main"
-          className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden"
           tabIndex={-1}
         >
           {contentStatus === "loading" && (

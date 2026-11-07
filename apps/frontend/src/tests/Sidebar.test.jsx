@@ -379,4 +379,51 @@ describe('Sidebar', () => {
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
   })
+
+  it('matches a floor to its location by order, not array index, so available tiles are clickable', () => {
+    const onSelect = vi.fn()
+    const locations = [
+      { id: 'lg-lobby', order: 0, name: 'LG Lobby', description: 'Lobby', panorama: {} },
+      { id: 'fourth-floor', order: 5, name: 'Fourth Floor', description: '4F', panorama: {} },
+    ]
+    render(
+      <Sidebar
+        locations={locations}
+        currentLocationId={null}
+        open
+        onSelect={onSelect}
+      />,
+    )
+
+    // 4F is at FLOOR_SEQUENCE index 5; its location has order 5.
+    // With index-based mapping, 4F would get null (only 2 locations).
+    // With order-based matching, 4F gets the fourth-floor location.
+    const fourthFloorButton = screen.getByRole('button', { name: /4F Fourth Floor/ })
+    expect(fourthFloorButton).not.toBeDisabled()
+
+    fireEvent.click(fourthFloorButton)
+    expect(onSelect).toHaveBeenCalledWith('fourth-floor')
+  })
+
+  it('disables a floor button when no location exists for that floor', () => {
+    const onSelect = vi.fn()
+    const locations = [
+      { id: 'lg-lobby', order: 0, name: 'LG Lobby', description: 'Lobby', panorama: {} },
+    ]
+    render(
+      <Sidebar
+        locations={locations}
+        currentLocationId={null}
+        open
+        onSelect={onSelect}
+      />,
+    )
+
+    // UG is at FLOOR_SEQUENCE index 1; no location has order 1.
+    const ugButton = screen.getByRole('button', { name: /^UG$/ })
+    expect(ugButton).toBeDisabled()
+
+    fireEvent.click(ugButton)
+    expect(onSelect).not.toHaveBeenCalled()
+  })
 })

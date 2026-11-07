@@ -42,17 +42,25 @@ const FLOOR_SCENE_MAP = {
 };
 
 function buildFloorItems(locations) {
-  const sortedLocations = [...locations].sort((a, b) => a.order - b.order);
+  // Match each floor to its location by floor label position (order), not by
+  // array index. Index-based matching breaks when locations do not cover every
+  // floor in sequence order (e.g. order 0 = LG, order 5 = 4F): then UG would
+  // incorrectly receive 4F's data and 4F would receive nothing.
+  const locationByOrder = new Map();
+  for (const location of locations) {
+    locationByOrder.set(location.order, location);
+  }
+
   const items = FLOOR_SEQUENCE.map((floor, index) => ({
     floor,
-    location: sortedLocations[index] ?? null,
+    location: locationByOrder.get(index) ?? null,
   }));
 
   return items.reverse();
 }
 
-function getPairGroup(floor) {
-  return PAIRED_FLOORS.find((group) => group.includes(floor)) ?? null;
+function getPairGroup(floor, entries = PAIRED_FLOORS) {
+  return entries.find((group) => group.includes(floor)) ?? null;
 }
 
 function buildFloorRows(items) {
@@ -427,7 +435,7 @@ export default function Sidebar({
     <>
       <aside
         id="location-sidebar"
-        className={`flex-none overflow-hidden border-r bg-surface/86 transition-all duration-300 ease-in-out compact:fixed compact:top-16 compact:bottom-0 compact:left-0 compact:z-30 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
+        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r bg-surface/86 transition-all duration-300 ease-in-out compact:top-16 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}

@@ -15,7 +15,7 @@ function withSecondLocation() {
     id: 'glitch-tower-library',
     name: 'Glitch Tower Library',
     description: 'Browse the library.',
-    order: 1,
+    order: 12,
     narration: undefined,
   })
   return catalog
