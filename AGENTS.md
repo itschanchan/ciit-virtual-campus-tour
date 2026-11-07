@@ -50,6 +50,11 @@
 
 - **Prefer Component Abstraction**: For complex or recurring UI elements, extract clean, reusable components instead of relying on long, unreadable utility class strings or heavy custom CSS overrides. Use a global theme file for easier class values management.
 
+- **Avoid Tailwind Display Conflicts**: Never apply `flex` and `hidden` to the same element simultaneously, as they conflict for the `display` property.
+  - **Bad**: `<div class="flex hidden">`
+  - **Good (Responsive)**: `<div class="hidden md:flex">`
+  - **Good (Conditional)**: Use state to swap classes entirely (`isOpen ? 'flex' : 'hidden'`) or toggle `hidden` on a parent wrapper.
+
 ### Preferred Clean Syntax Patterns
 
 - **Explicit over Implicit:** Write clear, self-explanatory variable and function names. Do not prioritize saving keystrokes over clarity.
