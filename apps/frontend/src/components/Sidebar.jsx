@@ -2,10 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Popover from "@mui/material/Popover";
-import {
-  FLOOR_SEQUENCE,
-  FLOOR_SCENE_MAP,
-} from "../lib/floorSceneMap";
+import { FLOOR_SEQUENCE, FLOOR_SCENE_MAP } from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
@@ -416,7 +413,8 @@ export default function Sidebar({
         inert={!open}
       >
         <div
-          className={`flex h-full w-80 flex-col overflow-y-auto p-5 pt-20 transition-opacity duration-200 compact:w-[min(20rem,86vw)] compact:pt-5 ${contentState}`}
+          // Adjust sidebar content's position
+          className={`flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 compact:w-[min(20rem,86vw)] compact:pt-2 ${contentState}`}
         >
           <SidebarLogo logoUrl={logoUrl} />
 
@@ -436,9 +434,10 @@ export default function Sidebar({
         </div>
       </aside>
 
+      {/* Sidebar Toggle */}
       <button
         type="button"
-        className={`fixed top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface text-ink shadow-sidebar transition-all duration-300 hover:border-accent hover:text-accent ${togglePosition}`}
+        className={`fixed h-45 top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface text-ink shadow-sidebar transition-all duration-300 hover:border-accent hover:text-accent ${togglePosition}`}
         aria-label={open ? "Collapse campus floors" : "Expand campus floors"}
         aria-expanded={open}
         aria-controls="location-sidebar"
