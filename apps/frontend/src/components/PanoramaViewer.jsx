@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { APP_DATA } from '../lib/data'
+import { useEffect, useRef, useState } from "react";
+import { APP_DATA } from "../lib/data";
 
-const MISSING_PANORAMA_MESSAGE = 'No panorama available yet.'
+const MISSING_PANORAMA_MESSAGE = "No panorama available yet.";
 
 // Floor label to designated first scene ID mapping (per spec sidebar guide).
 const FLOOR_FIRST_SCENE = {
@@ -14,21 +14,19 @@ const FLOOR_FIRST_SCENE = {
   "7F": "39-7f---2",
   "8F": "42-8f---2",
   "9F": "48-9f---1",
-}
+};
 
 // Switch to a scene by ID by dispatching a click on the corresponding
 // scene list element (Marzipano.jsx handles the actual scene switch).
 // The event must be cancelable so React's preventDefault() stops jsdom and
 // browsers from following the sanitized `javascript:` href.
 function switchToSceneId(sceneId) {
-  if (!sceneId) return
-  const el = document.querySelector(
-    `#sceneList .scene[data-id="${sceneId}"]`
-  )
+  if (!sceneId) return;
+  const el = document.querySelector(`#sceneList .scene[data-id="${sceneId}"]`);
   if (el) {
     el.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true })
-    )
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
   }
 }
 
@@ -42,7 +40,7 @@ const VIEW_CONTROLS = [
   ["right", "right.png", "ml-[5px]", "Pan right"],
   ["in", "plus.png", "ml-[55px]", "Zoom in"],
   ["out", "minus.png", "ml-[105px]", "Zoom out"],
-]
+];
 
 // Keyboard keys mapped to view control element ids. Marzipano's press
 // control only listens for mouse/touch events, so keyboard support presses
@@ -55,37 +53,38 @@ const KEY_CONTROL_MAP = {
   "+": "viewIn",
   "=": "viewIn",
   "-": "viewOut",
-}
+};
 
 function pressControl(controlId) {
-  const el = document.getElementById(controlId)
-  el?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+  const el = document.getElementById(controlId);
+  el?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
 }
 
 function releaseControl(controlId) {
-  const el = document.getElementById(controlId)
-  el?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }))
+  const el = document.getElementById(controlId);
+  el?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 }
 
 export default function PanoramaViewer({ location, onReady, onError }) {
-  const containerRef = useRef(null)
-  const onReadyRef = useRef(onReady)
-  const onErrorRef = useRef(onError)
-  const missing = !location?.panorama
+  const containerRef = useRef(null);
+  const onReadyRef = useRef(onReady);
+  const onErrorRef = useRef(onError);
 
-  const [status, setStatus] = useState(missing ? "error" : "loading")
-  const [currentSceneId, setCurrentSceneId] = useState(null)
-  const [error, setError] = useState(missing ? MISSING_PANORAMA_MESSAGE : null)
-  const [sceneListOpen, setSceneListOpen] = useState(false)
-
-  useEffect(() => {
-    onReadyRef.current = onReady
-    onErrorRef.current = onError
-  }, [onReady, onError])
+  const [status, setStatus] = useState(
+    APP_DATA.scenes.length === 0 ? "error" : "loading",
+  );
+  const [currentSceneId, setCurrentSceneId] = useState(null);
+  const [error, setError] = useState(
+    APP_DATA.scenes.length === 0 ? MISSING_PANORAMA_MESSAGE : null,
+  );
+  const [sceneListOpen] = useState(false);
 
   useEffect(() => {
-    if (missing) return
+    onReadyRef.current = onReady;
+    onErrorRef.current = onError;
+  }, [onReady, onError]);
 
+  useEffect(() => {
     // Render DOM skeleton first (done above), then dynamically import
     // Marzipano.jsx after mount so its IIFE queries rendered elements.
     Promise.resolve()
@@ -93,68 +92,66 @@ export default function PanoramaViewer({ location, onReady, onError }) {
       .then(() => {
         // Marzipano.jsx initializes on import via window globals.
         // Set the initial scene to the LG first scene `0-lg---1`.
-        const initialSceneId = FLOOR_FIRST_SCENE["LG"]
-        setCurrentSceneId(initialSceneId)
+        const initialSceneId = FLOOR_FIRST_SCENE["LG"];
+        setCurrentSceneId(initialSceneId);
 
         // Give the DOM a frame to render, then trigger initial scene switch.
         setTimeout(() => {
-          switchToSceneId(initialSceneId)
-          setStatus("ready")
-          setError(null)
-          onReadyRef.current?.()
-        }, 0)
+          switchToSceneId(initialSceneId);
+          setStatus("ready");
+          setError(null);
+          onReadyRef.current?.();
+        }, 0);
       })
       .catch((err) => {
-        console.error("Marzipano viewer failed to load:", err)
-        setStatus("error")
-        setError(MISSING_PANORAMA_MESSAGE)
-        onErrorRef.current?.(MISSING_PANORAMA_MESSAGE)
-      })
+        console.error("Marzipano viewer failed to load:", err);
+        if (APP_DATA.scenes.length === 0) {
+          setStatus("error");
+          setError(MISSING_PANORAMA_MESSAGE);
+          onErrorRef.current?.(MISSING_PANORAMA_MESSAGE);
+        }
+      });
     // Intentionally NOT keyed on `location`: the Sidebar dispatches floor
     // scene switches itself, and re-running this init on every location
     // change would revert the viewer to the LG scene (FR-002/FR-013).
-  }, [missing])
-
-  // Notify the parent when the location has no panorama (initial state).
-  useEffect(() => {
-    if (!missing) return
-    onErrorRef.current?.(MISSING_PANORAMA_MESSAGE)
-  }, [missing])
+  }, []);
 
   // Expose scene switching for Sidebar integration via window.
   useEffect(() => {
     window.__panoramaViewer = {
       switchToSceneId,
       getCurrentSceneId: () => currentSceneId,
-    }
+    };
     return () => {
-      window.__panoramaViewer = undefined
-    }
-  }, [currentSceneId])
+      window.__panoramaViewer = undefined;
+    };
+  }, [currentSceneId]);
 
   // Track scene changes triggered by Marzipano link hotspots (DOM mutations
   // on the scene list `.scene.current` class) so React stays in sync.
   useEffect(() => {
-    const sceneList = document.getElementById("sceneList")
-    if (!sceneList) return
+    const sceneList = document.getElementById("sceneList");
+    if (!sceneList) return;
 
     const observer = new MutationObserver(() => {
-      const current = sceneList.querySelector(".scene.current")
+      const current = sceneList.querySelector(".scene.current");
       if (current) {
-        const id = current.getAttribute("data-id")
+        const id = current.getAttribute("data-id");
         if (id && id !== currentSceneId) {
-          setCurrentSceneId(id)
+          setCurrentSceneId(id);
         }
       }
-    })
+    });
 
-    observer.observe(sceneList, { attributes: true, childList: true, subtree: true })
-    return () => observer.disconnect()
-  }, [currentSceneId])
+    observer.observe(sceneList, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [currentSceneId]);
 
-  const sceneName =
-    APP_DATA.scenes.find((s) => s.id === currentSceneId)?.name ?? ""
-  const locationLabel = location?.name ?? "Campus location"
+  const locationLabel = location?.name ?? "Campus location";
 
   // Scene list positioning: off-screen left when closed, visible when open
   const sceneListClasses = [
@@ -162,7 +159,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
     "bg-surface-strong border-r border-line",
     "pt-10 transition-all duration-500 ease-in-out",
     sceneListOpen ? "translate-x-0" : "-translate-x-full",
-  ].join(" ")
+  ].join(" ");
 
   return (
     <section
@@ -171,27 +168,24 @@ export default function PanoramaViewer({ location, onReady, onError }) {
       aria-label={`360 degree view of ${locationLabel}`}
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.target !== e.currentTarget) return
-        const controlId = KEY_CONTROL_MAP[e.key]
-        if (!controlId) return
-        e.preventDefault()
-        pressControl(controlId)
+        if (e.target !== e.currentTarget) return;
+        const controlId = KEY_CONTROL_MAP[e.key];
+        if (!controlId) return;
+        e.preventDefault();
+        pressControl(controlId);
       }}
       onKeyUp={(e) => {
-        if (e.target !== e.currentTarget) return
-        const controlId = KEY_CONTROL_MAP[e.key]
-        if (!controlId) return
-        releaseControl(controlId)
+        if (e.target !== e.currentTarget) return;
+        const controlId = KEY_CONTROL_MAP[e.key];
+        if (!controlId) return;
+        releaseControl(controlId);
       }}
     >
       {/* Panorama render target */}
       <div id="pano" className="absolute inset-0" />
 
       {/* Scene list */}
-      <div
-        id="sceneList"
-        className={sceneListClasses}
-      >
+      <div id="sceneList" className={sceneListClasses}>
         <div className="flex flex-col p-4 space-y-2">
           {APP_DATA.scenes.map((scene) => (
             <a
@@ -200,16 +194,16 @@ export default function PanoramaViewer({ location, onReady, onError }) {
               className={[
                 "scene block w-full h-[30px]",
                 scene.id === currentSceneId ? "bg-[rgba(103,115,131,0.8)]" : "",
-              ].join(" ").trim()}
+              ]
+                .join(" ")
+                .trim()}
               data-id={scene.id}
               onClick={(e) => {
-                e.preventDefault()
-                setCurrentSceneId(scene.id)
+                e.preventDefault();
+                setCurrentSceneId(scene.id);
               }}
             >
-              <li
-                className="text w-full h-full px-[15px] leading-[30px] overflow-hidden text-ellipsis whitespace-nowrap"
-              >
+              <li className="text w-full h-full px-[15px] leading-[30px] overflow-hidden text-ellipsis whitespace-nowrap">
                 {scene.name}
               </li>
             </a>
@@ -217,62 +211,71 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         </div>
       </div>
 
-      {/* Scene list toggle */}
+      {/* Hamburger scene list toggle: hidden but kept in DOM so frozen Marzipano.jsx can query it */}
       <a
         href="javascript:void(0)"
         id="sceneListToggle"
-        className="absolute top-0 left-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink"
-        onClick={(e) => {
-          e.preventDefault()
-          setSceneListOpen((prev) => !prev)
-        }}
+        className="absolute top-0 left-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
       >
         <span className="text-xl">☰</span>
       </a>
 
-      {/* Title bar: right-40 for fullscreen button, left-40 for scene list toggle */}
-      <div
-        id="titleBar"
-        className="absolute top-0 left-[40px] right-[40px] z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line flex items-center justify-center px-4"
-      >
-        <h1 className="sceneName text-sm text-ink truncate">{sceneName}</h1>
-      </div>
-
-      {/* Autorotate toggle */}
-      <a
-        href="javascript:void(0)"
-        id="autorotateToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hover:bg-accent transition-colors"
-        onClick={(e) => {
-          e.preventDefault()
-          document
-            .getElementById("autorotateToggle")
-            ?.classList.toggle("enabled")
-        }}
-      >
-        <img className="icon off w-6 h-6" src="img/play.png" alt="Autorotate on" />
-        <img className="icon on w-6 h-6 hidden" src="img/pause.png" alt="Autorotate off" />
-      </a>
-
-      {/* Fullscreen toggle */}
+      {/* Fullscreen toggle: hidden but kept in DOM so frozen Marzipano.jsx can query it */}
       <a
         href="javascript:void(0)"
         id="fullscreenToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hover:bg-accent transition-colors"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
+      >
+        <img
+          className="icon off w-6 h-6"
+          src="img/fullscreen.png"
+          alt="Fullscreen on"
+        />
+        <img
+          className="icon on w-6 h-6 hidden"
+          src="img/windowed.png"
+          alt="Fullscreen off"
+        />
+      </a>
+
+      {/* Title bar: hidden but kept in DOM so frozen Marzipano.jsx can query #titleBar .sceneName */}
+      <div
+        id="titleBar"
+        className="absolute top-0 left-[40px] right-[40px] z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line flex items-center justify-center px-4 hidden"
+      >
+        <h1 className="sceneName text-sm text-ink truncate" id="sceneName">
+          {location?.name ?? ""}
+        </h1>
+      </div>
+
+      {/* Autorotate toggle: hidden but kept in DOM so frozen Marzipano.jsx can query it */}
+      <a
+        href="javascript:void(0)"
+        id="autorotateToggle"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
         onClick={(e) => {
-          e.preventDefault()
-          const el = document.documentElement
-          if (el.requestFullscreen) el.requestFullscreen()
+          e.preventDefault();
+          document
+            .getElementById("autorotateToggle")
+            ?.classList.toggle("enabled");
         }}
       >
-        <img className="icon off w-6 h-6" src="img/fullscreen.png" alt="Fullscreen on" />
-        <img className="icon on w-6 h-6 hidden" src="img/windowed.png" alt="Fullscreen off" />
+        <img
+          className="icon off w-6 h-6"
+          src="img/play.png"
+          alt="Autorotate on"
+        />
+        <img
+          className="icon on w-6 h-6 hidden"
+          src="img/pause.png"
+          alt="Autorotate off"
+        />
       </a>
 
       {/* View control buttons: centered at bottom with original margins */}
       <div className="absolute bottom-0 left-1/2 z-10 pb-4" id="viewControls">
         {VIEW_CONTROLS.map(([id, img, marginClass, label]) => {
-          const controlId = `view${id.charAt(0).toUpperCase() + id.slice(1)}`
+          const controlId = `view${id.charAt(0).toUpperCase() + id.slice(1)}`;
           return (
             <a
               key={id}
@@ -284,26 +287,24 @@ export default function PanoramaViewer({ location, onReady, onError }) {
               ].join(" ")}
               onClick={(e) => e.preventDefault()}
               onKeyDown={(e) => {
-                if (e.key !== "Enter" && e.key !== " ") return
-                e.preventDefault()
-                pressControl(controlId)
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                pressControl(controlId);
               }}
               onKeyUp={(e) => {
-                if (e.key !== "Enter" && e.key !== " ") return
-                releaseControl(controlId)
+                if (e.key !== "Enter" && e.key !== " ") return;
+                releaseControl(controlId);
               }}
             >
               <img className="icon w-6 h-6" src={`img/${img}`} alt={label} />
             </a>
-          )
+          );
         })}
       </div>
 
       {/* Loading state */}
-      {!missing && status === "loading" && (
-        <div
-          className="absolute top-1/2 left-1/2 z-[6] grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-line bg-surface-soft p-5 text-center text-ink"
-        >
+      {status === "loading" && (
+        <div className="absolute top-1/2 left-1/2 z-[6] grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-line bg-surface-soft p-5 text-center text-ink">
           <span
             className="size-8 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent"
             aria-hidden="true"
@@ -313,7 +314,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
       )}
 
       {/* Error state */}
-      {(missing || status === "error") && (
+      {status === "error" && (
         <div
           className="absolute top-1/2 left-1/2 z-[6] grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-danger/50 bg-surface-soft p-5 text-center text-danger"
           role="alert"
@@ -323,5 +324,5 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         </div>
       )}
     </section>
-  )
+  );
 }
