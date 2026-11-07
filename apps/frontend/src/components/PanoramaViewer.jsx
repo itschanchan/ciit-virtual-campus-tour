@@ -220,7 +220,7 @@ export default function PanoramaViewer({
               key={scene.id}
               href="javascript:void(0)"
               className={[
-                "scene block w-full h-[30px]",
+                "scene block w-full h-7.5",
                 scene.id === currentSceneId ? "bg-[rgba(103,115,131,0.8)]" : "",
               ]
                 .join(" ")
@@ -231,7 +231,7 @@ export default function PanoramaViewer({
                 setCurrentSceneId(scene.id);
               }}
             >
-              <li className="text w-full h-full px-[15px] leading-[30px] overflow-hidden text-ellipsis whitespace-nowrap">
+              <li className="text w-full h-full px-3.75 leading-7.5 overflow-hidden text-ellipsis whitespace-nowrap">
                 {scene.name}
               </li>
             </a>
@@ -243,7 +243,7 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="sceneListToggle"
-        className="absolute top-0 left-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
+        className="absolute top-0 left-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
       >
         <span className="text-xl">☰</span>
       </a>
@@ -252,7 +252,7 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="fullscreenToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
       >
         <img
           className="icon off w-6 h-6"
@@ -269,7 +269,7 @@ export default function PanoramaViewer({
       {/* Title bar: hidden but kept in DOM so frozen Marzipano.jsx can query #titleBar .sceneName */}
       <div
         id="titleBar"
-        className="absolute top-0 left-[40px] right-[40px] z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line flex items-center justify-center px-4 hidden"
+        className="absolute top-0 left-10 right-10 z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line hidden"
       >
         <h1 className="sceneName text-sm text-ink truncate" id="sceneName">
           {sceneName}
@@ -280,7 +280,7 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="autorotateToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hidden"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
         onClick={(e) => {
           e.preventDefault();
           document
@@ -310,7 +310,7 @@ export default function PanoramaViewer({
               href="javascript:void(0)"
               id={controlId}
               className={[
-                "viewControlButton absolute bottom-0 w-10 h-10 p-[5px] bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hover:bg-accent transition-colors",
+                "viewControlButton absolute bottom-0 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hover:bg-accent transition-colors",
                 marginClass,
               ].join(" ")}
               onClick={(e) => e.preventDefault()}
@@ -332,7 +332,7 @@ export default function PanoramaViewer({
 
       {/* Loading state */}
       {status === "loading" && (
-        <div className="absolute top-1/2 left-1/2 z-[6] grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-line bg-surface-soft p-5 text-center text-ink">
+        <div className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-line bg-surface-soft p-5 text-center text-ink">
           <span
             className="size-8 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent"
             aria-hidden="true"
@@ -344,7 +344,7 @@ export default function PanoramaViewer({
       {/* Error state */}
       {status === "error" && (
         <div
-          className="absolute top-1/2 left-1/2 z-[6] grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-danger/50 bg-surface-soft p-5 text-center text-danger"
+          className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-danger/50 bg-surface-soft p-5 text-center text-danger"
           role="alert"
         >
           <strong>Panorama unavailable</strong>
