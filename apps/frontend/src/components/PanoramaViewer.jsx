@@ -69,15 +69,20 @@ export default function PanoramaViewer({ location, onReady, onError }) {
   const containerRef = useRef(null);
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
+  const viewerStartedRef = useRef(false);
 
-  const [status, setStatus] = useState(
-    APP_DATA.scenes.length === 0 ? "error" : "loading",
-  );
+  // spec-004 (FR-001/FR-002): the viewer owns the missing-panorama empty
+  // state. No location, no panorama, or no scene data means the alert shows
+  // and the Marzipano viewer is never initialized for that content.
+  const missingPanorama = !location?.panorama || APP_DATA.scenes.length === 0;
+
+  const [viewerStatus, setViewerStatus] = useState("loading");
   const [currentSceneId, setCurrentSceneId] = useState(null);
-  const [error, setError] = useState(
-    APP_DATA.scenes.length === 0 ? MISSING_PANORAMA_MESSAGE : null,
-  );
   const [sceneListOpen] = useState(false);
+
+  // The empty state is derived, not stored: `missingPanorama` flips the
+  // display straight to the alert and back when a valid panorama returns.
+  const status = missingPanorama ? "error" : viewerStatus;
 
   useEffect(() => {
     onReadyRef.current = onReady;
@@ -85,6 +90,21 @@ export default function PanoramaViewer({ location, onReady, onError }) {
   }, [onReady, onError]);
 
   useEffect(() => {
+    // Missing-panorama empty state: notify the parent and never initialize
+    // the viewer for this content.
+    if (missingPanorama) {
+      onErrorRef.current?.(MISSING_PANORAMA_MESSAGE);
+      return;
+    }
+
+    // Already initialized: nothing to do, the derived empty state above
+    // simply stops covering the viewer again.
+    if (viewerStartedRef.current) {
+      return;
+    }
+
+    viewerStartedRef.current = true;
+
     // Render DOM skeleton first (done above), then dynamically import
     // Marzipano.jsx after mount so its IIFE queries rendered elements.
     Promise.resolve()
@@ -98,23 +118,18 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         // Give the DOM a frame to render, then trigger initial scene switch.
         setTimeout(() => {
           switchToSceneId(initialSceneId);
-          setStatus("ready");
-          setError(null);
+          setViewerStatus("ready");
           onReadyRef.current?.();
         }, 0);
       })
       .catch((err) => {
         console.error("Marzipano viewer failed to load:", err);
-        if (APP_DATA.scenes.length === 0) {
-          setStatus("error");
-          setError(MISSING_PANORAMA_MESSAGE);
-          onErrorRef.current?.(MISSING_PANORAMA_MESSAGE);
-        }
       });
     // Intentionally NOT keyed on `location`: the Sidebar dispatches floor
     // scene switches itself, and re-running this init on every location
     // change would revert the viewer to the LG scene (FR-002/FR-013).
-  }, []);
+    // Only the empty-state flip (spec-004) re-runs this effect.
+  }, [missingPanorama]);
 
   // Expose scene switching for Sidebar integration via window.
   useEffect(() => {
@@ -152,6 +167,15 @@ export default function PanoramaViewer({ location, onReady, onError }) {
   }, [currentSceneId]);
 
   const locationLabel = location?.name ?? "Campus location";
+
+  // The title bar always shows the current scene name (spec-006 FR-004).
+  // Deriving it from React state keeps ownership of the text node in React,
+  // so a location change no longer overwrites Marzipano's scene switch
+  // (FR-013: the most recently selected scene stays displayed).
+  const activeScene = APP_DATA.scenes.find(
+    (scene) => scene.id === currentSceneId,
+  );
+  const sceneName = activeScene?.name ?? "";
 
   // Scene list positioning: off-screen left when closed, visible when open
   const sceneListClasses = [
@@ -244,7 +268,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
         className="absolute top-0 left-[40px] right-[40px] z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line flex items-center justify-center px-4 hidden"
       >
         <h1 className="sceneName text-sm text-ink truncate" id="sceneName">
-          {location?.name ?? ""}
+          {sceneName}
         </h1>
       </div>
 
@@ -320,7 +344,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
           role="alert"
         >
           <strong>Panorama unavailable</strong>
-          <span className="text-ink">{error ?? MISSING_PANORAMA_MESSAGE}</span>
+          <span className="text-ink">{MISSING_PANORAMA_MESSAGE}</span>
         </div>
       )}
     </section>
