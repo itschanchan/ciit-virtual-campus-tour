@@ -407,7 +407,7 @@ export default function Sidebar({
     <>
       <aside
         id="location-sidebar"
-        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r bg-surface/86 transition-all duration-300 ease-in-out compact:top-16 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
+        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r border-line bg-surface/86 transition-all duration-300 ease-in-out compact:top-16 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}
@@ -437,7 +437,7 @@ export default function Sidebar({
       {/* Sidebar Toggle */}
       <button
         type="button"
-        className={`fixed h-45 top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface text-ink shadow-sidebar transition-all duration-300 hover:border-accent hover:text-accent ${togglePosition}`}
+        className={`fixed h-45 -ml-px top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface/86 text-ink transition-all duration-300 ease-in-out hover:border-accent hover:text-accent ${togglePosition}`}
         aria-label={open ? "Collapse campus floors" : "Expand campus floors"}
         aria-expanded={open}
         aria-controls="location-sidebar"
