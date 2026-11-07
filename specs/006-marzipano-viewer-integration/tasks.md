@@ -4,7 +4,7 @@
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Tests are OPTIONAL - only include them if explicitly requested in the feature specification. No tests were explicitly requested in the spec, so no test tasks are generated (see T030 for the deferred Vitest tooling gate).
+**Tests**: Tests are OPTIONAL - only include them if explicitly requested in the feature specification. No tests were explicitly requested in the spec, so no test tasks are generated (see T030 for the Vitest tooling gate). Existing test files are referenced only as verification evidence inside verification tasks (e.g. T035).
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -20,6 +20,8 @@
 ## Execution State
 
 T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation exists and was verified end-to-end. T013 and T023 were verified and completed on 2026-11-06, T029/T030 completed with maintainer approval on 2026-11-06 (lint clean, test suite green: 6 files / 49 tests / 0 errors). **T028 remains open by explicit maintainer decision** (tile commit deferred).
+
+T031–T035 were appended on 2026-11-07 for the clarify/plan sessions of that date (Integration Rules #1/#2: floor-code scene sync, keep-previous fallback, active-button label). IDs are appended after the original T001–T030 sequence; their phase placement reflects execution order. All five are implemented and verified: root `npm run test` → 63/63 (backend 8, frontend 55), `npx eslint .` → 0 errors, `npm run build` → succeeds.
 
 ---
 
@@ -43,7 +45,8 @@ T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation ex
 - [X] T005 [P] Wire Marzipano.jsx into PanoramaViewer.jsx so the Marzipano viewer logic initializes inside the React component (`src/components/PanoramaViewer.jsx`)
 - [X] T006 [P] Drive viewer scenes from APP_DATA in `src/lib/data.js` (scene ids, names, levels, link hotspots, info hotspots, initial view parameters)
 - [X] T007 [P] Migrate global styles from the original Marzipano CSS to Tailwind CSS within `PanoramaViewer.jsx` or `src/index.css` per FR-011 (Marzipano globals in `@layer base`, hotspot styles in `@layer components`)
-- [X] T008 Set the initial tour scene to LG first scene `0-lg---1` in PanoramaViewer.jsx per FR-001
+- [X] T008 Set the initial tour scene to LG first scene `0-lg---1` in `src/components/PanoramaViewer.jsx` per FR-001
+- [X] T031 [P] Extract the shared floor↔scene mapping into `src/lib/floorSceneMap.js` (`FLOOR_SEQUENCE`, `FLOOR_SCENE_MAP`, `getSceneIdForFloor`, `getFloorIndex`, `getFloorForSceneId`) and import it from `src/components/Sidebar.jsx` and `src/components/PanoramaViewer.jsx` so button→scene and scene→floor logic lives in one module
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -62,6 +65,7 @@ T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation ex
 - [X] T011 [P] [US1] Display the current scene name in the viewer title bar (`src/components/PanoramaViewer.jsx`)
 - [X] T012 [US1] Verify each floor selection loads the correct first scene without a page reload (`src/components/PanoramaViewer.jsx`, `src/components/Sidebar.jsx`)
 - [X] T013 [US1] Verify/Implement FR-013 rapid floor switching: when floors are switched while a previous scene is still loading, the most recently selected scene wins and the Sidebar highlight matches it (`src/components/PanoramaViewer.jsx`) — verified by code path: `Marzipano.jsx switchScene` is synchronous (`setParameters` → `switchTo` → DOM), floor clicks dispatch synchronously so the last dispatch wins, and Sidebar `onSelect` updates last-wins (quickstart.md Scenario 5 confirms manually)
+- [X] T032 [P] [US1] Display the location name from `catalog.json` only on the active floor button — visible text and accessible name (`aria-label`); inactive buttons show only the floor label (Rule 2, contract C6) (`src/components/Sidebar.jsx`)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -79,6 +83,9 @@ T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation ex
 - [X] T015 [P] [US2] Handle link hotspot clicks to switch to the target scene within the same floor (`src/components/Marzipano.jsx` - handles via switchScene + findSceneById)
 - [X] T016 [US2] Highlight the current floor in the Sidebar when the scene changes (`src/components/PanoramaViewer.jsx` - MutationObserver tracks scene list .current changes)
 - [X] T017 [US2] Verify link hotspot clicks switch to the target scene of the same floor without page reload (`src/components/PanoramaViewer.jsx`)
+- [X] T033 [US2] Emit the displayed scene id to the parent through an `onSceneChange(sceneId)` callback whenever the current scene changes — initial load, scene list click, and link hotspot (MutationObserver on `#sceneList .scene.current`) (`src/components/PanoramaViewer.jsx`, contract C5)
+- [X] T034 [US2] Resolve the scene id to its floor by parsing the floor code (`16-4f---11` → `4f` → `4F`) and select the matching location; when the floor code resolves to no sidebar floor, keep the previous highlight (no clear, no fallback) (`src/components/Layout.jsx` — `handleSceneChange` using `getFloorForSceneId` from `src/lib/floorSceneMap.js`; FR-006, clarification 2026-11-07)
+- [X] T035 [US2] Verify Rule 1 sync end to end: all 54 scene ids in `src/lib/data.js` resolve to their floor button, each floor's first scene round-trips, cross-floor hotspots move the highlight to the target floor (e.g. `2-lg---3` → `5-ug---1` activates UG), and unknown ids keep the previous highlight (`src/tests/floorSceneMap.test.js`) — verified: frontend suite 55/55 green
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -110,7 +117,7 @@ T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation ex
 - [X] T024 [P] Test the viewer on mobile and desktop for layout and control responsiveness (`src/components/PanoramaViewer.jsx`)
 - [X] T025 Verify no JavaScript errors appear in the browser console during scene and floor switching (`src/components/PanoramaViewer.jsx`)
 - [X] T026 [P] Run quickstart.md validation scenarios to confirm end-to-end behavior (`specs/006-marzipano-viewer-integration/quickstart.md`)
-- [X] T027 [P] Perform manual smoke test of the full floor navigation flow
+- [X] T027 [P] Perform manual smoke test of the full floor navigation flow (`specs/006-marzipano-viewer-integration/quickstart.md` Scenarios 1–8)
 - [ ] T028 [P] Commit the tile set `apps/frontend/public/tiles/` (~709 MB, 54 scene dirs, currently untracked) to version control per clarification 2026-11-06 so fresh clones satisfy FR-001 (verify it is not covered by any `.gitignore` rule first)
 - [X] T029 [P] Obtain maintainer approval and resolve the pre-existing ESLint error `apps/frontend/src/components/Marzipano.jsx:436` (`no-redeclare`) — one-line rename or scoped `eslint-disable-next-line no-redeclare` (Constitution gate gap 1 in plan.md; requires approval because the file is frozen) — APPROVED (variable rename): dropped the unused `eventList` parameter of `stopTouchAndScrollEventPropagation`; `npm run lint` now passes clean (Constitution Gate III gap 1 resolved)
 - [X] T030 [P] Obtain maintainer approval to install deferred test tooling (`vitest`, `jsdom`, Testing Library) in `apps/frontend`, run the existing suite in `apps/frontend/src/tests/`, and add an FR-013 regression test in `apps/frontend/src/tests/PanoramaViewer.test.jsx` (Constitution gate gap 2 in plan.md) — APPROVED (install): 73 packages added as `apps/frontend` devDependencies; suite rewritten for the clarified architecture (vendor-global mock + `vi.resetModules()` per test) and green (6 files / 49 tests / 0 errors), including the FR-013 rapid-switch regression test and SC-005 keyboard/alt-text tests (Gate III gap 2 resolved)
@@ -147,6 +154,7 @@ T001–T012, T014–T022, T024–T027 are complete (`[X]`) — implementation ex
 - T010 and T011 (different files: `Sidebar.jsx` vs `PanoramaViewer.jsx`) can run in parallel
 - T014 and T015 (different files: `PanoramaViewer.jsx` vs `Marzipano.jsx`) can run in parallel
 - T024, T026, T027, T028, T029, T030 in Polish touch different areas and can run in parallel
+- **2026-11-07 sync batch**: T031 (new `src/lib/floorSceneMap.js` + imports) runs first; T032 (`Sidebar.jsx`) and T033 (`PanoramaViewer.jsx`) then run in parallel; T034 (`Layout.jsx`) depends on T031 + T033; T035 (verification) runs last
 - Once Foundational phase completes, user stories can start in parallel (if team capacity allows)
 - Different user stories can be worked on in parallel by different team members
 
@@ -202,3 +210,4 @@ With multiple developers:
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
 - T013, T023, T028–T030 originate from the 2026-11-06 clarify/plan sessions (FR-013, SC-005 extension, tile-commit decision, Constitution gate gaps); T028 is intentionally left open (maintainer deferred the ~709 MB tiles commit)
+- T031–T035 originate from the 2026-11-07 clarify/plan sessions (Integration Rule #1 floor-code sync for all 54 scenes, keep-previous fallback for unresolvable floor codes, Integration Rule #2 active-button location label); IDs appended after T030 while phase placement reflects execution order

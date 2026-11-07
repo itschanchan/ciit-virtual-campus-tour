@@ -1,5 +1,9 @@
 import { lazy, Suspense, useEffect } from "react";
 import { useTour } from "../context/useTour";
+import {
+  getFloorForSceneId,
+  getFloorIndex,
+} from "../lib/floorSceneMap";
 import NarrationPlayer from "./NarrationPlayer";
 import Header from "./Header";
 import RoomGallery from "./RoomGallery";
@@ -60,6 +64,24 @@ export default function Layout() {
       }
     }
   }, [currentLocation, locations]);
+
+  // Sync the sidebar's active floor button when the displayed panorama
+  // scene changes (Rule 1: Button Sync).
+  function handleSceneChange(sceneId) {
+    const floor = getFloorForSceneId(sceneId);
+    if (!floor) {
+      return;
+    }
+
+    const floorIndex = getFloorIndex(floor);
+    const location = locations.find(
+      (loc) => loc.order === floorIndex,
+    );
+
+    if (location) {
+      selectLocation(location.id);
+    }
+  }
 
   return (
     <div className="relative h-dvh overflow-hidden bg-canvas text-ink">
@@ -160,7 +182,10 @@ export default function Layout() {
                   </div>
                 }
               >
-                <PanoramaViewer location={currentLocation} />
+                <PanoramaViewer
+                  location={currentLocation}
+                  onSceneChange={handleSceneChange}
+                />
               </Suspense>
 
               {currentLocation && (

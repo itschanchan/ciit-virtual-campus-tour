@@ -57,7 +57,7 @@ describe('Sidebar', () => {
     )
 
     expect(screen.getByText('Glitch Tower Lobby')).toBeInTheDocument()
-    expect(screen.getByText('Glitch Tower Library')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^UG$/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Glitch Tower Lobby/ })).toHaveAttribute(
       'aria-current',
       'true',
@@ -75,7 +75,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /Glitch Tower Library/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^UG$/ }))
 
     expect(onSelect).toHaveBeenCalledWith(secondLocation.id)
   })
@@ -93,7 +93,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /Glitch Tower Library/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^UG$/ }))
 
     expect(onClose).toHaveBeenCalledTimes(1)
   })
@@ -109,7 +109,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    const button = screen.getByRole('button', { name: /Glitch Tower Library/ })
+    const button = screen.getByRole('button', { name: /^UG/ })
     expect(button).toBeDisabled()
     expect(screen.getByText('This location is unavailable.')).toBeInTheDocument()
   })
@@ -289,7 +289,7 @@ describe('Sidebar', () => {
     expect(sixF.closest('li')).not.toBe(pairRow)
   })
 
-  it('orders the pair as 5M then 5F to match the descending list', () => {
+  it('orders the pair as 5F then 5M per spec 010', () => {
     render(
       <Sidebar
         locations={buildAvailableLocations(8)}
@@ -302,7 +302,7 @@ describe('Sidebar', () => {
     const fiveM = screen.getByRole('button', { name: /5M/ })
     const fiveF = screen.getByRole('button', { name: /5F/ })
 
-    expect(fiveM.compareDocumentPosition(fiveF)).toBe(
+    expect(fiveF.compareDocumentPosition(fiveM)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
   })
@@ -375,7 +375,7 @@ describe('Sidebar', () => {
     const fiveM = within(group).getByRole('button', { name: /5M/ })
     const fiveF = within(group).getByRole('button', { name: /5F/ })
 
-    expect(fiveM.compareDocumentPosition(fiveF)).toBe(
+    expect(fiveF.compareDocumentPosition(fiveM)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
   })
@@ -389,7 +389,7 @@ describe('Sidebar', () => {
     render(
       <Sidebar
         locations={locations}
-        currentLocationId={null}
+        currentLocationId="fourth-floor"
         open
         onSelect={onSelect}
       />,

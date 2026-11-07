@@ -1,20 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_DATA } from "../lib/data";
+import { getSceneIdForFloor } from "../lib/floorSceneMap";
 
 const MISSING_PANORAMA_MESSAGE = "No panorama available yet.";
-
-// Floor label to designated first scene ID mapping (per spec sidebar guide).
-const FLOOR_FIRST_SCENE = {
-  LG: "0-lg---1",
-  UG: "5-ug---1",
-  "4F": "10-4f---1",
-  "5F": "23-5f---1",
-  "5M": "27-5m---1",
-  "6F": "29-6f---2",
-  "7F": "39-7f---2",
-  "8F": "42-8f---2",
-  "9F": "48-9f---1",
-};
 
 // Switch to a scene by ID by dispatching a click on the corresponding
 // scene list element (Marzipano.jsx handles the actual scene switch).
@@ -65,7 +53,12 @@ function releaseControl(controlId) {
   el?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 }
 
-export default function PanoramaViewer({ location, onReady, onError }) {
+export default function PanoramaViewer({
+  location,
+  onReady,
+  onError,
+  onSceneChange,
+}) {
   const containerRef = useRef(null);
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
@@ -78,6 +71,17 @@ export default function PanoramaViewer({ location, onReady, onError }) {
 
   const [viewerStatus, setViewerStatus] = useState("loading");
   const [currentSceneId, setCurrentSceneId] = useState(null);
+
+  // Sync the sidebar when the displayed panorama scene changes
+  // (Rule 1: Button Sync - sidebar buttons sync with the current panorama).
+  useEffect(() => {
+    if (!onSceneChange || !currentSceneId) {
+      return;
+    }
+
+    onSceneChange(currentSceneId);
+  }, [currentSceneId, onSceneChange]);
+
   const [sceneListOpen] = useState(false);
 
   // The empty state is derived, not stored: `missingPanorama` flips the
@@ -112,7 +116,7 @@ export default function PanoramaViewer({ location, onReady, onError }) {
       .then(() => {
         // Marzipano.jsx initializes on import via window globals.
         // Set the initial scene to the LG first scene `0-lg---1`.
-        const initialSceneId = FLOOR_FIRST_SCENE["LG"];
+        const initialSceneId = getSceneIdForFloor("LG");
         setCurrentSceneId(initialSceneId);
 
         // Give the DOM a frame to render, then trigger initial scene switch.

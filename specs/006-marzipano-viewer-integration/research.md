@@ -2,7 +2,7 @@
 
 **Feature**: Marzipano Panorama Viewer Integration
 **Branch**: `006-marzipano-viewer-integration`
-**Date**: 2026-11-06
+**Date**: 2026-11-06 | **Updated**: 2026-11-07 (sidebar sync clarifications)
 
 ## Research Item 1: Marzipano vendor library integration with React
 
@@ -44,6 +44,17 @@
 - Keep `reset.min.css` and adapt Tailwind around it: Rejected (clarified 2026-11-06) — reintroduces the typography regression and keeps two competing resets.
 - Move Marzipano globals into Tailwind `@utilities`: Rejected — they are element/ID selectors, which belong in base/components layers.
 
+## Research Item 5: Scene → floor resolution for Sidebar sync (Rule 1)
+
+**Decision**: Resolve the active Sidebar floor by parsing the floor code embedded in the displayed scene id (`{index}-{floorCode}---{n}` → e.g. `16-4f---11` → `4f` → `4F`) using a code→label map derived from `FLOOR_SEQUENCE` in `src/lib/floorSceneMap.js`. Every one of the 54 scenes resolves to its floor button; if the code cannot be resolved, the handler keeps the previously highlighted floor active (no clear, no fallback floor).
+
+**Rationale**: Integration Rule #1 states "All of the panorama tiles with 'lg' with its ID will sync in with the LG button" — a rule about id *patterns*, not an enumeration. Matching only the nine designated first-scene ids (the pre-clarification behavior) left 45 hotspot-reached scenes (`2-lg---3`, `16-4f---11`, …) failing to move the highlight, breaking FR-006 and SC-007 ("highlighted for 100% of scene switches"). Parsing is a single pure function over an already-documented id format, needs no hand-maintained table, and satisfies the KISA rule against clever/complex code. The keep-previous fallback (clarified 2026-11-07) is what the existing `?? null` guard already provides, so no extra state is introduced.
+
+**Alternatives considered**:
+- Match only the nine designated first-scene ids (previous behavior): Rejected — violates Rule #1's example and SC-007 for 45 of 54 scenes.
+- Explicit lookup table enumerating all 54 scene ids → floor: Rejected — same behavior but a 54-entry hand-maintained table that must be updated for every new scene; no benefit over parsing the id.
+- Derive the floor from the currently selected location instead of the scene: Rejected — the location only changes *after* the sync, so it can never reflect hotspot-driven scene changes (cross-floor hotspots, scene list clicks).
+
 ## Consolidated Decisions
 
 | Item | Decision |
@@ -55,5 +66,7 @@
 | CSS migration | `reset.min.css` removed; Marzipano CSS → `@layer base` / `@layer components` in `src/index.css` |
 | Info hotspots | Out of scope — all 54 scenes have empty `infoHotspots` |
 | Rapid floor switching | Last selection wins (FR-013) |
+| Scene → floor sync (Rule 1) | Parse the floor code from any scene id (all 54 scenes sync); unresolvable code keeps the previous highlight |
+| Active button label (Rule 2) | Location name from `catalog.json` shown only on the active button (visible text + accessible name) |
 
 All `NEEDS CLARIFICATION` items from the spec are resolved. Research complete.

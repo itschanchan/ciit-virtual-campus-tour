@@ -31,6 +31,12 @@
 - Q: When a visitor switches floors rapidly while a previous scene is still loading, which scene should the viewer end up showing? → A: Last selection wins — the most recently chosen floor/scene is always the one displayed and the Sidebar highlight matches it.
 - Q: Where should the panoramic tile images (`tiles/{id}/{z}/{f}/{y}/{x}.jpg` per APP_DATA) be sourced from — should they be provided as static assets, or should placeholder/generated images be used? → A: Panoramic tile images are provided as static assets and committed under `public/tiles/` (see tile-commit answer above); no generated placeholders are used, though a visible placeholder/empty state remains the fallback when a scene's tiles are missing.
 
+### Session 2026-11-07
+
+- Q: When the displayed panorama scene changes, should the active sidebar button be resolved from the floor code embedded in any scene ID, or only by matching the nine designated first-scene IDs? → A: Parse the floor code from any scene ID — every scene whose ID contains `-lg-` activates the LG button, `-5m-` activates 5M, and so on, so all 54 scenes sync the sidebar (Integration Rule #1), instead of matching only the nine first-scene IDs.
+
+- Q: If a scene's ID contains a floor code that has no sidebar button (an unknown or future floor), what should the sidebar highlight do? → A: Keep the previous floor button active — the highlight does not clear and no fallback floor is forced, so a valid active state is never lost.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - View the campus panorama by floor (Priority: P1)
@@ -86,7 +92,8 @@ The panorama viewer includes standard controls: autorotate toggle, fullscreen to
 - The viewer loads on a narrow mobile viewport.
 - The visitor switches floors rapidly while a previous scene is still loading → **resolved**: last selection wins; the most recently chosen scene is the one displayed and the Sidebar highlight matches it (see FR-013).
 - The Sidebar is collapsed while the panorama is displayed.
-- A scene has link hotspots pointing to scenes on other floors.
+- A scene has link hotspots pointing to scenes on other floors → **resolved**: the Sidebar highlight follows the floor parsed from the newly displayed scene's ID (for example `2-lg---3` → `5-ug---1` activates the UG button).
+- A displayed scene's ID contains a floor code with no sidebar button (unknown or future floor) → **resolved**: the previously highlighted floor button stays active; the highlight is not cleared and no fallback floor is forced.
 - Marzipano.jsx IIFE queries DOM elements at import time before React mounts them, causing TypeError caught by ErrorBoundary; PanoramaViewer.jsx must render DOM skeleton first, then dynamic-import Marzipano.jsx after mount.
 - A scene's panorama tile images are missing from `public/tiles/`; the viewer displays a visible placeholder/empty state instead of failing.
 
@@ -99,7 +106,7 @@ The panorama viewer includes standard controls: autorotate toggle, fullscreen to
 - **FR-003**: Interconnected scenes within a floor MUST be reachable by clicking link hotspots in the panorama.
 - **FR-004**: The current scene name MUST be displayed in the viewer title bar.
 - **FR-005**: The viewer MUST include an autorotate toggle, fullscreen toggle, scene list toggle, and directional view controls.
-- **FR-006**: The current floor selection in the Sidebar MUST be highlighted when the visitor switches scenes.
+- **FR-006**: The current floor selection in the Sidebar MUST be highlighted whenever the visitor switches scenes. The floor is resolved by parsing the floor code from the displayed scene's ID (for example any `*-lg-*` scene → LG, any `*-5m-*` scene → 5M), so every one of the 54 scenes — including those reached by link hotspots — syncs its floor button. If the floor code cannot be resolved to a sidebar button, the previously highlighted floor stays active.
 - **FR-007**: The viewer MUST work on desktop and narrow mobile viewports.
 - **FR-008**: Marzipano.jsx MUST contain the complete Marzipano viewer logic (scene creation, hotspots, controls, autorotate, fullscreen) and be usable by PanoramaViewer.jsx via dynamic `import()` after DOM mount so its IIFE queries rendered elements.
 - **FR-009**: APP_DATA (scene data: ids, names, tile sizes, levels, link hotspots, info hotspots, initial view parameters) MUST drive the scenes shown in the viewer.
@@ -127,7 +134,7 @@ The panorama viewer includes standard controls: autorotate toggle, fullscreen to
 - **SC-004**: The current scene name is visible in the title bar for 100% of displayed scenes.
 - **SC-005**: All viewer controls (autorotate, fullscreen, scene list, directional) respond to interaction on both desktop and mobile viewports; every control is operable by keyboard with a visible focus state, and panorama/control images expose meaningful alt text.
 - **SC-006**: No page reload occurs when switching between floors or scenes.
-- **SC-007**: The current floor in the Sidebar is highlighted for 100% of scene switches.
+- **SC-007**: The current floor in the Sidebar is highlighted for 100% of scene switches, where the floor is derived from the floor code in the displayed scene's ID (all 54 scenes covered, not just the nine first scenes).
 - **SC-008**: Vendor assets load successfully and the viewer initializes without JavaScript errors in the browser console.
 
 ## Assumptions
