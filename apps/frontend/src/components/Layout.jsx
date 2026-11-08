@@ -4,6 +4,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Panorama from "../pages/Panorama";
 import Dashboard from "../pages/Dashboard";
+import FloatingMenu from "./FloatingMenu";
 
 export default function Layout() {
   const {
@@ -13,6 +14,12 @@ export default function Layout() {
     selectLocation,
     toggleSidebar,
     setSidebarOpen,
+    narrationStatus,
+    isMuted,
+    playNarration,
+    pauseNarration,
+    setNarrationStatus,
+    toggleMute,
   } = useTour();
 
   const [activeView] = useState("panorama");
@@ -31,7 +38,7 @@ export default function Layout() {
   return (
     <div className="relative h-dvh overflow-hidden bg-canvas text-ink">
       <a
-        className="absolute top-3 left-3 z-[100] -translate-y-[200%] rounded-full bg-focus px-4 py-2.5 font-bold text-focus-ink no-underline focus:translate-y-0"
+        className="absolute top-3 left-3 z-100 translate-y-[-200%] rounded-full bg-focus px-4 py-2.5 font-bold text-focus-ink no-underline focus:translate-y-0"
         href="#tour-main"
       >
         Skip to the tour
@@ -42,6 +49,17 @@ export default function Layout() {
         sidebarOpen={sidebarOpen}
         currentLocation={currentLocation}
         onToggleSidebar={toggleSidebar}
+      />
+
+      {/* FLOATING MENU - narration controls at center bottom */}
+      <FloatingMenu
+        narration={currentLocation?.narration ?? null}
+        status={narrationStatus}
+        muted={isMuted}
+        onPlay={playNarration}
+        onPause={pauseNarration}
+        onStatusChange={setNarrationStatus}
+        onMuteToggle={toggleMute}
       />
 
       {/* SIDEBAR */}
@@ -71,11 +89,7 @@ export default function Layout() {
           className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden"
           tabIndex={-1}
         >
-          {activeView === "panorama" ? (
-            <Panorama />
-          ) : (
-            <Dashboard />
-          )}
+          {activeView === "panorama" ? <Panorama /> : <Dashboard />}
         </main>
       </div>
     </div>

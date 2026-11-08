@@ -18,6 +18,7 @@ function createInitialState() {
     sidebarOpen: getInitialSidebarOpen(),
     galleryOpen: false,
     narrationStatus: 'idle',
+    isMuted: false,
     errorMessage: null,
   }
 }
@@ -81,6 +82,8 @@ function reducer(state, action) {
       }
 
       return state
+    case 'TOGGLE_MUTE':
+      return { ...state, isMuted: !state.isMuted }
     case 'SET_NARRATION_STATUS':
       if (!NARRATION_STATUSES.includes(action.status)) {
         return state
@@ -153,6 +156,10 @@ export function TourProvider({ children, catalogSource = catalogData }) {
     dispatch({ type: 'PAUSE_NARRATION' })
   }, [])
 
+  const toggleMute = useCallback(() => {
+    dispatch({ type: 'TOGGLE_MUTE' })
+  }, [])
+
   const setNarrationStatus = useCallback((status) => {
     dispatch({ type: 'SET_NARRATION_STATUS', status })
   }, [])
@@ -184,6 +191,7 @@ export function TourProvider({ children, catalogSource = catalogData }) {
       setGalleryOpen,
       playNarration,
       pauseNarration,
+      toggleMute,
       setNarrationStatus,
       resetNarration,
       retryContent: loadContent,
@@ -199,6 +207,7 @@ export function TourProvider({ children, catalogSource = catalogData }) {
       setGalleryOpen,
       playNarration,
       pauseNarration,
+      toggleMute,
       setNarrationStatus,
       resetNarration,
       loadContent,

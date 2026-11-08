@@ -74,11 +74,12 @@ export default function PanoramaViewer({
 
   // Sync the sidebar when the displayed panorama scene changes
   // (Rule 1: Button Sync - sidebar buttons sync with the current panorama).
+  const lastReportedSceneId = useRef(null);
   useEffect(() => {
-    if (!onSceneChange || !currentSceneId) {
+    if (!onSceneChange || !currentSceneId || currentSceneId === lastReportedSceneId.current) {
       return;
     }
-
+    lastReportedSceneId.current = currentSceneId;
     onSceneChange(currentSceneId);
   }, [currentSceneId, onSceneChange]);
 
@@ -301,7 +302,11 @@ export default function PanoramaViewer({
       </a>
 
       {/* View control buttons: centered at bottom with original margins */}
-      <div className="absolute bottom-0 left-1/2 z-10 pb-4" id="viewControls">
+      <div
+        className="absolute bottom-0 left-1/2 z-10 pb-4
+        hidden"
+        id="viewControls"
+      >
         {VIEW_CONTROLS.map(([id, img, marginClass, label]) => {
           const controlId = `view${id.charAt(0).toUpperCase() + id.slice(1)}`;
           return (
