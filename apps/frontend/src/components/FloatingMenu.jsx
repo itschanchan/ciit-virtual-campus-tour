@@ -4,6 +4,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import MapIcon from "@mui/icons-material/Map";
+import { isCompactViewport } from "../lib/viewport";
 
 const STATUS_LABELS = {
   idle: "Narration ready.",
@@ -23,6 +24,7 @@ export default function FloatingMenu({
   onStatusChange,
   muted = false,
   onMuteToggle,
+  sidebarOpen = false,
 }) {
   const audioRef = useRef(null);
   const [transcriptOpen, setTranscriptOpen] = useState(false);
@@ -91,6 +93,12 @@ export default function FloatingMenu({
       : status === "ended"
         ? "Replay narration"
         : "Play narration";
+
+  // Hide the floating navigation bar when the sidebar is open on a mobile
+  // viewport so the sidebar's tinted background is the sole focus.
+  if (sidebarOpen && isCompactViewport()) {
+    return null;
+  }
 
   return (
     <>
