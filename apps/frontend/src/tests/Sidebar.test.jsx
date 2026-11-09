@@ -56,7 +56,7 @@ describe('Sidebar', () => {
       />,
     )
 
-    expect(screen.getByText('Glitch Tower Lobby')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Glitch Tower Lobby/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^UG$/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Glitch Tower Lobby/ })).toHaveAttribute(
       'aria-current',

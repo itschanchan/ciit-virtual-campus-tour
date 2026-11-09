@@ -22,12 +22,12 @@ function switchToSceneId(sceneId) {
 // The margin must be a complete literal class name so Tailwind can scan and
 // generate it - building it with `ml-[${value}]` at runtime never produces CSS.
 const VIEW_CONTROLS = [
-  ["up", "up.png", "ml-[-145px]", "Pan up"],
-  ["down", "down.png", "ml-[-95px]", "Pan down"],
-  ["left", "left.png", "ml-[-45px]", "Pan left"],
-  ["right", "right.png", "ml-[5px]", "Pan right"],
-  ["in", "plus.png", "ml-[55px]", "Zoom in"],
-  ["out", "minus.png", "ml-[105px]", "Zoom out"],
+  ["up", "up.png", "ml-[-145px] compact:ml-[-120px] narrow:ml-[-95px]", "Pan up"],
+  ["down", "down.png", "ml-[-95px] compact:ml-[-80px] narrow:ml-[-65px]", "Pan down"],
+  ["left", "left.png", "ml-[-45px] compact:ml-[-35px] narrow:ml-[-25px]", "Pan left"],
+  ["right", "right.png", "ml-[5px] compact:ml-[2px] narrow:ml-0", "Pan right"],
+  ["in", "plus.png", "ml-[55px] compact:ml-[45px] narrow:ml-[35px]", "Zoom in"],
+  ["out", "minus.png", "ml-[105px] compact:ml-[85px] narrow:ml-[65px]", "Zoom out"],
 ];
 
 // Keyboard keys mapped to view control element ids. Marzipano's press
@@ -184,9 +184,10 @@ export default function PanoramaViewer({
 
   // Scene list positioning: off-screen left when closed, visible when open
   const sceneListClasses = [
-    "fixed inset-y-0 left-0 z-20 w-[220px] max-h-full overflow-x-hidden overflow-y-auto",
+    "fixed inset-y-0 left-0 z-20 w-[16rem] max-h-full overflow-x-hidden overflow-y-auto",
     "bg-surface-strong border-r border-line",
     "pt-10 transition-all duration-500 ease-in-out",
+    "compact:w-[14rem] narrow:w-[16rem]",
     sceneListOpen ? "translate-x-0" : "-translate-x-full",
   ].join(" ");
 
@@ -232,7 +233,7 @@ export default function PanoramaViewer({
                 setCurrentSceneId(scene.id);
               }}
             >
-              <li className="text w-full h-full px-3.75 leading-7.5 overflow-hidden text-ellipsis whitespace-nowrap">
+              <li className="text w-full h-full px-3 leading-10 overflow-hidden text-ellipsis whitespace-nowrap compact:text-sm narrow:text-xs">
                 {scene.name}
               </li>
             </a>
@@ -244,24 +245,24 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="sceneListToggle"
-        className="absolute top-0 left-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
+        className="absolute top-0 left-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
       >
-        <span className="text-xl">☰</span>
+        <span className="text-xl compact:text-lg narrow:text-base">☰</span>
       </a>
 
       {/* Fullscreen toggle: hidden but kept in DOM so frozen Marzipano.jsx can query it */}
       <a
         href="javascript:void(0)"
         id="fullscreenToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
       >
         <img
-          className="icon off w-6 h-6"
+          className="icon off w-6 h-6 compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
           src="img/fullscreen.png"
           alt="Fullscreen on"
         />
         <img
-          className="icon on w-6 h-6 hidden"
+          className="icon on w-6 h-6 hidden compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
           src="img/windowed.png"
           alt="Fullscreen off"
         />
@@ -270,9 +271,9 @@ export default function PanoramaViewer({
       {/* Title bar: hidden but kept in DOM so frozen Marzipano.jsx can query #titleBar .sceneName */}
       <div
         id="titleBar"
-        className="absolute top-0 left-10 right-10 z-10 h-10 bg-[rgba(58,68,84,0.8)] border-b border-line hidden"
+        className="absolute top-0 left-10 right-10 z-10 h-10 compact:left-6 compact:right-6 narrow:left-4 narrow:right-4 bg-[rgba(58,68,84,0.8)] border-b border-line hidden"
       >
-        <h1 className="sceneName text-sm text-ink truncate" id="sceneName">
+        <h1 className="sceneName text-sm text-ink truncate compact:text-xs narrow:text-xs" id="sceneName">
           {sceneName}
         </h1>
       </div>
@@ -281,7 +282,7 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="autorotateToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] hidden"
+        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
         onClick={(e) => {
           e.preventDefault();
           document
@@ -290,12 +291,12 @@ export default function PanoramaViewer({
         }}
       >
         <img
-          className="icon off w-6 h-6"
+          className="icon off w-6 h-6 compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
           src="img/play.png"
           alt="Autorotate on"
         />
         <img
-          className="icon on w-6 h-6 hidden"
+          className="icon on w-6 h-6 hidden compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
           src="img/pause.png"
           alt="Autorotate off"
         />
@@ -303,7 +304,7 @@ export default function PanoramaViewer({
 
       {/* View control buttons: centered at bottom with original margins */}
       <div
-        className="absolute bottom-0 left-1/2 z-10 pb-4
+        className="absolute bottom-0 left-1/2 z-10 pb-4 compact:pb-3 narrow:pb-2
         hidden"
         id="viewControls"
       >
@@ -337,9 +338,9 @@ export default function PanoramaViewer({
 
       {/* Loading state */}
       {status === "loading" && (
-        <div className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-line bg-surface-soft p-5 text-center text-ink">
+        <div className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 compact:gap-2 narrow:gap-2 rounded-panel border border-line bg-surface-soft compact:p-4 narrow:p-3 text-center text-ink">
           <span
-            className="size-8 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent"
+            className="size-8 compact:size-7 narrow:size-6 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent"
             aria-hidden="true"
           />
           Loading the 360 degree view...
@@ -349,11 +350,11 @@ export default function PanoramaViewer({
       {/* Error state */}
       {status === "error" && (
         <div
-          className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 rounded-panel border border-danger/50 bg-surface-soft p-5 text-center text-danger"
+          className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 compact:gap-2 narrow:gap-2 rounded-panel border border-danger/50 bg-surface-soft compact:p-4 narrow:p-3 text-center text-danger"
           role="alert"
         >
           <strong>Panorama unavailable</strong>
-          <span className="text-ink">{MISSING_PANORAMA_MESSAGE}</span>
+          <span className="text-ink compact:text-sm narrow:text-xs">{MISSING_PANORAMA_MESSAGE}</span>
         </div>
       )}
     </section>

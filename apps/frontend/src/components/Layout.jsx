@@ -67,7 +67,7 @@ export default function Layout() {
       {sidebarOpen && (
         <button
           type="button"
-          className="fixed inset-x-0 top-16 bottom-0 z-20 hidden w-full border-0 bg-canvas/70 compact:block"
+          className="fixed inset-x-0 top-16 bottom-0 z-20 hidden w-full border-0 bg-transparent compact:block"
           aria-label="Close location menu"
           onClick={() => setSidebarOpen(false)}
         />

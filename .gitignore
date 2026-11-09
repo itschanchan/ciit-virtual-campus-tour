@@ -36,3 +36,6 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Local backend tool state
+apps/backend/client.rest
