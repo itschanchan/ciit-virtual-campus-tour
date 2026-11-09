@@ -60,6 +60,7 @@ export default function Layout() {
         onPause={pauseNarration}
         onStatusChange={setNarrationStatus}
         onMuteToggle={toggleMute}
+        sidebarOpen={sidebarOpen}
       />
 
       {/* SIDEBAR */}
@@ -89,7 +90,9 @@ export default function Layout() {
           className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden"
           tabIndex={-1}
         >
-          {activeView === "panorama" ? <Panorama /> : <Dashboard />}
+          {activeView === "panorama" ? (
+            <Panorama sidebarOpen={sidebarOpen} />
+          ) : <Dashboard />}
         </main>
       </div>
     </div>

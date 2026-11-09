@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
+import { isCompactViewport } from "../lib/viewport";
 
-export default function RoomGallery({ images, open, onClose }) {
+export default function RoomGallery({ images, open, onClose, sidebarOpen = false }) {
   const closeButtonRef = useRef(null);
   const previousFocusRef = useRef(null);
   const sortedImages = [...images].sort((a, b) => a.order - b.order);
@@ -26,6 +27,12 @@ export default function RoomGallery({ images, open, onClose }) {
       previousFocusRef.current?.focus?.();
     };
   }, [open, onClose]);
+
+  // Hide the room gallery when the sidebar is open on a mobile viewport so
+  // the sidebar's tinted background is the sole focus.
+  if (sidebarOpen && isCompactViewport()) {
+    return null;
+  }
 
   if (!open) {
     return null;

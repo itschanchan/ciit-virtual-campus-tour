@@ -1,10 +1,11 @@
 import { Suspense, useCallback, useEffect } from "react";
 import { useTour } from "../context/useTour";
 import { getFloorForSceneId, getFloorIndex } from "../lib/floorSceneMap";
+import { isCompactViewport } from "../lib/viewport";
 import PanoramaViewer from "../components/PanoramaViewer";
 import RoomGallery from "../components/RoomGallery";
 
-export default function Panorama() {
+export default function Panorama({ sidebarOpen = false }) {
   const {
     contentStatus,
     currentLocation,
@@ -128,7 +129,9 @@ export default function Panorama() {
             />
           </Suspense>
 
-          {currentLocation && (
+          {currentLocation && !(
+            sidebarOpen && isCompactViewport()
+          ) && (
             <>
               <div className="absolute top-20 right-4 z-8 compact:top-20 compact:right-3">
                 <button
@@ -150,6 +153,7 @@ export default function Panorama() {
         images={currentLocation?.gallery ?? []}
         open={galleryOpen}
         onClose={() => setGalleryOpen(false)}
+        sidebarOpen={sidebarOpen}
       />
     </>
   );
