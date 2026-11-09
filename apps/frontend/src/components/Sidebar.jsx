@@ -4,6 +4,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Popover from "@mui/material/Popover";
 import { FLOOR_SEQUENCE, FLOOR_SCENE_MAP } from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
+import CloseIcon from "@mui/icons-material/Close";
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
 const POPOVER_DELAY_MS = 1500;
@@ -117,13 +118,26 @@ function getFloorStatus(location) {
   return null;
 }
 
+function getCurrentLocationName(locations, currentLocationId) {
+  if (!locations || !currentLocationId) {
+    return null;
+  }
+
+  const location = locations.find((loc) => loc.id === currentLocationId);
+  return location?.name ?? null;
+}
+
 function SidebarLogo({ logoUrl }) {
   return (
-    <div className="mb-5 flex flex-col items-center gap-2 border-b border-line pb-5 text-center">
+    <div className="mb-5 flex flex-col items-center gap-2 border-b border-line pb-5 text-center compact:mb-4 narrow:mb-3">
       {logoUrl ? (
-        <img src={logoUrl} alt="CIIT logo" className="h-16 w-auto" />
+        <img
+          src={logoUrl}
+          alt="CIIT logo"
+          className="h-16 w-auto compact:h-12 narrow:h-10"
+        />
       ) : (
-        <span className="rounded-mark bg-accent px-3 py-1 text-lg font-black tracking-[0.12em] text-accent-ink">
+        <span className="rounded-mark bg-accent px-3 py-1 text-lg font-black tracking-[0.12em] text-accent-ink compact:text-base narrow:text-sm">
           CIIT
         </span>
       )}
@@ -181,18 +195,16 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
   return (
     <button
       type="button"
-      className={`grid items-center w-fit gap-1 rounded-full px-[0.9rem] py-[0.8rem] text-left text-ink transition ${stateClass} ${interactionClass}`}
+      className={`grid items-center w-fit gap-1 rounded-full px-3 py-2 text-left text-ink transition ${stateClass} ${interactionClass}`}
       aria-label={accessibleName}
       aria-current={current ? "true" : undefined}
       onClick={handleClick}
       disabled={disabled}
     >
       <span className="flex items-center justify-between gap-2">
-        <span className="text-[0.95rem] font-black tracking-[0.08em]">
-          {floor}
-        </span>
+        <span className="text-sm font-black tracking-[0.08em]">{floor}</span>
         {locked && (
-          <span className="text-[0.7rem] font-bold tracking-[0.08em] uppercase">
+          <span className="text-xs font-bold tracking-[0.08em] uppercase">
             OFF LIMITS
           </span>
         )}
@@ -201,9 +213,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
         <span className={`font-bold ${detailClass}`}>{location.name}</span>
       )}
       {status && (
-        <span className={`text-[0.82rem] leading-[1.4] ${detailClass}`}>
-          {status}
-        </span>
+        <span className={`text-xs leading-snug ${detailClass}`}>{status}</span>
       )}
     </button>
   );
@@ -214,7 +224,7 @@ function FloorPair({ entries, currentLocationId, onSelect, onLocked }) {
     <div
       role="group"
       aria-label="Fifth-floor levels"
-      className="flex max-w-full justify-center gap-[0.6rem]"
+      className="flex max-w-full justify-center gap-1.5 narrow:gap-2"
     >
       {entries.map(({ floor, location }) => (
         <FloorButton
@@ -407,22 +417,45 @@ export default function Sidebar({
     <>
       <aside
         id="location-sidebar"
-        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r border-line bg-surface/86 transition-all duration-300 ease-in-out compact:top-16 compact:w-[min(20rem,86vw)] compact:shadow-sidebar ${shellState}`}
+        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r border-line bg-surface/86 narrow:bg-surface/86 transition-all duration-300 ease-in-out compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}
       >
         <div
           // Adjust sidebar content's position
-          className={`flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 compact:w-[min(20rem,86vw)] compact:pt-2 ${contentState}`}
+          /*
+            narrow:pt-4 - vertical position
+            narrow:pb-4 - bottom padding (if u want more space at the bottom)
+          */
+          className={`relative flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 compact:w-[min(20rem,86vw)] narrow:w-full compact:pt-2 narrow:pt-4 narrow:px-4 narrow:pb-4 ${contentState}`}
         >
+          {open && (
+            <button
+              type="button"
+              className="absolute top-4 left-4 z-50 size-10 items-center justify-center bg-surface/86 text-ink transition-colors hover:border-accent hover:text-accent hidden narrow:inline-flex"
+              aria-label="Close location menu"
+              aria-controls="location-sidebar"
+              onClick={onClose}
+            >
+              <CloseIcon></CloseIcon>
+            </button>
+          )}
           <SidebarLogo logoUrl={logoUrl} />
 
+          {/* {currentLocationId && (
+            <p className="compact:block hidden mb-3 compact:mb-2 narrow:mb-0 text-xs font-bold text-accent tracking-[0.16em] uppercase compact:text-left narrow:text-left compact:px-4 narrow:px-4 compact:pt-2 narrow:pt-0">
+              {getCurrentLocationName(locations, currentLocationId)}
+            </p>
+          )} */}
+
           <div className="mb-4">
-            <p className="mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] text-accent uppercase">
+            <p className="mb-1.5 text-xs font-extrabold tracking-[0.16em] text-accent uppercase compact:text-sm narrow:text-xs">
               Explore
             </p>
-            <h2 className="mb-0 text-xl">Campus Floors</h2>
+            <h2 className="mb-0 text-xl compact:text-2xl narrow:text-lg">
+              Campus Floors
+            </h2>
           </div>
 
           <FloorList
@@ -437,7 +470,7 @@ export default function Sidebar({
       {/* Sidebar Toggle */}
       <button
         type="button"
-        className={`fixed h-45 -ml-px top-1/2 z-40 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 border-line bg-surface/86 text-ink transition-all duration-300 ease-in-out hover:border-accent hover:text-accent ${togglePosition}`}
+        className={`fixed h-40 compact:h-45 narrow:h-36 -ml-px top-1/2 narrow:top-24 z-40 inline-flex size-8 compact:size-9 narrow:size-7 -translate-y-1/2 items-center justify-center rounded-r-full compact:rounded-r-full narrow:rounded-full border border-l-0 narrow:border border-line bg-surface/86 text-ink transition-all duration-300 ease-in-out hover:border-accent hover:text-accent narrow:hidden ${togglePosition}`}
         aria-label={open ? "Collapse campus floors" : "Expand campus floors"}
         aria-expanded={open}
         aria-controls="location-sidebar"

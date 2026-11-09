@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import FloatingMenu from "../components/FloatingMenu"
 
 const narration = {
@@ -18,6 +18,19 @@ const defaultProps = {
   onMuteToggle: vi.fn(),
 }
 
+function mockMatchMedia(matches) {
+  window.matchMedia = vi.fn((query) => ({
+    matches,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
+}
+
 describe("FloatingMenu", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
@@ -25,6 +38,10 @@ describe("FloatingMenu", () => {
     defaultProps.onPause.mockReset()
     defaultProps.onStatusChange.mockReset()
     defaultProps.onMuteToggle.mockReset()
+  })
+
+  afterEach(() => {
+    delete window.matchMedia
   })
 
   it("renders play/pause and mute/unmute controls", () => {
@@ -148,5 +165,45 @@ describe("FloatingMenu", () => {
       "aria-expanded",
       "true",
     )
+  })
+
+  it("renders all controls on a narrow mobile viewport", () => {
+    mockMatchMedia(true)
+    render(<FloatingMenu {...defaultProps} />)
+
+    expect(screen.getByRole("button", { name: "Play narration" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Mute narration" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Show transcript" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Open map" })).toBeInTheDocument()
+  })
+
+  it("hides the audio visualization on a narrow mobile viewport", () => {
+    mockMatchMedia(true)
+    const { container } = render(
+      <FloatingMenu {...defaultProps} status="playing" />
+    )
+
+    const viz = container.querySelector(".audio-viz")
+    expect(viz).toHaveClass("narrow:hidden")
+  })
+
+  it("keeps controls tappable on a narrow mobile viewport", () => {
+    mockMatchMedia(true)
+    render(<FloatingMenu {...defaultProps} status="playing" />)
+
+    const playButton = screen.getByRole("button", { name: "Pause narration" })
+
+    fireEvent.click(playButton)
+    expect(defaultProps.onPause).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the mute button tappable on a narrow mobile viewport", () => {
+    mockMatchMedia(true)
+    render(<FloatingMenu {...defaultProps} />)
+
+    const muteButton = screen.getByRole("button", { name: "Mute narration" })
+
+    fireEvent.click(muteButton)
+    expect(defaultProps.onMuteToggle).toHaveBeenCalledTimes(1)
   })
 })
