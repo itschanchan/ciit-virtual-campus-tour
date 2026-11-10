@@ -1,6 +1,33 @@
 import '@testing-library/jest-dom/vitest'
 import { vi } from 'vitest'
 
+if (typeof HTMLDialogElement !== 'undefined') {
+  const dialogPrototype = HTMLDialogElement.prototype
+
+  if (typeof dialogPrototype.showModal !== 'function') {
+    dialogPrototype.showModal = function showModal() {
+      this.setAttribute('open', '')
+      this.dispatchEvent(new Event('open'))
+    }
+  }
+
+  if (typeof dialogPrototype.close !== 'function') {
+    dialogPrototype.close = function close(returnValue) {
+      if (!this.hasAttribute('open')) {
+        return
+      }
+
+      this.removeAttribute('open')
+
+      if (returnValue !== undefined) {
+        this.returnValue = returnValue
+      }
+
+      this.dispatchEvent(new Event('close'))
+    }
+  }
+}
+
 vi.mock('marzipano', () => {
   const createView = () => ({
     yaw: vi.fn(() => 0),

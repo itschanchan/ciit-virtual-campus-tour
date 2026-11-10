@@ -20,10 +20,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the CIIT Virtual Campus Tour title over a blue and violet horizon.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Glitch Tower Lobby gallery.",
+          "caption": "Glitch Tower Lobby placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Glitch Tower Lobby gallery.",
+          "caption": "Glitch Tower Lobby placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Glitch Tower Lobby gallery.",
+          "caption": "Glitch Tower Lobby placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -50,10 +62,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the upperground level of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Upperground Level gallery.",
+          "caption": "Upperground Level placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Upperground Level gallery.",
+          "caption": "Upperground Level placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Upperground Level gallery.",
+          "caption": "Upperground Level placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -80,10 +104,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the fourth floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Fourth Floor gallery.",
+          "caption": "Fourth Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Fourth Floor gallery.",
+          "caption": "Fourth Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Fourth Floor gallery.",
+          "caption": "Fourth Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -110,10 +146,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the fifth floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Fifth Floor gallery.",
+          "caption": "Fifth Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Fifth Floor gallery.",
+          "caption": "Fifth Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Fifth Floor gallery.",
+          "caption": "Fifth Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -140,10 +188,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the fifth floor mezzanine of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Fifth Floor Mezzanine gallery.",
+          "caption": "Fifth Floor Mezzanine placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Fifth Floor Mezzanine gallery.",
+          "caption": "Fifth Floor Mezzanine placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Fifth Floor Mezzanine gallery.",
+          "caption": "Fifth Floor Mezzanine placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -170,10 +230,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the sixth floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Sixth Floor gallery.",
+          "caption": "Sixth Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Sixth Floor gallery.",
+          "caption": "Sixth Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Sixth Floor gallery.",
+          "caption": "Sixth Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -200,10 +272,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the seventh floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Seventh Floor gallery.",
+          "caption": "Seventh Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Seventh Floor gallery.",
+          "caption": "Seventh Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Seventh Floor gallery.",
+          "caption": "Seventh Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -230,10 +314,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the eighth floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Eighth Floor gallery.",
+          "caption": "Eighth Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Eighth Floor gallery.",
+          "caption": "Eighth Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Eighth Floor gallery.",
+          "caption": "Eighth Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {
@@ -260,10 +356,22 @@
       },
       "gallery": [
         {
-          "src": "/panoramas/placeholder/equirect.svg",
-          "alt": "Development placeholder showing the ninth floor of Glitch Tower.",
-          "caption": "Placeholder panorama preview",
+          "src": "/panoramas/placeholder/gallery-1.svg",
+          "alt": "Placeholder image one for the Ninth Floor gallery.",
+          "caption": "Ninth Floor placeholder image 1 of 3",
           "order": 0
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-2.svg",
+          "alt": "Placeholder image two for the Ninth Floor gallery.",
+          "caption": "Ninth Floor placeholder image 2 of 3",
+          "order": 1
+        },
+        {
+          "src": "/panoramas/placeholder/gallery-3.svg",
+          "alt": "Placeholder image three for the Ninth Floor gallery.",
+          "caption": "Ninth Floor placeholder image 3 of 3",
+          "order": 2
         }
       ],
       "narration": {

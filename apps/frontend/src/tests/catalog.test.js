@@ -13,6 +13,26 @@ describe('catalog validation', () => {
     expect(result.errors).toEqual([])
   })
 
+  it('provides three distinct gallery images for every location', () => {
+    catalogData.locations.forEach((location) => {
+      expect(location.gallery).toHaveLength(3)
+
+      const orders = location.gallery.map((image) => image.order)
+      expect(orders).toEqual([0, 1, 2])
+
+      const sources = new Set()
+
+      location.gallery.forEach((image) => {
+        expect(image.src).toContain('/panoramas/placeholder/gallery-')
+        expect(image.alt.trim()).not.toBe('')
+        expect(image.caption.trim()).not.toBe('')
+        sources.add(image.src)
+      })
+
+      expect(sources.size).toBe(3)
+    })
+  })
+
   it('requires a version, default location, and at least one location', () => {
     const catalog = cloneCatalog()
     delete catalog.version

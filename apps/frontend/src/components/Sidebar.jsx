@@ -118,15 +118,6 @@ function getFloorStatus(location) {
   return null;
 }
 
-function getCurrentLocationName(locations, currentLocationId) {
-  if (!locations || !currentLocationId) {
-    return null;
-  }
-
-  const location = locations.find((loc) => loc.id === currentLocationId);
-  return location?.name ?? null;
-}
-
 function SidebarLogo({ logoUrl }) {
   return (
     <div className="border-line compact:mb-4 narrow:mb-3 mb-5 flex flex-col items-center gap-2 border-b pb-5 text-center">

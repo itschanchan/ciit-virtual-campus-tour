@@ -53,6 +53,14 @@ export function getSceneIdForFloor(floor) {
   return FLOOR_SCENE_MAP[floor] ?? null;
 }
 
+export function getFloorForLocation(location) {
+  if (!location || typeof location.order !== "number") {
+    return null;
+  }
+
+  return FLOOR_SEQUENCE[location.order] ?? null;
+}
+
 export function getFloorIndex(floor) {
   return FLOOR_SEQUENCE.indexOf(floor);
 }

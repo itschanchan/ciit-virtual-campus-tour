@@ -163,6 +163,22 @@
       }
     }
 
+    @keyframes gallery-image-enter {
+      from {
+        opacity: 0;
+        transform: translateX(0.75rem) scale(0.99);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .gallery-image-enter {
+      animation: gallery-image-enter 260ms ease both;
+    }
+
     .welcome-screen {
       background-image:
         linear-gradient(110deg, rgb(1 37 55 / 0.82), rgb(4 60 79 / 0.64)),

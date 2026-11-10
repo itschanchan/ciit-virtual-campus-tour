@@ -9,6 +9,7 @@ import FloatingMenu from "./FloatingMenu";
 export default function Layout() {
   const {
     sidebarOpen,
+    galleryOpen,
     currentLocation,
     locations,
     selectLocation,
@@ -26,14 +27,14 @@ export default function Layout() {
 
   useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === "Escape" && sidebarOpen) {
+      if (event.key === "Escape" && sidebarOpen && !galleryOpen) {
         setSidebarOpen(false);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [sidebarOpen, setSidebarOpen]);
+  }, [sidebarOpen, galleryOpen, setSidebarOpen]);
 
   return (
     <div className="bg-canvas text-ink relative h-dvh overflow-hidden">
