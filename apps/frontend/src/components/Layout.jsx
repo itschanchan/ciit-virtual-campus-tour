@@ -37,13 +37,6 @@ export default function Layout() {
 
   return (
     <div className="bg-canvas text-ink relative h-dvh overflow-hidden">
-      <a
-        className="bg-focus text-focus-ink absolute top-3 left-3 z-100 translate-y-[-200%] rounded-full px-4 py-2.5 font-bold no-underline focus:translate-y-0"
-        href="#tour-main"
-      >
-        Skip to the tour
-      </a>
-
       {/* HEADER */}
       <Header
         sidebarOpen={sidebarOpen}
@@ -92,7 +85,9 @@ export default function Layout() {
         >
           {activeView === "panorama" ? (
             <Panorama sidebarOpen={sidebarOpen} />
-          ) : <Dashboard />}
+          ) : (
+            <Dashboard />
+          )}
         </main>
       </div>
     </div>
