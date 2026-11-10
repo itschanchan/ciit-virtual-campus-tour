@@ -126,6 +126,212 @@
   }
 }
 
+@layer components {
+  .entry-screen {
+      position: relative;
+      min-height: 100dvh;
+      overflow: hidden;
+      isolation: isolate;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background-color: #063f55;
+      background-image:
+        linear-gradient(rgb(3 48 69 / 0.72), rgb(3 48 69 / 0.72)),
+        url('glitch.png');
+      background-position: center;
+      background-size: cover;
+      font-family: var(--font-sans);
+    }
+
+    .entry-screen::before {
+      position: absolute;
+      inset: -2rem;
+      z-index: -1;
+      content: '';
+      background: inherit;
+      filter: blur(2px);
+    }
+
+    @keyframes page-enter {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .welcome-screen {
+      background-image:
+        linear-gradient(110deg, rgb(1 37 55 / 0.82), rgb(4 60 79 / 0.64)),
+        url('glitch.png');
+    }
+
+    .entry-content {
+      width: min(100% - 2rem, 72rem);
+      text-align: center;
+    }
+
+    .welcome-content {
+      display: grid;
+      justify-items: center;
+      animation: page-enter 1500ms ease both;
+      transform: translateY(-2vh);
+    }
+
+    .welcome-logo {
+      display: block;
+      width: min(22rem, 58vw);
+      height: auto;
+      margin-bottom: 1.4rem;
+    }
+
+    .welcome-content h1,
+    .instructions-content h1 {
+      margin-bottom: 0;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+    }
+
+    .welcome-rule {
+      width: min(18rem, 68vw);
+      height: 2px;
+      margin: 0.45rem 0 0.7rem;
+      background: currentColor;
+    }
+
+    .welcome-subtitle {
+      margin-bottom: 2.7rem;
+      font-size: clamp(1.05rem, 2.3vw, 1.55rem);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+    }
+
+    .entry-button {
+      min-width: 14rem;
+      padding: 0.5rem 2rem;
+      border-radius: 999px;
+      background: #29abd0;
+      color: white;
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.25;
+      transition: background-color 160ms ease, transform 160ms ease;
+    }
+
+    .entry-button:hover {
+      background: #47c4e3;
+      transform: translateY(-2px);
+    }
+
+    .instructions-screen {
+      cursor: pointer;
+      background-image:
+        linear-gradient(rgb(3 48 69 / 0.83), rgb(3 48 69 / 0.83)),
+        url('glitch.png');
+    }
+
+    .instructions-content {
+      display: grid;
+      justify-items: center;
+      animation: page-enter 1500ms ease both;
+      padding: 2rem 0;
+    }
+
+    .instructions-lead {
+      margin: 0.55rem 0 2.7rem;
+      color: #d7e0e5;
+      font-size: clamp(1rem, 2vw, 1.35rem);
+    }
+
+    .instruction-grid {
+      display: grid;
+      width: min(100%, 54rem);
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(1.5rem, 5vw, 4.5rem);
+    }
+
+    .instruction-card {
+      display: grid;
+      grid-template-rows: 9.5rem auto 1fr;
+      row-gap: 0.9rem;
+      justify-items: center;
+      align-content: start;
+    }
+
+    .instruction-visual {
+      display: grid;
+      width: 12rem;
+      height: 9.5rem;
+      place-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .instruction-card:first-child .instruction-visual,
+    .instruction-card:last-child .instruction-visual {
+      align-items: start;
+    }
+
+    .instruction-card:first-child .instruction-visual-image,
+    .instruction-card:last-child .instruction-visual-image {
+      height: calc(100% - 1rem);
+    }
+
+    .instruction-visual-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .instruction-card h2 {
+      width: 100%;
+      min-height: 2.8rem;
+      display: grid;
+      place-items: center;
+      margin-bottom: 0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      background: rgb(39 70 98 / 0.95);
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      line-height: 1.2;
+    }
+
+    .instruction-card p {
+      max-width: 12rem;
+      margin: 0;
+      color: #d7e0e5;
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .continue-prompt {
+      margin: 3.5rem 0 0;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-weight: 600;
+    }
+
+    @media (max-width: 43.75rem) {
+      .instruction-grid {
+        gap: 0.6rem;
+      }
+
+      .instruction-card p {
+        font-size: 0.82rem;
+      }
+
+      .instruction-visual {
+        width: 8rem;
+        height: 7rem;
+        transform: scale(0.78);
+      }
+
+      .continue-prompt {
+        margin-top: 2.2rem;
+    }
 .floor-acknowledgement {
   border-color: var(--color-accent);
   background-color: var(--color-accent-soft);
