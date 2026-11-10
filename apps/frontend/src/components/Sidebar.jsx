@@ -499,7 +499,7 @@ export default function Sidebar({
             </div>
           </div>
 
-          <footer className="narrow:px-4 shrink-0 border-t px-5 py-3 text-center">
+          <footer className="narrow:px-4 shrink-0 py-3 text-center">
             <p className="text-muted m-0 text-xs">
               © 2026 CIIT. All rights reserved.
             </p>
