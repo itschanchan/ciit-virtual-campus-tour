@@ -427,3 +427,306 @@ describe('Sidebar', () => {
     expect(onSelect).not.toHaveBeenCalled()
   })
 })
+
+describe('Sidebar website, share, about, and footer', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    window.open = vi.fn()
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+    })
+  })
+
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+    delete navigator.clipboard
+  })
+
+  function renderSidebar(overrides = {}) {
+    return render(
+      <Sidebar
+        locations={[firstLocation, secondLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+        {...overrides}
+      />,
+    )
+  }
+
+  function openShareDialog() {
+    fireEvent.click(screen.getByRole('button', { name: /share this virtual tour/i }))
+  }
+
+  function openAboutDialog() {
+    fireEvent.click(screen.getByRole('button', { name: /about this virtual tour/i }))
+  }
+
+  it('renders the CIIT website action as a safe new-tab link', () => {
+    renderSidebar()
+
+    const website = screen.getByRole('link', { name: /ciit official website/i })
+
+    expect(website).toHaveAttribute('href', 'https://www.ciit.edu.ph/')
+    expect(website).toHaveAttribute('target', '_blank')
+    expect(website.getAttribute('rel')).toContain('noopener')
+    expect(website.getAttribute('rel')).toContain('noreferrer')
+  })
+
+  it('centers the action row and lets it wrap', () => {
+    renderSidebar()
+
+    const row = screen.getByTestId('sidebar-action-row')
+
+    expect(row).toHaveClass('justify-center')
+    expect(row).toHaveClass('flex-wrap')
+  })
+
+  it('pins the copyright line in a footer outside the scrollable body', () => {
+    renderSidebar()
+
+    const footer = screen.getByRole('contentinfo')
+    const scrollBody = screen.getByTestId('sidebar-scroll-body')
+
+    expect(footer).toHaveTextContent('© 2026 CIIT. All rights reserved.')
+    expect(footer).toHaveClass('shrink-0')
+    expect(scrollBody.contains(footer)).toBe(false)
+    expect(scrollBody).toHaveClass('overflow-y-auto')
+  })
+
+  it('keeps the narrow-viewport close control outside the scrollable body', () => {
+    renderSidebar()
+
+    const closeButton = screen.getByRole('button', { name: /close location menu/i })
+    const scrollBody = screen.getByTestId('sidebar-scroll-body')
+
+    expect(scrollBody.contains(closeButton)).toBe(false)
+  })
+
+  it('opens the share dialog and shows the current tour address', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByDisplayValue(window.location.href)).toBeInTheDocument()
+  })
+
+  it('keeps the share close control outside the scrollable content', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    const content = screen.getByTestId('share-dialog-content')
+    const closeButton = screen.getByRole('button', { name: /close share dialog/i })
+    const paper = document.querySelector('.MuiDialog-paper')
+
+    expect(content.contains(closeButton)).toBe(false)
+    expect(paper).toHaveClass('MuiDialog-paperFullWidth')
+    expect(paper).toHaveClass('MuiDialog-paperWidthSm')
+  })
+
+  it('copies the tour address and confirms it', async () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /copy tour link/i }))
+    })
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(window.location.href)
+    expect(screen.getByText(/link copied to your clipboard/i)).toBeInTheDocument()
+  })
+
+  it('opens Facebook and X with the encoded tour address', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    fireEvent.click(screen.getByRole('button', { name: /share on facebook/i }))
+
+    expect(window.open).toHaveBeenCalledTimes(1)
+    expect(window.open.mock.calls[0][0]).toContain(
+      encodeURIComponent(window.location.href),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /share on x/i }))
+
+    expect(window.open).toHaveBeenCalledTimes(2)
+    expect(window.open.mock.calls[1][0]).toContain(
+      encodeURIComponent(window.location.href),
+    )
+  })
+
+  it('opens WhatsApp and email with the tour address and message', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    fireEvent.click(screen.getByRole('button', { name: /share on whatsapp/i }))
+    fireEvent.click(screen.getByRole('button', { name: /share by email/i }))
+
+    expect(window.open).toHaveBeenCalledTimes(2)
+    expect(window.open.mock.calls[0][0]).toContain('wa.me')
+    expect(window.open.mock.calls[1][0]).toContain('mailto:')
+  })
+
+  it('copies the link before opening Messenger and Discord', async () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /share on messenger/i }))
+    })
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(window.location.href)
+    expect(window.open.mock.calls[0][0]).toContain('messenger.com')
+    expect(screen.getByText(/paste it in the chat/i)).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /share on discord/i }))
+    })
+
+    expect(window.open.mock.calls[1][0]).toContain('discord.com')
+  })
+
+  it('closes the share dialog by its close control without closing the sidebar', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    fireEvent.click(screen.getByRole('button', { name: /close share dialog/i }))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-hidden', 'false')
+  })
+
+  it('returns focus to the share trigger after closing', () => {
+    renderSidebar()
+
+    const trigger = screen.getByRole('button', { name: /share this virtual tour/i })
+    trigger.focus()
+
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('button', { name: /close share dialog/i }))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(trigger).toHaveFocus()
+  })
+
+  it('closes the share dialog by Escape without closing the sidebar', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-hidden', 'false')
+  })
+
+  it('closes the share dialog when the backdrop is clicked', () => {
+    renderSidebar()
+
+    openShareDialog()
+
+    fireEvent.click(document.querySelector('.MuiBackdrop-root'))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-hidden', 'false')
+  })
+
+  it('closes the share dialog when the sidebar closes', () => {
+    const { rerender } = renderSidebar()
+
+    openShareDialog()
+
+    rerender(
+      <Sidebar
+        locations={[firstLocation, secondLocation]}
+        currentLocationId={firstLocation.id}
+        open={false}
+        onSelect={vi.fn()}
+      />,
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('opens the about dialog with a description, credits, and a CIIT link', () => {
+    renderSidebar()
+
+    openAboutDialog()
+
+    const dialog = screen.getByRole('dialog')
+
+    expect(within(dialog).getByText(/360-degree walkthrough/i)).toBeInTheDocument()
+    expect(within(dialog).getAllByRole('listitem').length).toBeGreaterThanOrEqual(4)
+
+    const link = within(dialog).getByRole('link', { name: /ciit official website/i })
+
+    expect(link).toHaveAttribute('href', 'https://www.ciit.edu.ph/')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link.getAttribute('rel')).toContain('noopener')
+  })
+
+  it('keeps the about close control outside the scrollable content', () => {
+    renderSidebar()
+
+    openAboutDialog()
+
+    const content = screen.getByTestId('about-dialog-content')
+    const closeButton = screen.getByRole('button', { name: /close about dialog/i })
+
+    expect(content.contains(closeButton)).toBe(false)
+  })
+
+  it('closes the about dialog by close control and Escape', () => {
+    renderSidebar()
+
+    openAboutDialog()
+
+    fireEvent.click(screen.getByRole('button', { name: /close about dialog/i }))
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-hidden', 'false')
+
+    openAboutDialog()
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary')).toHaveAttribute('aria-hidden', 'false')
+  })
+})

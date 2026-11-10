@@ -5,12 +5,19 @@ import Popover from "@mui/material/Popover";
 import { FLOOR_SEQUENCE, FLOOR_SCENE_MAP } from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
 import CloseIcon from "@mui/icons-material/Close";
+import ReplyIcon from "@mui/icons-material/Reply";
+import InfoIcon from "@mui/icons-material/Info";
+import AboutDialog from "./AboutDialog";
+import ShareDialog from "./ShareDialog";
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
 const POPOVER_DELAY_MS = 1500;
 const ACKNOWLEDGEMENT_MS = 320;
 
 const PAIRED_FLOORS = [["5F", "5M"]];
+
+const ACTION_CLASS =
+  "text-ink border-line bg-surface-strong/50 hover:border-accent hover:text-accent inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold transition-colors";
 
 function buildFloorItems(locations) {
   // Match each floor to its location by floor label position (order), not by
@@ -116,15 +123,6 @@ function getFloorStatus(location) {
   }
 
   return null;
-}
-
-function getCurrentLocationName(locations, currentLocationId) {
-  if (!locations || !currentLocationId) {
-    return null;
-  }
-
-  const location = locations.find((loc) => loc.id === currentLocationId);
-  return location?.name ?? null;
 }
 
 function SidebarLogo({ logoUrl }) {
@@ -296,6 +294,8 @@ export default function Sidebar({
   logoUrl,
 }) {
   const [notice, setNotice] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const popoverTimerRef = useRef(null);
   const acknowledgementTimerRef = useRef(null);
   const acknowledgedElementRef = useRef(null);
@@ -423,12 +423,7 @@ export default function Sidebar({
         inert={!open}
       >
         <div
-          // Adjust sidebar content's position
-          /*
-            narrow:pt-4 - vertical position
-            narrow:pb-4 - bottom padding (if u want more space at the bottom)
-          */
-          className={`compact:w-[min(20rem,86vw)] narrow:w-full compact:pt-2 narrow:pt-4 narrow:px-4 narrow:pb-4 relative flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 ${contentState}`}
+          className={`compact:w-[min(20rem,86vw)] narrow:w-full relative flex h-full w-80 flex-col transition-opacity duration-200 ${contentState}`}
         >
           {open && (
             <button
@@ -441,31 +436,85 @@ export default function Sidebar({
               <CloseIcon></CloseIcon>
             </button>
           )}
-          <SidebarLogo logoUrl={logoUrl} />
 
-          {/* {currentLocationId && (
-            <p className="compact:block hidden mb-3 compact:mb-2 narrow:mb-0 text-xs font-bold text-accent tracking-[0.16em] uppercase compact:text-left narrow:text-left compact:px-4 narrow:px-4 compact:pt-2 narrow:pt-0">
-              {getCurrentLocationName(locations, currentLocationId)}
-            </p>
-          )} */}
+          <div
+            data-testid="sidebar-scroll-body"
+            className="compact:pt-2 narrow:px-4 narrow:pt-16 narrow:pb-4 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 pt-5"
+          >
+            <SidebarLogo logoUrl={logoUrl} />
 
-          <div className="mb-4">
-            <p className="text-accent compact:text-sm narrow:text-xs mb-1.5 text-xs font-extrabold tracking-[0.16em] uppercase">
-              Explore
-            </p>
-            <h2 className="compact:text-2xl narrow:text-lg mb-0 text-xl">
-              Campus Floors
-            </h2>
+            <div className="mb-4">
+              <p className="text-accent compact:text-sm narrow:text-xs mb-1.5 text-xs font-extrabold tracking-[0.16em] uppercase">
+                Explore
+              </p>
+              <h2 className="compact:text-2xl narrow:text-lg mb-0 text-xl">
+                Campus Floors
+              </h2>
+            </div>
+
+            <FloorList
+              items={floorItems}
+              currentLocationId={currentLocationId}
+              onSelect={handleSelect}
+              onLocked={handleLockedFloor}
+            />
+
+            <div
+              data-testid="sidebar-action-row"
+              className="narrow:gap-2 compact:pt-3 mt-auto flex flex-wrap items-center justify-center gap-3 pt-5"
+            >
+              {/* <a
+                href="https://www.ciit.edu.ph/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open the CIIT official website in a new tab"
+                className={ACTION_CLASS}
+              >
+                <LanguageIcon fontSize="small" />
+                <span>CIIT Website</span>
+              </a> */}
+
+              <button
+                type="button"
+                aria-label="Share this virtual tour"
+                className={ACTION_CLASS}
+                onClick={() => setShareOpen(true)}
+              >
+                <ReplyIcon
+                  fontSize="small"
+                  sx={{ transform: "scaleX(-1)" }}
+                ></ReplyIcon>
+                <span>Share</span>
+              </button>
+
+              <button
+                type="button"
+                aria-label="About this virtual tour"
+                className={ACTION_CLASS}
+                onClick={() => setAboutOpen(true)}
+              >
+                <InfoIcon fontSize="small" />
+                <span>About</span>
+              </button>
+            </div>
           </div>
 
-          <FloorList
-            items={floorItems}
-            currentLocationId={currentLocationId}
-            onSelect={handleSelect}
-            onLocked={handleLockedFloor}
-          />
+          <footer className="narrow:px-4 shrink-0 border-t px-5 py-3 text-center">
+            <p className="text-muted m-0 text-xs">
+              © 2026 CIIT. All rights reserved.
+            </p>
+          </footer>
         </div>
       </aside>
+
+      <ShareDialog
+        open={open && shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
+      <AboutDialog
+        open={open && aboutOpen}
+        onClose={() => setAboutOpen(false)}
+      />
 
       {/* Sidebar Toggle */}
       <button

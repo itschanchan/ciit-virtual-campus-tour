@@ -7,7 +7,7 @@ const instructions = [
   {
     title: "Use Arrow Keys",
     description:
-      "Press the arrow keys to pan the camera upward, downward, left, or right.",
+      "Press the arrow keys to move camera upward, downward, left, or right.",
     visual: "/arrow_keys.png",
   },
   {
