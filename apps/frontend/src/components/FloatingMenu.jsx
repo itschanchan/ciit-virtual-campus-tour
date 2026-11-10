@@ -139,10 +139,10 @@ export default function FloatingMenu({
       `}</style>
 
       <section
-        className="fixed bottom-4 left-1/2 z-7 -translate-x-1/2 w-[min(44rem,calc(100%-1.5rem))] rounded-full border border-line bg-surface/90 px-4 py-[0.9rem] shadow-narration backdrop-blur-narration narrow:bottom-0 narrow:w-full narrow:rounded-t-panel narrow:rounded-b-none narrow:border-x-0 narrow:border-b-0"
+        className="border-line bg-surface/90 shadow-narration backdrop-blur-narration narrow:bottom-0 narrow:w-full narrow:rounded-t-panel narrow:rounded-b-none narrow:border-x-0 narrow:border-b-0 fixed bottom-4 left-1/2 z-7 w-[min(44rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-full border px-4 py-[0.9rem]"
         aria-label="Tour narration controls"
       >
-        <div className="flex justify-center items-center gap-[0.6rem]">
+        <div className="flex items-center justify-center gap-[0.6rem]">
           <span
             className={`audio-viz narrow:hidden ${playing ? "playing" : "hidden"}`}
             aria-hidden="true"
@@ -155,7 +155,7 @@ export default function FloatingMenu({
           {/* Play/Pause Button */}
           <button
             type="button"
-            className={`inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent px-4 py-[0.55rem] font-bold text-accent-ink transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${audioError ? "opacity-50 pointer-events-none" : ""}`}
+            className={`bg-accent text-accent-ink hover:bg-accent-hover focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-transparent px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none ${audioError ? "pointer-events-none opacity-50" : ""}`}
             onClick={handlePlayPause}
             onKeyDown={(keyEvent) => {
               if (keyEvent.key === "p") {
@@ -176,7 +176,7 @@ export default function FloatingMenu({
           {/* Mute / Unmute Button */}
           <button
             type="button"
-            className="inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-line bg-surface-soft px-4 py-[0.55rem] font-bold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="border-line bg-surface-soft text-ink hover:border-accent hover:text-accent focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             onClick={handleMuteToggle}
             onKeyDown={(event) => {
               if (event.key === "m") {
@@ -197,7 +197,7 @@ export default function FloatingMenu({
           {narration && (
             <button
               type="button"
-              className="inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-line bg-surface-soft px-4 py-[0.55rem] font-bold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="border-line bg-surface-soft text-ink hover:border-accent hover:text-accent focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
               onClick={() => setTranscriptOpen((current) => !current)}
               aria-expanded={transcriptOpen}
               aria-controls="floating-menu-transcript"
@@ -209,7 +209,7 @@ export default function FloatingMenu({
           {/* Map Button */}
           <button
             type="button"
-            className="inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-line bg-surface-soft px-4 py-[0.55rem] font-bold text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="border-line bg-surface-soft text-ink hover:border-accent hover:text-accent focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             aria-label="Open map"
           >
             <MapIcon></MapIcon>
@@ -222,7 +222,7 @@ export default function FloatingMenu({
 
         {audioError && (
           <p
-            className="mt-3 mb-0 rounded-mark border-l-[3px] border-accent bg-accent-notice px-3 py-[0.6rem] text-[0.86rem] text-selected-ink"
+            className="rounded-mark border-accent bg-accent-notice text-selected-ink mt-3 mb-0 border-l-[3px] px-3 py-[0.6rem] text-[0.86rem]"
             role="status"
           >
             Playback was blocked by your browser. Open the transcript to read
@@ -232,7 +232,7 @@ export default function FloatingMenu({
 
         {status === "error" && (
           <p
-            className="mt-3 mb-0 rounded-mark border-l-[3px] border-accent bg-accent-notice px-3 py-[0.6rem] text-[0.86rem] text-selected-ink"
+            className="rounded-mark border-accent bg-accent-notice text-selected-ink mt-3 mb-0 border-l-[3px] px-3 py-[0.6rem] text-[0.86rem]"
             role="alert"
           >
             The narration could not be played. Open the transcript to read it
@@ -241,9 +241,9 @@ export default function FloatingMenu({
         )}
 
         {narration && transcriptOpen && (
-          <div className="mt-[0.8rem] max-h-44 overflow-y-auto border-t border-line pt-[0.8rem]">
+          <div className="border-line mt-[0.8rem] max-h-44 overflow-y-auto border-t pt-[0.8rem]">
             <h3 className="mb-[0.4rem] text-[0.95rem]">Transcript</h3>
-            <p className="mb-0 text-[0.9rem] leading-[1.55] text-muted">
+            <p className="text-muted mb-0 text-[0.9rem] leading-[1.55]">
               {narration.transcript}
             </p>
           </div>

@@ -9,11 +9,11 @@ export default function Header({
 }) {
   return (
     <div className="absolute inset-x-0 top-0 z-40">
-      <header className="relative z-40 flex min-h-16 items-center gap-4 bg-transparent px-5 py-3 compact:px-3.5 compact:py-2.5 narrow:px-3 narrow:py-2">
+      <header className="compact:px-3.5 compact:py-2.5 narrow:px-3 narrow:py-2 relative z-40 flex min-h-16 items-center gap-4 bg-transparent px-5 py-3">
         {!sidebarOpen && (
           <button
             type="button"
-            className="size-10 items-center justify-center gap-1.5 bg-surface text-xl leading-none text-ink transition-colors hover:border-accent hover:text-accent hidden narrow:inline-flex"
+            className="bg-surface text-ink hover:border-accent hover:text-accent narrow:inline-flex hidden size-10 items-center justify-center gap-1.5 text-xl leading-none transition-colors"
             aria-label="Open location menu"
             aria-expanded={sidebarOpen}
             aria-controls="location-sidebar"
@@ -23,11 +23,11 @@ export default function Header({
           </button>
         )}
 
-        <div className="flex min-w-0 items-baseline gap-2.5 compact:gap-2 narrow:gap-1.5">
+        <div className="compact:gap-2 narrow:gap-1.5 flex min-w-0 items-baseline gap-2.5">
           <img
             src="/img/CIIT_Logo_Inverse_cropped.svg"
             alt="CIIT logo"
-            className={`h-7 w-auto compact:h-6 narrow:h-5 ${sidebarOpen ? "hidden" : ""}`}
+            className={`compact:h-6 narrow:h-5 h-7 w-auto ${sidebarOpen ? "hidden" : ""}`}
           />
           {/* <span
             className={`font-bold whitespace-nowrap compact:text-[0.92rem] tiny:hidden ${sidebarOpen ? "hidden" : ""}`}
@@ -37,7 +37,7 @@ export default function Header({
         </div>
 
         <p
-          className="ml-auto overflow-hidden text-ellipsis whitespace-nowrap text-[0.95rem] text-muted compact:max-w-xs compact:text-xs tiny:max-w-sm tiny:text-xs"
+          className="text-muted compact:max-w-xs compact:text-xs tiny:max-w-sm tiny:text-xs ml-auto overflow-hidden text-[0.95rem] text-ellipsis whitespace-nowrap"
           aria-live="polite"
         >
           {currentLocation?.name ?? "Loading campus locations"}

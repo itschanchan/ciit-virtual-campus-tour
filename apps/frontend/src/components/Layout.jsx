@@ -36,9 +36,9 @@ export default function Layout() {
   }, [sidebarOpen, setSidebarOpen]);
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-canvas text-ink">
+    <div className="bg-canvas text-ink relative h-dvh overflow-hidden">
       <a
-        className="absolute top-3 left-3 z-100 translate-y-[-200%] rounded-full bg-focus px-4 py-2.5 font-bold text-focus-ink no-underline focus:translate-y-0"
+        className="bg-focus text-focus-ink absolute top-3 left-3 z-100 translate-y-[-200%] rounded-full px-4 py-2.5 font-bold no-underline focus:translate-y-0"
         href="#tour-main"
       >
         Skip to the tour
@@ -68,13 +68,13 @@ export default function Layout() {
       {sidebarOpen && (
         <button
           type="button"
-          className="fixed inset-x-0 top-16 bottom-0 z-20 hidden w-full border-0 bg-transparent compact:block"
+          className="compact:block fixed inset-x-0 top-16 bottom-0 z-20 hidden w-full border-0 bg-transparent"
           aria-label="Close location menu"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <div className="relative flex h-full w-full min-h-0 flex-col">
+      <div className="relative flex h-full min-h-0 w-full flex-col">
         <Sidebar
           locations={locations}
           currentLocationId={currentLocation?.id ?? ""}

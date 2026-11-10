@@ -22,12 +22,32 @@ function switchToSceneId(sceneId) {
 // The margin must be a complete literal class name so Tailwind can scan and
 // generate it - building it with `ml-[${value}]` at runtime never produces CSS.
 const VIEW_CONTROLS = [
-  ["up", "up.png", "ml-[-145px] compact:ml-[-120px] narrow:ml-[-95px]", "Pan up"],
-  ["down", "down.png", "ml-[-95px] compact:ml-[-80px] narrow:ml-[-65px]", "Pan down"],
-  ["left", "left.png", "ml-[-45px] compact:ml-[-35px] narrow:ml-[-25px]", "Pan left"],
+  [
+    "up",
+    "up.png",
+    "ml-[-145px] compact:ml-[-120px] narrow:ml-[-95px]",
+    "Pan up",
+  ],
+  [
+    "down",
+    "down.png",
+    "ml-[-95px] compact:ml-[-80px] narrow:ml-[-65px]",
+    "Pan down",
+  ],
+  [
+    "left",
+    "left.png",
+    "ml-[-45px] compact:ml-[-35px] narrow:ml-[-25px]",
+    "Pan left",
+  ],
   ["right", "right.png", "ml-[5px] compact:ml-[2px] narrow:ml-0", "Pan right"],
   ["in", "plus.png", "ml-[55px] compact:ml-[45px] narrow:ml-[35px]", "Zoom in"],
-  ["out", "minus.png", "ml-[105px] compact:ml-[85px] narrow:ml-[65px]", "Zoom out"],
+  [
+    "out",
+    "minus.png",
+    "ml-[105px] compact:ml-[85px] narrow:ml-[65px]",
+    "Zoom out",
+  ],
 ];
 
 // Keyboard keys mapped to view control element ids. Marzipano's press
@@ -76,7 +96,11 @@ export default function PanoramaViewer({
   // (Rule 1: Button Sync - sidebar buttons sync with the current panorama).
   const lastReportedSceneId = useRef(null);
   useEffect(() => {
-    if (!onSceneChange || !currentSceneId || currentSceneId === lastReportedSceneId.current) {
+    if (
+      !onSceneChange ||
+      !currentSceneId ||
+      currentSceneId === lastReportedSceneId.current
+    ) {
       return;
     }
     lastReportedSceneId.current = currentSceneId;
@@ -194,7 +218,7 @@ export default function PanoramaViewer({
   return (
     <section
       ref={containerRef}
-      className="relative min-h-0 flex-1 touch-none overflow-hidden bg-canvas"
+      className="bg-canvas relative min-h-0 flex-1 touch-none overflow-hidden"
       aria-label={`360 degree view of ${locationLabel}`}
       tabIndex={0}
       onKeyDown={(e) => {
@@ -216,13 +240,13 @@ export default function PanoramaViewer({
 
       {/* Scene list */}
       <div id="sceneList" className={sceneListClasses}>
-        <div className="flex flex-col p-4 space-y-2">
+        <div className="flex flex-col space-y-2 p-4">
           {APP_DATA.scenes.map((scene) => (
             <a
               key={scene.id}
               href="javascript:void(0)"
               className={[
-                "scene block w-full h-7.5",
+                "scene block h-7.5 w-full",
                 scene.id === currentSceneId ? "bg-[rgba(103,115,131,0.8)]" : "",
               ]
                 .join(" ")
@@ -233,7 +257,7 @@ export default function PanoramaViewer({
                 setCurrentSceneId(scene.id);
               }}
             >
-              <li className="text w-full h-full px-3 leading-10 overflow-hidden text-ellipsis whitespace-nowrap compact:text-sm narrow:text-xs">
+              <li className="text compact:text-sm narrow:text-xs h-full w-full overflow-hidden px-3 leading-10 text-ellipsis whitespace-nowrap">
                 {scene.name}
               </li>
             </a>
@@ -245,24 +269,24 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="sceneListToggle"
-        className="absolute top-0 left-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
+        className="compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 absolute top-0 left-0 z-10 hidden h-10 w-10 bg-[rgba(103,115,131,0.8)] p-1.25"
       >
-        <span className="text-xl compact:text-lg narrow:text-base">☰</span>
+        <span className="compact:text-lg narrow:text-base text-xl">☰</span>
       </a>
 
       {/* Fullscreen toggle: hidden but kept in DOM so frozen Marzipano.jsx can query it */}
       <a
         href="javascript:void(0)"
         id="fullscreenToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
+        className="compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 absolute top-0 right-0 z-10 hidden h-10 w-10 bg-[rgba(103,115,131,0.8)] p-1.25"
       >
         <img
-          className="icon off w-6 h-6 compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
+          className="icon off compact:w-5 compact:h-5 narrow:w-5 narrow:h-5 h-6 w-6"
           src="img/fullscreen.png"
           alt="Fullscreen on"
         />
         <img
-          className="icon on w-6 h-6 hidden compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
+          className="icon on compact:w-5 compact:h-5 narrow:w-5 narrow:h-5 hidden h-6 w-6"
           src="img/windowed.png"
           alt="Fullscreen off"
         />
@@ -271,9 +295,12 @@ export default function PanoramaViewer({
       {/* Title bar: hidden but kept in DOM so frozen Marzipano.jsx can query #titleBar .sceneName */}
       <div
         id="titleBar"
-        className="absolute top-0 left-10 right-10 z-10 h-10 compact:left-6 compact:right-6 narrow:left-4 narrow:right-4 bg-[rgba(58,68,84,0.8)] border-b border-line hidden"
+        className="compact:left-6 compact:right-6 narrow:left-4 narrow:right-4 border-line absolute top-0 right-10 left-10 z-10 hidden h-10 border-b bg-[rgba(58,68,84,0.8)]"
       >
-        <h1 className="sceneName text-sm text-ink truncate compact:text-xs narrow:text-xs" id="sceneName">
+        <h1
+          className="sceneName text-ink compact:text-xs narrow:text-xs truncate text-sm"
+          id="sceneName"
+        >
           {sceneName}
         </h1>
       </div>
@@ -282,7 +309,7 @@ export default function PanoramaViewer({
       <a
         href="javascript:void(0)"
         id="autorotateToggle"
-        className="absolute top-0 right-0 z-10 w-10 h-10 p-1.25 compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 bg-[rgba(103,115,131,0.8)] hidden"
+        className="compact:w-9 compact:h-9 compact:p-1 narrow:w-8 narrow:h-8 narrow:p-1 absolute top-0 right-0 z-10 hidden h-10 w-10 bg-[rgba(103,115,131,0.8)] p-1.25"
         onClick={(e) => {
           e.preventDefault();
           document
@@ -291,12 +318,12 @@ export default function PanoramaViewer({
         }}
       >
         <img
-          className="icon off w-6 h-6 compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
+          className="icon off compact:w-5 compact:h-5 narrow:w-5 narrow:h-5 h-6 w-6"
           src="img/play.png"
           alt="Autorotate on"
         />
         <img
-          className="icon on w-6 h-6 hidden compact:w-5 compact:h-5 narrow:w-5 narrow:h-5"
+          className="icon on compact:w-5 compact:h-5 narrow:w-5 narrow:h-5 hidden h-6 w-6"
           src="img/pause.png"
           alt="Autorotate off"
         />
@@ -304,8 +331,7 @@ export default function PanoramaViewer({
 
       {/* View control buttons: centered at bottom with original margins */}
       <div
-        className="absolute bottom-0 left-1/2 z-10 pb-4 compact:pb-3 narrow:pb-2
-        hidden"
+        className="compact:pb-3 narrow:pb-2 absolute bottom-0 left-1/2 z-10 hidden pb-4"
         id="viewControls"
       >
         {VIEW_CONTROLS.map(([id, img, marginClass, label]) => {
@@ -316,7 +342,7 @@ export default function PanoramaViewer({
               href="javascript:void(0)"
               id={controlId}
               className={[
-                "viewControlButton absolute bottom-0 w-10 h-10 p-1.25 bg-[rgba(103,115,131,0.8)] flex items-center justify-center text-ink hover:bg-accent transition-colors",
+                "viewControlButton text-ink hover:bg-accent absolute bottom-0 flex h-10 w-10 items-center justify-center bg-[rgba(103,115,131,0.8)] p-1.25 transition-colors",
                 marginClass,
               ].join(" ")}
               onClick={(e) => e.preventDefault()}
@@ -330,7 +356,7 @@ export default function PanoramaViewer({
                 releaseControl(controlId);
               }}
             >
-              <img className="icon w-6 h-6" src={`img/${img}`} alt={label} />
+              <img className="icon h-6 w-6" src={`img/${img}`} alt={label} />
             </a>
           );
         })}
@@ -338,9 +364,9 @@ export default function PanoramaViewer({
 
       {/* Loading state */}
       {status === "loading" && (
-        <div className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 compact:gap-2 narrow:gap-2 rounded-panel border border-line bg-surface-soft compact:p-4 narrow:p-3 text-center text-ink">
+        <div className="compact:gap-2 narrow:gap-2 rounded-panel border-line bg-surface-soft compact:p-4 narrow:p-3 text-ink absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 border text-center">
           <span
-            className="size-8 compact:size-7 narrow:size-6 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent"
+            className="compact:size-7 narrow:size-6 border-accent/25 border-t-accent size-8 animate-spin rounded-full border-[3px]"
             aria-hidden="true"
           />
           Loading the 360 degree view...
@@ -350,11 +376,13 @@ export default function PanoramaViewer({
       {/* Error state */}
       {status === "error" && (
         <div
-          className="absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 compact:gap-2 narrow:gap-2 rounded-panel border border-danger/50 bg-surface-soft compact:p-4 narrow:p-3 text-center text-danger"
+          className="compact:gap-2 narrow:gap-2 rounded-panel border-danger/50 bg-surface-soft compact:p-4 narrow:p-3 text-danger absolute top-1/2 left-1/2 z-6 grid -translate-x-1/2 -translate-y-1/2 place-items-center gap-3 border text-center"
           role="alert"
         >
           <strong>Panorama unavailable</strong>
-          <span className="text-ink compact:text-sm narrow:text-xs">{MISSING_PANORAMA_MESSAGE}</span>
+          <span className="text-ink compact:text-sm narrow:text-xs">
+            {MISSING_PANORAMA_MESSAGE}
+          </span>
         </div>
       )}
     </section>

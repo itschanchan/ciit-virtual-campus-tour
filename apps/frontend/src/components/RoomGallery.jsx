@@ -40,7 +40,7 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
 
   return (
     <div
-      className="fixed inset-0 z-60 grid place-items-center bg-canvas/78 p-5 backdrop-blur-gallery tiny:p-0"
+      className="bg-canvas/78 backdrop-blur-gallery tiny:p-0 fixed inset-0 z-60 grid place-items-center p-5"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -49,14 +49,14 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
     >
       <section
         id="room-gallery"
-        className="max-h-[min(88dvh,52rem)] w-[min(68rem,100%)] overflow-y-auto rounded-gallery-panel border border-line bg-surface p-5 shadow-gallery tiny:min-h-dvh tiny:w-full tiny:max-h-dvh tiny:rounded-none"
+        className="rounded-gallery-panel border-line bg-surface shadow-gallery tiny:min-h-dvh tiny:w-full tiny:max-h-dvh tiny:rounded-none max-h-[min(88dvh,52rem)] w-[min(68rem,100%)] overflow-y-auto border p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="room-gallery-title"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] text-accent uppercase">
+            <p className="text-accent mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] uppercase">
               Room details
             </p>
             <h2
@@ -69,7 +69,7 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
           <button
             ref={closeButtonRef}
             type="button"
-            className="inline-flex size-10 items-center justify-center gap-1.5 rounded-full border border-line bg-surface text-xl leading-none text-ink transition-colors hover:border-accent hover:text-accent"
+            className="border-line bg-surface text-ink hover:border-accent hover:text-accent inline-flex size-10 items-center justify-center gap-1.5 rounded-full border text-xl leading-none transition-colors"
             aria-label="Close gallery"
             onClick={onClose}
           >
@@ -78,7 +78,7 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
         </div>
 
         {sortedImages.length === 0 ? (
-          <p className="m-0 rounded-gallery-item border border-dashed border-line px-4 py-8 text-center text-muted">
+          <p className="rounded-gallery-item border-line text-muted m-0 border border-dashed px-4 py-8 text-center">
             No gallery images are available for this location yet.
           </p>
         ) : (
@@ -86,7 +86,7 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
             {sortedImages.map((image, index) => (
               <figure
                 key={`${image.src}-${image.order}`}
-                className="m-0 overflow-hidden rounded-gallery-item border border-line bg-surface-strong"
+                className="rounded-gallery-item border-line bg-surface-strong m-0 overflow-hidden border"
               >
                 <img
                   className="block aspect-16/10 w-full object-cover"
@@ -95,7 +95,7 @@ export default function RoomGallery({ images, open, onClose, sidebarOpen = false
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 {image.caption && (
-                  <figcaption className="px-[0.9rem] py-3 text-[0.85rem] text-muted">
+                  <figcaption className="text-muted px-[0.9rem] py-3 text-[0.85rem]">
                     {image.caption}
                   </figcaption>
                 )}

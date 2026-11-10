@@ -129,15 +129,15 @@ function getCurrentLocationName(locations, currentLocationId) {
 
 function SidebarLogo({ logoUrl }) {
   return (
-    <div className="mb-5 flex flex-col items-center gap-2 border-b border-line pb-5 text-center compact:mb-4 narrow:mb-3">
+    <div className="border-line compact:mb-4 narrow:mb-3 mb-5 flex flex-col items-center gap-2 border-b pb-5 text-center">
       {logoUrl ? (
         <img
           src={logoUrl}
           alt="CIIT logo"
-          className="h-16 w-auto compact:h-12 narrow:h-10"
+          className="compact:h-12 narrow:h-10 h-16 w-auto"
         />
       ) : (
-        <span className="rounded-mark bg-accent px-3 py-1 text-lg font-black tracking-[0.12em] text-accent-ink compact:text-base narrow:text-sm">
+        <span className="rounded-mark bg-accent text-accent-ink compact:text-base narrow:text-sm px-3 py-1 text-lg font-black tracking-[0.12em]">
           CIIT
         </span>
       )}
@@ -195,7 +195,7 @@ function FloorButton({ floor, location, current, onSelect, onLocked }) {
   return (
     <button
       type="button"
-      className={`grid items-center w-fit gap-1 rounded-full px-3 py-2 text-left text-ink transition ${stateClass} ${interactionClass}`}
+      className={`text-ink grid w-fit items-center gap-1 rounded-full px-3 py-2 text-left transition ${stateClass} ${interactionClass}`}
       aria-label={accessibleName}
       aria-current={current ? "true" : undefined}
       onClick={handleClick}
@@ -224,7 +224,7 @@ function FloorPair({ entries, currentLocationId, onSelect, onLocked }) {
     <div
       role="group"
       aria-label="Fifth-floor levels"
-      className="flex max-w-full justify-center gap-1.5 narrow:gap-2"
+      className="narrow:gap-2 flex max-w-full justify-center gap-1.5"
     >
       {entries.map(({ floor, location }) => (
         <FloorButton
@@ -417,7 +417,7 @@ export default function Sidebar({
     <>
       <aside
         id="location-sidebar"
-        className={`absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r border-line bg-surface/86 narrow:bg-surface/86 transition-all duration-300 ease-in-out compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 ${shellState}`}
+        className={`border-line bg-surface/86 narrow:bg-surface/86 compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r transition-all duration-300 ease-in-out ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}
@@ -428,12 +428,12 @@ export default function Sidebar({
             narrow:pt-4 - vertical position
             narrow:pb-4 - bottom padding (if u want more space at the bottom)
           */
-          className={`relative flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 compact:w-[min(20rem,86vw)] narrow:w-full compact:pt-2 narrow:pt-4 narrow:px-4 narrow:pb-4 ${contentState}`}
+          className={`compact:w-[min(20rem,86vw)] narrow:w-full compact:pt-2 narrow:pt-4 narrow:px-4 narrow:pb-4 relative flex h-full w-80 flex-col overflow-y-auto p-5 pt-5 transition-opacity duration-200 ${contentState}`}
         >
           {open && (
             <button
               type="button"
-              className="absolute top-4 left-4 z-50 size-10 items-center justify-center bg-surface/86 text-ink transition-colors hover:border-accent hover:text-accent hidden narrow:inline-flex"
+              className="bg-surface/86 text-ink hover:border-accent hover:text-accent narrow:inline-flex absolute top-4 left-4 z-50 hidden size-10 items-center justify-center transition-colors"
               aria-label="Close location menu"
               aria-controls="location-sidebar"
               onClick={onClose}
@@ -450,10 +450,10 @@ export default function Sidebar({
           )} */}
 
           <div className="mb-4">
-            <p className="mb-1.5 text-xs font-extrabold tracking-[0.16em] text-accent uppercase compact:text-sm narrow:text-xs">
+            <p className="text-accent compact:text-sm narrow:text-xs mb-1.5 text-xs font-extrabold tracking-[0.16em] uppercase">
               Explore
             </p>
-            <h2 className="mb-0 text-xl compact:text-2xl narrow:text-lg">
+            <h2 className="compact:text-2xl narrow:text-lg mb-0 text-xl">
               Campus Floors
             </h2>
           </div>
@@ -470,7 +470,7 @@ export default function Sidebar({
       {/* Sidebar Toggle */}
       <button
         type="button"
-        className={`fixed h-40 compact:h-45 narrow:h-36 -ml-px top-1/2 narrow:top-24 z-40 inline-flex size-8 compact:size-9 narrow:size-7 -translate-y-1/2 items-center justify-center rounded-r-full compact:rounded-r-full narrow:rounded-full border border-l-0 narrow:border border-line bg-surface/86 text-ink transition-all duration-300 ease-in-out hover:border-accent hover:text-accent narrow:hidden ${togglePosition}`}
+        className={`compact:h-45 narrow:h-36 narrow:top-24 compact:size-9 narrow:size-7 compact:rounded-r-full narrow:rounded-full narrow:border border-line bg-surface/86 text-ink hover:border-accent hover:text-accent narrow:hidden fixed top-1/2 z-40 -ml-px inline-flex size-8 h-40 -translate-y-1/2 items-center justify-center rounded-r-full border border-l-0 transition-all duration-300 ease-in-out ${togglePosition}`}
         aria-label={open ? "Collapse campus floors" : "Expand campus floors"}
         aria-expanded={open}
         aria-controls="location-sidebar"
