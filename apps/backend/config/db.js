@@ -1,4 +1,22 @@
+import { setServers } from 'node:dns'
 import mongoose from 'mongoose'
+
+export function configureMongoDns(value = process.env.MONGODB_DNS_SERVERS) {
+  if (!value) {
+    return
+  }
+
+  const servers = value
+    .split(',')
+    .map((server) => server.trim())
+    .filter(Boolean)
+
+  if (servers.length === 0) {
+    throw new Error('MONGODB_DNS_SERVERS must contain at least one DNS server.')
+  }
+
+  setServers(servers)
+}
 
 export async function connectDatabase(uri) {
   if (!uri) {

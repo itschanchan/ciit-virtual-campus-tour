@@ -1,4 +1,4 @@
-import { connectDatabase } from './config/db.js'
+import { configureMongoDns, connectDatabase } from './config/db.js'
 import { loadEnv } from './config/env.js'
 import { createApp } from './app.js'
 
@@ -12,6 +12,7 @@ try {
 }
 
 try {
+  configureMongoDns()
   await connectDatabase(config.mongoUri)
   console.log('MongoDB connection established.')
 } catch (error) {
