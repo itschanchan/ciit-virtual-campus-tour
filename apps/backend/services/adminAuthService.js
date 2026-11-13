@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { AppError } from '../utils/errors.js'
-import { Admin } from '../models/Admin.js'
+import { Admin } from '../models/Admins.js'
 
 export function sanitizeAdmin(admin) {
   if (!admin) {
@@ -9,7 +9,7 @@ export function sanitizeAdmin(admin) {
   }
 
   const plainAdmin = admin.toObject ? admin.toObject() : admin
-  const { passwordHash, ...safeAdmin } = plainAdmin
+  const { password, ...safeAdmin } = plainAdmin
 
   return {
     ...safeAdmin,
@@ -19,9 +19,13 @@ export function sanitizeAdmin(admin) {
 
 export function createAdminAuthService({
   AdminModel = Admin,
-  jwtSecret = process.env.JWT_SECRET ?? 'ciit-dev-secret',
+  jwtSecret = process.env.JWT_SECRET,
   tokenTTL = '8h',
 } = {}) {
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET is required.')
+  }
+
   async function login({ username, email, password }) {
     const identifier = username ?? email
 
@@ -39,13 +43,13 @@ export function createAdminAuthService({
       admin = null
     }
 
-    if (!admin || !admin.passwordHash) {
+    if (!admin || !admin.password) {
       throw new AppError('Invalid credentials.', 401, 'INVALID_CREDENTIALS')
     }
 
-    const passwordMatches = await bcrypt.compare(password, admin.passwordHash)
+    const passwordMatches = await bcrypt.compare(password, admin.password)
 
-    if (!passwordMatches || !admin.isActive) {
+    if (!passwordMatches || !admin.is_active) {
       throw new AppError('Invalid credentials.', 401, 'INVALID_CREDENTIALS')
     }
 
@@ -72,7 +76,7 @@ export function createAdminAuthService({
       const payload = jwt.verify(token, jwtSecret)
       const admin = await AdminModel.findById(payload.sub)
 
-      if (!admin || !admin.isActive) {
+      if (!admin || !admin.is_active) {
         return null
       }
 
@@ -88,7 +92,3 @@ export function createAdminAuthService({
 
   return { login, logout, getSessionUser }
 }
-
-export const adminAuthService = createAdminAuthService()
-
-export default adminAuthService

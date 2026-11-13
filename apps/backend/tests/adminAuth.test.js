@@ -1,6 +1,5 @@
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
-import { createApp } from '../app.js'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const adminUser = {
   id: 'admin-1',
@@ -10,25 +9,44 @@ const adminUser = {
   role: 'admin',
 }
 
-describe('Admin auth routes', () => {
-  it('logs in an administrator and sets a secure cookie', async () => {
-    const app = createApp({
-      corsOrigins: ['http://localhost:5173'],
-      adminAuthService: {
-        login: async ({ username, password }) => {
-          if (username !== 'admin' || password !== 'secret123') {
-            throw new Error('Invalid credentials')
-          }
+const authState = vi.hoisted(() => ({
+  login: async () => {
+    throw new Error('Invalid credentials')
+  },
+  logout: async () => ({ ok: true }),
+  getSessionUser: async () => null,
+}))
 
-          return { user: adminUser }
-        },
-        logout: async () => ({ ok: true }),
-        getSessionUser: async () => adminUser,
-      },
-    })
+vi.mock('../services/AdminAuthService.js', () => ({
+  createAdminAuthService: () => ({
+    login: (...args) => authState.login(...args),
+    logout: (...args) => authState.logout(...args),
+    getSessionUser: (...args) => authState.getSessionUser(...args),
+  }),
+}))
+
+import app from '../index.js'
+
+describe('Admin auth routes', () => {
+  beforeEach(() => {
+    authState.login = async () => {
+      throw new Error('Invalid credentials')
+    }
+    authState.logout = async () => ({ ok: true })
+    authState.getSessionUser = async () => null
+  })
+
+  it('logs in an administrator and sets a secure cookie', async () => {
+    authState.login = async ({ username, password }) => {
+      if (username !== 'admin' || password !== 'secret123') {
+        throw new Error('Invalid credentials')
+      }
+
+      return { token: 'mock-jwt', user: adminUser }
+    }
 
     const response = await request(app)
-      .post('/api/admin/login')
+      .post('/api/admins/login')
       .send({ username: 'admin', password: 'secret123' })
       .expect(200)
 
@@ -39,19 +57,8 @@ describe('Admin auth routes', () => {
   })
 
   it('rejects invalid login attempts', async () => {
-    const app = createApp({
-      corsOrigins: ['http://localhost:5173'],
-      adminAuthService: {
-        login: async () => {
-          throw new Error('Invalid credentials')
-        },
-        logout: async () => ({ ok: true }),
-        getSessionUser: async () => null,
-      },
-    })
-
     const response = await request(app)
-      .post('/api/admin/login')
+      .post('/api/admins/login')
       .send({ username: 'admin', password: 'wrong' })
       .expect(401)
 
@@ -59,17 +66,10 @@ describe('Admin auth routes', () => {
   })
 
   it('returns the current session user when a valid cookie is present', async () => {
-    const app = createApp({
-      corsOrigins: ['http://localhost:5173'],
-      adminAuthService: {
-        login: async () => ({ user: adminUser }),
-        logout: async () => ({ ok: true }),
-        getSessionUser: async () => adminUser,
-      },
-    })
+    authState.getSessionUser = async () => adminUser
 
     const response = await request(app)
-      .get('/api/admin/session')
+      .get('/api/admins/session')
       .set('Cookie', ['token=mock-jwt'])
       .expect(200)
 

@@ -1,42 +1,59 @@
-import { setServers } from 'node:dns'
+// Handshake between the app and the database. The server must not accept
+// requests until this connection succeeds.
+import dns from 'node:dns'
 import mongoose from 'mongoose'
 
-export function configureMongoDns(value = process.env.MONGODB_DNS_SERVERS) {
-  if (!value) {
+let isConnected = false
+
+function applyConfiguredDnsServers() {
+  const configured = process.env.MONGODB_DNS_SERVERS
+
+  if (!configured) {
     return
   }
 
-  const servers = value
+  const servers = configured
     .split(',')
     .map((server) => server.trim())
     .filter(Boolean)
 
-  if (servers.length === 0) {
-    throw new Error('MONGODB_DNS_SERVERS must contain at least one DNS server.')
+  if (servers.length > 0) {
+    dns.setServers(servers)
   }
-
-  setServers(servers)
 }
 
-export async function connectDatabase(uri) {
-  if (!uri) {
-    throw new Error('A MongoDB URI is required.')
+export async function connectDB({ uri, dbName } = {}) {
+  const resolvedUri = uri ?? process.env.MONGODB_URI
+  const resolvedDbName = dbName ?? process.env.MONGODB_NAME
+
+  if (!resolvedUri) {
+    throw new Error('MONGODB_URI is required.')
   }
 
-  mongoose.set('strictQuery', true)
-  await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 5000,
-  })
+  if (
+    !resolvedUri.startsWith('mongodb://') &&
+    !resolvedUri.startsWith('mongodb+srv://')
+  ) {
+    throw new Error(
+      "MONGODB_URI must start with 'mongodb://' or 'mongodb+srv://'.",
+    )
+  }
 
-  return mongoose.connection
-}
+  applyConfiguredDnsServers()
 
-export async function disconnectDatabase() {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect()
+  try {
+    await mongoose.connect(resolvedUri, { dbName: resolvedDbName })
+    isConnected = true
+  } catch (error) {
+    isConnected = false
+    throw new Error(
+      `MongoDB connection failed (${error.name}). ${error.message}`,
+    )
   }
 }
 
 export function isDatabaseReady() {
-  return mongoose.connection.readyState === 1
+  return isConnected
 }
+
+export default connectDB

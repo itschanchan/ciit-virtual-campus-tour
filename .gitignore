@@ -1,41 +1,37 @@
-# Node.js / JavaScript
+# CIIT Virtual Campus Tour - .gitignore
+
+# Dependencies
 node_modules/
-dist/
-build/
-*.log
-.env*
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Build outputs
 dist/
 build/
-*.tgz
-coverage/
+*.log
 
-# Environment
+# Environment files (secrets - must never be committed)
 .env
 .env.local
 .env.*.local
 
-# Local backend tool state
+# Backend client REST client file (secrets)
 apps/backend/client.rest
+
+# Spec Kit feature state (generated per feature)
+.specify/feature.json
+
+# Spec Kit extension local config (machine-local)
+.specify/extensions/example/local-config.yml
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# Editor
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+.vitest/
