@@ -24,7 +24,7 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 
 | Layer    | Dependency    | Approval | Description                                                           |
 | :------- | :------------ | :------- | :-------------------------------------------------------------------- |
-| Backend  | cookie-parser | Deferred | For managing web cookies. Install when authentication work begins.    |
+| Backend  | cookie-parser | Approved | For managing web cookies. Installed for session cookies.              |
 | Backend  | cors          | Approved | Cross-Origin Resource Sharing with an explicit origin allowlist.      |
 | Backend  | dotenv        | Approved | Manages API keys and other environment variables in `.env`.           |
 | Backend  | express       | Approved | Handles the server-side logic.                                        |
@@ -45,8 +45,8 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 | Layer       | DevDependency               | Approval | Description                                                         |
 | :---------- | :-------------------------- | :------- | :------------------------------------------------------------------ |
 | Backend     | nodemon                     | Deferred | NodeJS development reloader. `node --watch` is used until approved. |
-| Backend     | supertest                   | Deferred | For testing HTTP APIs and application endpoints.                    |
-| Backend     | vitest                      | Deferred | For unit and integration testing.                                   |
+| Backend     | supertest                   | Approved | For testing HTTP APIs and application endpoints.                    |
+| Backend     | vitest                      | Approved | For unit and integration testing.                                   |
 | Frontend    | @testing-library/react      | Deferred | Component behavior tests.                                           |
 | Frontend    | @testing-library/jest-dom   | Deferred | Accessible DOM assertions.                                          |
 | Frontend    | @testing-library/user-event | Deferred | Keyboard and pointer interaction tests.                             |
@@ -126,8 +126,9 @@ root/
 - The frontend owns the static tour catalog and all media so the tour remains usable without the backend.
 - Tailwind CSS is the primary frontend styling approach. Design tokens live in `apps/frontend/src/index.css`, and contributor conventions live in `docs/styling.md`.
 - MUI (Material UI) is an approved additive component library. Existing tour components remain on Tailwind, MUI `CssBaseline` is not mounted globally, and Tailwind Preflight stays disabled. New MUI surfaces belong in `apps/frontend/src/components/` and follow the coexistence rules in `specs/003-add-mui-dependencies/contracts/ui-contract.md`.
-- The backend exposes `GET /api/health`, validates environment configuration, and connects to MongoDB through Mongoose.
-- CORS uses an explicit origin allowlist from `CORS_ORIGIN`.
+- The backend exposes `GET /api/health` from a single module-scope app in `apps/backend/index.js`. `PORT` uses `process.env.PORT || 3000`, startup is gated by `NODE_ENV !== "test"`, and the Mongoose connection is awaited before `app.listen()`. `PORT` and `NODE_ENV` are not separately validated.
+- `JWT_SECRET` is required by the admin auth service and has no hardcoded fallback.
+- CORS uses an explicit hardcoded origin allowlist in `apps/backend/index.js`; no `CORS_ORIGIN` variable is read.
 - Run `npm install`, `npm run setup`, and copy `apps/backend/.env.example` to `apps/backend/.env` before development.
 - Use `npm run dev`, `npm run test`, `npm run lint`, `npm run build`, `npm run verify:content`, and `npm run verify:ignore` from the repository root.
-- Backend test tooling and `cookie-parser` remain deferred until the maintainer approves them.
+- Backend tests run with installed Vitest and Supertest. `cookie-parser` is installed and used for session cookies.

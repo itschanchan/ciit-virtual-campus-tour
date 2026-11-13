@@ -5,8 +5,9 @@ import Popover from "@mui/material/Popover";
 import { FLOOR_SEQUENCE, FLOOR_SCENE_MAP } from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
 import CloseIcon from "@mui/icons-material/Close";
-import ReplyIcon from "@mui/icons-material/Reply";
 import InfoIcon from "@mui/icons-material/Info";
+import LanguageIcon from "@mui/icons-material/Language";
+import ReplyIcon from "@mui/icons-material/Reply";
 import AboutDialog from "./AboutDialog";
 import ShareDialog from "./ShareDialog";
 
@@ -463,16 +464,16 @@ export default function Sidebar({
               data-testid="sidebar-action-row"
               className="narrow:gap-2 compact:pt-3 mt-auto flex flex-wrap items-center justify-center gap-3 pt-5"
             >
-              {/* <a
+              <a
                 href="https://www.ciit.edu.ph/"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Open the CIIT official website in a new tab"
+                aria-label="CIIT official website"
                 className={ACTION_CLASS}
               >
                 <LanguageIcon fontSize="small" />
                 <span>CIIT Website</span>
-              </a> */}
+              </a>
 
               <button
                 type="button"

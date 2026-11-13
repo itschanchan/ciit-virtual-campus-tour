@@ -1,24 +1,59 @@
+// Handshake between the app and the database. The server must not accept
+// requests until this connection succeeds.
+import dns from 'node:dns'
 import mongoose from 'mongoose'
 
-export async function connectDatabase(uri) {
-  if (!uri) {
-    throw new Error('A MongoDB URI is required.')
+let isConnected = false
+
+function applyConfiguredDnsServers() {
+  const configured = process.env.MONGODB_DNS_SERVERS
+
+  if (!configured) {
+    return
   }
 
-  mongoose.set('strictQuery', true)
-  await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 5000,
-  })
+  const servers = configured
+    .split(',')
+    .map((server) => server.trim())
+    .filter(Boolean)
 
-  return mongoose.connection
+  if (servers.length > 0) {
+    dns.setServers(servers)
+  }
 }
 
-export async function disconnectDatabase() {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect()
+export async function connectDB({ uri, dbName } = {}) {
+  const resolvedUri = uri ?? process.env.MONGODB_URI
+  const resolvedDbName = dbName ?? process.env.MONGODB_NAME
+
+  if (!resolvedUri) {
+    throw new Error('MONGODB_URI is required.')
+  }
+
+  if (
+    !resolvedUri.startsWith('mongodb://') &&
+    !resolvedUri.startsWith('mongodb+srv://')
+  ) {
+    throw new Error(
+      "MONGODB_URI must start with 'mongodb://' or 'mongodb+srv://'.",
+    )
+  }
+
+  applyConfiguredDnsServers()
+
+  try {
+    await mongoose.connect(resolvedUri, { dbName: resolvedDbName })
+    isConnected = true
+  } catch (error) {
+    isConnected = false
+    throw new Error(
+      `MongoDB connection failed (${error.name}). ${error.message}`,
+    )
   }
 }
 
 export function isDatabaseReady() {
-  return mongoose.connection.readyState === 1
+  return isConnected
 }
+
+export default connectDB
