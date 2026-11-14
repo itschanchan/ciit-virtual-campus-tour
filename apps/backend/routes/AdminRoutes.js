@@ -1,31 +1,23 @@
 import { Router } from 'express'
 import verifyToken from '../middleware/verifyToken.js'
 import { requireRole } from '../middleware/authorize.js'
-import userController from '../controllers/UserController.js'
-import gamesController from '../controllers/GamesController.js'
+import adminController from '../controllers/AdminController.js'
 
 const router = Router()
 
-/*
-    NOTES:
+// Public auth endpoints
+router.post('/login', adminController.login)
+router.post('/logout', adminController.logout)
 
-    userRoute.js - serves as the map for all user-related API endpoints.
-    It defines the routes and associates them with the corresponding controller functions in UserController.js.
-    The middleman between the View and Controller.
+// Protected admin endpoints (require valid session)
+router.get('/session', adminController.session)
+router.get('/me', verifyToken, adminController.getMyProfile)
 
-    - GET /users/:id - Get user details
-    - POST /users - Create a new user
-    - PUT /users/:id - Update user information
-    - DELETE /users/:id - Delete a user
-    - PATCH /users/:id/activate - Activate a user account
-*/
-
-router.get('/me', verifyToken, userController.getMyProfile)
-router.get('/me/rating-count', verifyToken, requireRole('author', 'admin'), gamesController.getMyRatingCount)
-router.get('/:id', verifyToken, requireRole('admin'), userController.getUserDetails)
-router.post('/', verifyToken, requireRole('admin'), userController.createUser)
-router.put('/:id', verifyToken, requireRole('admin'), userController.updateUser)
-router.delete('/:id', verifyToken, requireRole('admin'), userController.deleteUser)
-router.patch('/:id/activate', verifyToken, requireRole('admin'), userController.changePassword)
+// Admin-only user management (require admin role)
+router.get('/:id', requireRole('admin'), adminController.getUserDetails)
+router.post('/', requireRole('admin'), adminController.createUser)
+router.put('/:id', requireRole('admin'), adminController.updateUser)
+router.delete('/:id', requireRole('admin'), adminController.deleteUser)
+router.patch('/:id/activate', requireRole('admin'), adminController.changePassword)
 
 export default router

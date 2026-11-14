@@ -9,6 +9,20 @@ import { errorHandler, notFoundHandler } from './utils/errors.js'
 
 dotenv.config()
 
+// JWT secret is always required; MongoDB vars are required outside test mode
+if (!process.env.JWT_SECRET) {
+  console.error('Missing required environment variable: JWT_SECRET')
+  process.exit(1)
+}
+if (process.env.NODE_ENV !== 'test') {
+  for (const key of ['MONGODB_URI', 'MONGODB_NAME']) {
+    if (!process.env[key]) {
+      console.error(`${key} is required.`)
+      process.exit(1)
+    }
+  }
+}
+
 const PORT = process.env.PORT || 3000
 const ALLOWED_ORIGINS = ['http://localhost:5173']
 

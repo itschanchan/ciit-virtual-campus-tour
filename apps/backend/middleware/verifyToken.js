@@ -1,31 +1,24 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken'
 
-// This middleware protects routes that require a logged-in user.
-// It expects the clietn to send the access token in the Authorization header;
-// Authorization: Bearer <accessToken>
+// This middleware protects routes that require a logged-in admin.
+// It reads the JWT from the HTTP-only session cookie (set at login).
 const verifyToken = (req, res, next) => {
-  // Read the Authorization header
-  const authHeader = req.headers["authorization"];
-
-  // The header looks like: "Bearer eyJhbGc..."
-  // We split on the space and take the second part (the actual token)
-  const token = authHeader && authHeader.split(" ")[1];
+  const token =
+    req.cookies?.token ??
+    (req.headers.authorization && req.headers.authorization.split(" ")[1]) ??
+    null
 
   if (!token) {
-    return res.status(401).json({ error: "Access token required" });
+    return res.status(401).json({ error: 'Authentication required' })
   }
 
   try {
-    // jwt.verift throws if the token is expired or has a bad signature
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    // Attach the decoded payload (userId, username) to req so controllers can use it
-    req.user = decoded;
-
-    next(); // move on to the controller
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = decoded
+    next()
   } catch (error) {
-    return res.status(401).json({ error: "Invalid or expired access token" });
+    return res.status(401).json({ error: 'Invalid or expired session' })
   }
-};
+}
 
-export default verifyToken;
+export default verifyToken

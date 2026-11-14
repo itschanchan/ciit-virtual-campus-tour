@@ -2,7 +2,7 @@
 
 ## Endpoints
 
-### POST `/api/admin/login`
+### POST `/api/admins/login`
 Creates an authenticated admin session through a secure JWT cookie.
 
 **Request Body**
@@ -39,7 +39,7 @@ Creates an authenticated admin session through a secure JWT cookie.
 }
 ```
 
-### POST `/api/admin/logout`
+### POST `/api/admins/logout`
 Clears the admin session cookie and signs the user out.
 
 **Success Response**
@@ -51,7 +51,7 @@ Clears the admin session cookie and signs the user out.
 }
 ```
 
-### GET `/api/admin/session`
+### GET `/api/admins/session`
 Returns the current authenticated admin session if present.
 
 **Success Response**

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createAdminAuthService } from '../services/AdminAuthService.js'
+import { createAdminAuthService } from '../services/AuthService.js'
 
 describe('Admin auth service configuration', () => {
   afterEach(() => {
