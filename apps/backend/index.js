@@ -7,15 +7,20 @@ import AdminRoutes from './routes/AdminRoutes.js'
 import AuthRoutes from './routes/AuthRoutes.js'
 import { errorHandler, notFoundHandler } from './utils/errors.js'
 
+// Middlewares
+import verifyToken from "./middleware/verifyToken.js";
+
 dotenv.config()
 
 const PORT = process.env.PORT || 3000
 const ALLOWED_ORIGINS = ['http://localhost:5173']
 
+// const cors = require("cors"); // creates an instance of the cors package.
 const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+
 app.use(
   cors({
     origin: ALLOWED_ORIGINS,
@@ -24,7 +29,11 @@ app.use(
   }),
 )
 app.use('/api/admins', AdminRoutes)
-app.use('/api/auth', AuthRoutes)
+app.use('/api/admin', AuthRoutes)
+
+app.get("/api/admins", verifyToken, (req, res) => {
+  res.json({ message: "Success" });
+});
 
 app.get('/welcome', (req, res) => {
   res.json({
@@ -36,18 +45,19 @@ app.get('/welcome', (req, res) => {
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-function registerShutdownHandlers(server) {
-  function shutdown(signal) {
-    console.log(`${signal} received. Shutting down.`)
-    server.close(() => {
-      process.exit(0)
-    })
-  }
+// function registerShutdownHandlers(server) {
+//   function shutdown(signal) {
+//     console.log(`${signal} received. Shutting down.`)
+//     server.close(() => {
+//       process.exit(0)
+//     })
+//   }
 
-  process.on('SIGINT', () => shutdown('SIGINT'))
-  process.on('SIGTERM', () => shutdown('SIGTERM'))
-}
+//   process.on('SIGINT', () => shutdown('SIGINT'))
+//   process.on('SIGTERM', () => shutdown('SIGTERM'))
+// }
 
+// Only start the server when this file is run directly (not during tests)
 if (process.env.NODE_ENV !== "test") {
   try {
     await connectDB({
@@ -64,7 +74,7 @@ if (process.env.NODE_ENV !== "test") {
     console.log(`CIIT campus tour API listening on port ${PORT}.`)
   })
 
-  registerShutdownHandlers(server)
+  // registerShutdownHandlers(server)
 }
 
 export default app
