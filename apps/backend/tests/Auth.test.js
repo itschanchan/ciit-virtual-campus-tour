@@ -17,12 +17,13 @@ const authState = vi.hoisted(() => ({
   getSessionUser: async () => null,
 }))
 
-vi.mock('../services/AdminAuthService.js', () => ({
-  createAdminAuthService: () => ({
+vi.mock('../services/AuthService.js', () => ({
+  __esModule: true,
+  default: {
     login: (...args) => authState.login(...args),
     logout: (...args) => authState.logout(...args),
     getSessionUser: (...args) => authState.getSessionUser(...args),
-  }),
+  },
 }))
 
 import app from '../index.js'
@@ -42,23 +43,27 @@ describe('Admin auth routes', () => {
         throw new Error('Invalid credentials')
       }
 
-      return { token: 'mock-jwt', user: adminUser }
+      return {
+        accessToken: 'mock-access-token',
+        refreshToken: 'mock-refresh-token',
+        user: adminUser,
+      }
     }
 
     const response = await request(app)
-      .post('/api/admins/login')
+      .post('/api/admin/login')
       .send({ username: 'admin', password: 'secret123' })
       .expect(200)
 
     expect(response.body.user).toMatchObject({ username: 'admin', role: 'admin' })
-    expect(response.headers['set-cookie'][0]).toContain('token=')
+    expect(response.headers['set-cookie'][0]).toContain('refreshToken=')
     expect(response.headers['set-cookie'][0]).toContain('HttpOnly')
-    expect(response.headers['set-cookie'][0]).not.toContain('Max-Age=')
+    expect(response.headers['set-cookie'][0]).toContain('Max-Age=')
   })
 
   it('rejects invalid login attempts', async () => {
     const response = await request(app)
-      .post('/api/admins/login')
+      .post('/api/admin/login')
       .send({ username: 'admin', password: 'wrong' })
       .expect(401)
 
@@ -69,8 +74,8 @@ describe('Admin auth routes', () => {
     authState.getSessionUser = async () => adminUser
 
     const response = await request(app)
-      .get('/api/admins/session')
-      .set('Cookie', ['token=mock-jwt'])
+      .get('/api/admin/session')
+      .set('Cookie', ['refreshToken=mock-jwt'])
       .expect(200)
 
     expect(response.body).toMatchObject({ user: { username: 'admin', role: 'admin' } })

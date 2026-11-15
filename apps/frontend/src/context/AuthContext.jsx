@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch('/api/admins/session', {
+      const response = await fetch('/api/admin/session', {
         credentials: 'include',
       })
 
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
   }, [checkSession])
 
   const login = useCallback(async (credentials) => {
-    const response = await fetch('/api/admins/login', {
+    const response = await fetch('/api/admin/login', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -74,7 +74,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch('/api/admins/logout', {
+      await fetch('/api/admin/logout', {
         method: 'POST',
         credentials: 'include',
       })

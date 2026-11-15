@@ -51,7 +51,7 @@ describe('Admin login page', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/admins/login',
+        '/api/admin/login',
         expect.objectContaining({
           method: 'POST',
           credentials: 'include',
@@ -124,7 +124,7 @@ describe('Admin login page', () => {
       expect(screen.getByText('Logged in as admin')).toBeInTheDocument()
     })
 
-    expect(globalThis.fetch).toHaveBeenCalledWith('/api/admins/session', {
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/admin/session', {
       credentials: 'include',
     })
   })

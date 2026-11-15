@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const PORT = process.env.PORT || 3000
-const ALLOWED_ORIGINS = ['http://localhost:5173']
+const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://localhost:5174']
 
 // const cors = require("cors"); // creates an instance of the cors package.
 const app = express()
