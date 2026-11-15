@@ -5,8 +5,9 @@ import AdminController from '../controllers/AdminController.js'
 
 const router = Router()
 
-/*
-    NOTES:
+// Public auth endpoints
+router.post('/login', adminController.login)
+router.post('/logout', adminController.logout)
 
     AdminRoute.js - serves as the map for all Admin-related API endpoints.
     It defines the routes and associates them with the corresponding controller functions in AdminController.js.

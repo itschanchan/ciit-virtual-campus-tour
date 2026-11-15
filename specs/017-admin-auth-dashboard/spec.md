@@ -74,6 +74,15 @@ The dashboard should prepare for future administrative functionality without imp
 - The system receives a malformed or missing cookie; it must treat the user as unauthenticated and redirect to login.
 - The admin dashboard must not expose public registration or self-service account creation.
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: How long should a JWT admin session token remain valid before expiration? → A: 8 hours
+- Q: Which user attributes are required when creating an administrator account? → A: All current model fields (first_name, last_name, date_of_birth, address, contact_number)
+- Q: Should repeated failed login attempts be rate-limited to prevent brute-force attacks? → A: No rate limiting (unlimited retry attempts)
+- Q: What maximum response time should the admin login API return results within? → A: 2 seconds
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -106,7 +115,7 @@ The dashboard should prepare for future administrative functionality without imp
 
 ### Key Entities
 
-- **Administrator**: A user with authenticated admin access to the tour platform; includes a username or email and password hash.
+- **Administrator**: A user with authenticated admin access to the tour platform; includes username or email, password hash, first name, last name, date of birth, address, contact number, and active status.
 - **Admin Session**: The authenticated security state created after valid login, represented by a JWT stored in an HTTP-only cookie.
 - **Login Page**: The public entry point for admin access that accepts credentials and triggers server-side verification.
 - **Dashboard**: The protected admin landing area containing overview content, profile information, and navigation.
@@ -126,6 +135,8 @@ The dashboard should prepare for future administrative functionality without imp
 - **SC-007**: At least one automated authentication test and one protected-route test pass for the admin workflow under Vitest.
 - **SC-008**: Passwords are never stored or transmitted in plaintext and are verified through bcrypt.
 - **SC-009**: The admin dashboard remains limited to admin-only access and contains no public registration flow.
+- **SC-010**: JWT admin session tokens expire after 8 hours, requiring re-authentication once expired.
+- **SC-011**: The admin login API responds within 2 seconds for valid and invalid credential attempts.
 
 ## Assumptions
 
@@ -136,3 +147,4 @@ The dashboard should prepare for future administrative functionality without imp
 - The project continues to use React + Vite, Tailwind CSS, Express.js, MongoDB, Mongoose, and Vitest as its approved technology stack.
 - Protected routes redirect unauthenticated users to the login page instead of rendering the admin UI.
 - The admin dashboard includes placeholder navigation to support future management features without requiring those features in this release.
+- Failed login attempts are not rate-limited (unlimited retry attempts allowed); this is an explicit design decision documented in the Clarifications section.

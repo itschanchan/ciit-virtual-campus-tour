@@ -18,10 +18,10 @@
 
 **Purpose**: Confirm the current stack, dependency gate, and test baseline before auth changes
 
-- [ ] T001 [P] Review `apps/backend/package.json`, `apps/frontend/package.json`, and `docs/tech_stack.md` to confirm the approved stack and identify the required dependency approval for `bcrypt`
-- [ ] T002 [P] Confirm the current backend and frontend Vitest suites are runnable and note the expected failing tests before implementing auth changes
-- [ ] T003 [P] Update `docs/tech_stack.md` to record the `bcrypt` dependency approval and the password-hashing requirement for the admin feature
-- [ ] T004 [P] Add the `bcrypt` dependency to `apps/backend/package.json` only after the approval record is in place, and confirm the backend install is complete
+- [X] T001 [P] Review `apps/backend/package.json`, `apps/frontend/package.json`, and `docs/tech_stack.md` to confirm the approved stack and identify the required dependency approval for `bcrypt`
+- [X] T002 [P] Confirm the current backend and frontend Vitest suites are runnable and note the expected failing tests before implementing auth changes
+- [X] T003 [P] Update `docs/tech_stack.md` to record the `bcrypt` dependency approval and the password-hashing requirement for the admin feature
+- [X] T004 [P] Add the `bcrypt` dependency to `apps/backend/package.json` only after the approval record is in place, and confirm the backend install is complete
 
 ---
 
@@ -31,13 +31,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 [P] Create `apps/backend/config/env.js` to validate required environment variables for MongoDB, JWT secret, and cookie configuration
-- [ ] T006 [P] Create `apps/backend/utils/auth.js` with JWT creation, verification, and HTTP-only cookie helpers used by login and route protection
-- [ ] T007 [P] Create `apps/backend/models/Admin.js` with the admin schema, unique username/email rules, and secure password storage fields
-- [ ] T008 Create `apps/backend/services/adminAuthService.js` to verify credentials, issue JWTs, validate admin sessions, and centralize auth logic
-- [ ] T009 Create `apps/backend/controllers/adminAuthController.js` to handle login, logout, and session lookup HTTP responses
-- [ ] T010 Create `apps/backend/routes/adminAuthRoutes.js` and register the routes in `apps/backend/app.js` for login, logout, and session-check endpoints
-- [ ] T011 Create backend auth middleware in `apps/backend/utils/auth.js` or a dedicated guard to reject unauthenticated requests on protected admin routes
+- [X] T005 [P] Add startup configuration validation inline in `apps/backend/index.js` for MongoDB URI, JWT secret, and cookie settings
+- [X] T006 [P] Update `apps/backend/utils/auth.js` with JWT creation, verification, and HTTP-only cookie helpers used by login and route protection
+- [X] T007 [P] Create `apps/backend/models/Admins.js` with the admin schema, unique username/email rules, and secure password storage fields
+- [X] T008 Create `apps/backend/services/AuthService.js` to verify credentials, issue JWTs, validate admin sessions, and centralize auth logic
+- [X] T009 Create `apps/backend/controllers/AdminController.js` to handle login, logout, and session lookup HTTP responses
+- [X] T010 Create `apps/backend/routes/AdminRoutes.js` and register the routes in `apps/backend/index.js` for login, logout, and session-check endpoints
+- [X] T011 Create backend auth middleware in `apps/backend/utils/auth.js` or a dedicated guard to reject unauthenticated requests on protected admin routes
 
 **Checkpoint**: The auth foundation is ready; login and protected-route flows can now proceed in parallel with frontend work.
 
@@ -53,20 +53,20 @@
 
 > NOTE: Write these tests FIRST and confirm they fail before implementing.
 
-- [ ] T012 [P] [US1] Add failing backend contract tests in `apps/backend/tests/adminAuth.test.js` covering valid login, invalid credentials, missing username/password, and expired-token rejection
-- [ ] T013 [P] [US1] Add failing frontend test in `apps/frontend/tests/AdminLoginPage.test.jsx` covering successful login redirect, invalid login feedback, and redirect-for-authenticated-admin behavior
+- [X] T012 [P] [US1] Add failing backend contract tests in `apps/backend/tests/adminAuth.test.js` covering valid login, invalid credentials, missing username/password, and expired-token rejection
+- [X] T013 [P] [US1] Add failing frontend test in `apps/frontend/tests/AdminLoginPage.test.jsx` covering successful login redirect, invalid login feedback, and redirect-for-authenticated-admin behavior
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Implement `apps/backend/models/Admin.js` password verification behavior and credential lookup rules for admin accounts
-- [ ] T015 [US1] Implement `apps/backend/services/adminAuthService.js` login and session validation logic, including bcrypt comparison and JWT generation
-- [ ] T016 [US1] Implement `apps/backend/controllers/adminAuthController.js` login, logout, and session endpoints matching the API contract in `specs/017-admin-auth-dashboard/contracts/admin-auth-api.md`
-- [ ] T017 [US1] Implement `apps/backend/routes/adminAuthRoutes.js` and wire it into `apps/backend/app.js` with the proper auth middleware and cookie settings
-- [ ] T018 [US1] Create `apps/frontend/src/components/AdminLoginForm.jsx` with username/email and password fields, submit validation, and login error messaging
-- [ ] T019 [US1] Create `apps/frontend/src/pages/AdminLoginPage.jsx` and route it into the app so public admin login screens appear without exposing other app content
-- [ ] T020 [US1] Create `apps/frontend/src/lib/adminApi.js` to call `/api/admin/login`, `/api/admin/logout`, and `/api/admin/session`
-- [ ] T021 [US1] Add frontend auth state handling in `apps/frontend/src/context/AuthContext.jsx` and ensure authenticated admins are redirected away from the login page
-- [ ] T022 [US1] Run the Story 1 backend and frontend tests and fix all failures before moving to the next story
+- [X] T014 [US1] Implement `apps/backend/models/Admins.js` password verification behavior and credential lookup rules for admin accounts
+- [X] T015 [US1] Implement `apps/backend/services/AuthService.js` login and session validation logic, including bcrypt comparison and JWT generation
+- [X] T016 [US1] Implement `apps/backend/controllers/AdminController.js` login, logout, and session endpoints matching the API contract in `specs/017-admin-auth-dashboard/contracts/admin-auth-api.md`
+- [X] T017 [US1] Implement `apps/backend/routes/AdminRoutes.js` and wire it into `apps/backend/index.js` with the proper auth middleware and cookie settings
+- [X] T018 [US1] Create `apps/frontend/src/components/AdminLoginForm.jsx` with username/email and password fields, submit validation, and login error messaging
+- [X] T019 [US1] Create `apps/frontend/src/pages/AdminLoginPage.jsx` and route it into the app so public admin login screens appear without exposing other app content
+- [X] T020 [US1] Create `apps/frontend/src/lib/adminApi.js` to call `/api/admins/login`, `/api/admins/logout`, and `/api/admins/session`
+- [X] T021 [US1] Add frontend auth state handling in `apps/frontend/src/context/AuthContext.jsx` and ensure authenticated admins are redirected away from the login page
+- [X] T022 [US1] Run the Story 1 backend and frontend tests and fix all failures before moving to the next story
 
 **Checkpoint**: The admin login flow works independently and is ready for protected dashboard access.
 
@@ -80,18 +80,18 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T023 [P] [US2] Add failing frontend test in `apps/frontend/tests/AuthGuard.test.jsx` covering anonymous redirect and authenticated access to the dashboard
-- [ ] T024 [P] [US2] Add failing dashboard test in `apps/frontend/tests/AdminDashboardPage.test.jsx` covering overview, profile section, sidebar navigation, and logout flow
+- [X] T023 [P] [US2] Add failing frontend test in `apps/frontend/tests/AuthGuard.test.jsx` covering anonymous redirect and authenticated access to the dashboard
+- [X] T024 [P] [US2] Add failing dashboard test in `apps/frontend/tests/AdminDashboardPage.test.jsx` covering overview, profile section, sidebar navigation, and logout flow
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Create `apps/frontend/src/components/ProtectedRoute.jsx` to gate dashboard access and redirect unauthenticated users to the login page
-- [ ] T026 [US2] Create `apps/frontend/src/components/AdminSidebar.jsx` with a responsive sidebar and a Gallery Manager placeholder navigation item
-- [ ] T027 [US2] Create `apps/frontend/src/components/AdminLayout.jsx` to render the page shell with sidebar and content area consistent with the admin experience
-- [ ] T028 [US2] Create `apps/frontend/src/pages/AdminDashboardPage.jsx` with a dashboard overview, administrator profile section, and the protected layout wrapper
-- [ ] T029 [US2] Update `apps/frontend/src/App.jsx` to route the public login page and protected dashboard route based on auth state
-- [ ] T030 [US2] Ensure logout clears the JWT cookie and returns the user to the login page through the same auth context mechanism
-- [ ] T031 [US2] Run the Story 2 tests and fix all failures until the dashboard route behavior is stable
+- [X] T025 [US2] Create `apps/frontend/src/components/ProtectedRoute.jsx` to gate dashboard access and redirect unauthenticated users to the login page
+- [X] T026 [US2] Create `apps/frontend/src/components/AdminSidebar.jsx` with a responsive sidebar and a Gallery Manager placeholder navigation item
+- [X] T027 [US2] Create `apps/frontend/src/components/AdminLayout.jsx` to render the page shell with sidebar and content area consistent with the admin experience
+- [X] T028 [US2] Create `apps/frontend/src/pages/AdminDashboardPage.jsx` with a dashboard overview, administrator profile section, and the protected layout wrapper
+- [X] T029 [US2] Update `apps/frontend/src/App.jsx` to route the public login page and protected dashboard route based on auth state
+- [X] T030 [US2] Ensure logout clears the JWT cookie and returns the user to the login page through the same auth context mechanism
+- [X] T031 [US2] Run the Story 2 tests and fix all failures until the dashboard route behavior is stable
 
 **Checkpoint**: The dashboard is accessible only to authenticated administrators and behaves correctly on desktop and mobile widths.
 
@@ -101,13 +101,16 @@
 
 **Purpose**: Final validation, responsive checks, and quality gates for the release
 
-- [ ] T032 [P] Run `npm --prefix apps/backend run test` and fix all failing auth tests in `apps/backend/tests/adminAuth.test.js`
-- [ ] T033 [P] Run `npm --prefix apps/frontend run test` and fix all failing login/protected-route/dashboard tests in `apps/frontend/tests/`
-- [ ] T034 [P] Run `npm --prefix apps/frontend run lint` and resolve any ESLint or formatting issues in the frontend source
-- [ ] T035 [P] Run `npm --prefix apps/frontend run build` and confirm the admin login and dashboard shell are production-safe
-- [ ] T036 [P] Execute the manual validation scenarios in `specs/017-admin-auth-dashboard/quickstart.md` at desktop and mobile widths, checking form validation, redirect behavior, logout, and responsive layout
-- [ ] T037 [P] Verify no secrets or credentials were committed and that the implementation remains inside the approved stack and protected-scope boundaries
-- [ ] T038 [P] Review the final admin auth flow for accessible keyboard use, visible focus states, and no public registration path
+- [X] T032 [P] Run `npm --prefix apps/backend run test` and fix all failing auth tests in `apps/backend/tests/adminAuth.test.js`
+- [X] T033 [P] Run `npm --prefix apps/frontend run test` and fix all failing login/protected-route/dashboard tests in `apps/frontend/tests/`
+- [X] T034 [P] Run `npm --prefix apps/frontend run lint` and resolve any ESLint or formatting issues in the frontend source
+- [X] T035 [P] Run `npm --prefix apps/frontend run build` and confirm the admin login and dashboard shell are production-safe
+- [X] T036 [P] Execute the manual validation scenarios in `specs/017-admin-auth-dashboard/quickstart.md` at desktop and mobile widths, checking form validation, redirect behavior, logout, and responsive layout
+- [X] T037 [P] Verify no secrets or credentials were committed and that the implementation remains inside the approved stack and protected-scope boundaries
+- [X] T038 [P] Review the final admin auth flow for accessible keyboard use, visible focus states, and no public registration path
+- [X] T039 [P] Add regression test asserting no public admin registration route exists (covers FR-009)
+- [X] T040 [P] Add test for session persistence across tab refresh and new-tab re-auth requirement (covers FR-025)
+- [X] T041 [P] Fix existing broken test suites: repair imports in `adminProfile.test.js` and `AuthService.test.js`, and restore 0-test suites `Auth.test.js` and `startup.test.js`
 
 ---
 

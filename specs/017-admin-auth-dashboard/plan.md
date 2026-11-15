@@ -35,13 +35,13 @@ Add a secure administrator authentication flow for the CIIT Virtual Campus Tour 
 | Principle / Rule | Requirement | Status | Evidence |
 | :--- | :--- | :--- | :--- |
 | I. MERN Stack Alignment | Existing stack remains Express, MongoDB/Mongoose, React/Vite, JavaScript ES modules, Vitest | PASS | Feature remains within the approved stack and does not introduce a different framework or database |
-| I. MERN Stack Alignment | New dependencies require approval and documentation | CONDITIONAL PASS | `bcrypt` is required for password verification and is not in the current approved runtime list; approval + `docs/tech_stack.md` update are required before installation |
+| I. MERN Stack Alignment | New dependencies require approval and documentation | PASS | `bcrypt` is already declared in `apps/backend/package.json` and recorded in `docs/tech_stack.md`; no new dependency installation needed |
 | II. MVC Separation and Application Boundaries | Backend owns auth logic and DB access; frontend owns UI | PASS | Auth logic is placed in backend routes/services/models; frontend only renders login/dashboard UI and checks session state |
 | III. Test-First Quality Gate | Backend and frontend interaction behaviors must have tests; failing-first workflow | PASS | Backend login/auth and protected-route tests, plus frontend login/dashboard tests, are required before implementation is accepted |
 | IV. Security, Secrets, and Configuration Discipline | No secrets in repo; JWT and cookies handled securely | PASS | Auth uses environment variables, secure cookie options, JWT verification, and no plain-text credential storage |
 | V. Responsive, Accessible Immersive Experience | Desktop + mobile support, keyboard access, visible focus | PASS | Dashboard shell and login form are responsive with accessibility checks and keyboard-operable controls |
 | Development Workflow & Quality Gates | Spec Kit sequence and quality gates | PASS | The spec is in place and this plan follows the required sequence; lint/test/build verification remains mandatory |
-| Dependency governance | `cookie-parser` and `bcrypt` must be declared before auth features ship | PASS WITH REVIEW | `cookie-parser` is already part of the constitution’s approved dependencies; `bcrypt` needs approval before install and use |
+| Dependency governance | `cookie-parser` and `bcrypt` must be declared before auth features ship | PASS | `cookie-parser` and `bcrypt` are both already declared in `apps/backend/package.json`; `bcrypt` approval recorded in `docs/tech_stack.md` |
 
 No direct constitution violations are identified, but the feature introduces a dependency approval gate for `bcrypt` before implementation can proceed.
 
@@ -65,21 +65,23 @@ specs/017-admin-auth-dashboard/
 ```text
 apps/backend/
 ├── config/
-│   └── env.js                     # Validate JWT and MongoDB configuration
+│   └── db.js                      # MongoDB connection (existing)
 ├── controllers/
-│   └── adminAuthController.js     # Login, logout, and session verification logic
+│   └── AdminController.js         # Login, logout, and session verification logic (existing)
 ├── models/
-│   └── Admin.js                   # Admin account schema and password verification
+│   └── Admins.js                  # Admin account schema and password verification (existing)
+├── middleware/
+│   ├── verifyToken.js             # JWT verification middleware (existing)
+│   └── authorize.js               # Role-based authorization middleware (existing)
 ├── routes/
-│   └── adminAuthRoutes.js         # POST /login, POST /logout, GET /me or /session
+│   └── AdminRoutes.js             # POST /api/admins/login, POST /api/admins/logout, GET /api/admins/session (existing)
 ├── services/
-│   └── adminAuthService.js        # Token issuance and credential verification
+│   └── AuthService.js             # Token issuance and credential verification (existing)
 ├── utils/
-│   └── auth.js                   # JWT helpers, secure cookie helpers
-├── tests/
-│   └── adminAuth.test.js         # Login, invalid credentials, protected routes
-├── app.js                       # Register auth routes and middleware
-└── index.js                     # Bootstraps server
+│   └── auth.js                   # JWT helpers, secure cookie helpers (existing)
+├── index.js                     # Bootstraps server; inline config validation and route registration (existing)
+└── tests/
+    ├── AdminAuth.test.js          # Login, invalid credentials, protected routes (to be created)
 
 apps/frontend/
 ├── src/

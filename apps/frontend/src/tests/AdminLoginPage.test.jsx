@@ -33,7 +33,7 @@ describe('Admin login page', () => {
       }),
     }))
 
-    global.fetch = fetchMock
+    globalThis.fetch = fetchMock
 
     render(
       <AuthProvider>
@@ -51,7 +51,7 @@ describe('Admin login page', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/admin/login',
+        '/api/admins/login',
         expect.objectContaining({
           method: 'POST',
           credentials: 'include',
@@ -68,7 +68,7 @@ describe('Admin login page', () => {
       json: async () => ({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid credentials' } }),
     }))
 
-    global.fetch = fetchMock
+    globalThis.fetch = fetchMock
 
     render(
       <AuthProvider>
@@ -124,7 +124,7 @@ describe('Admin login page', () => {
       expect(screen.getByText('Logged in as admin')).toBeInTheDocument()
     })
 
-    expect(globalThis.fetch).toHaveBeenCalledWith('/api/admin/session', {
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/admins/session', {
       credentials: 'include',
     })
   })

@@ -10,7 +10,7 @@
 
 ## Key Decisions
 - **Backend auth flow**: The backend owns all credential checks, JWT issuance, and protected-route enforcement.
-- **Password hashing**: Password verification uses `bcrypt.compare()` against a stored bcrypt hash. `bcrypt` is a required runtime dependency and needs maintainer approval before installation.
+- **Password hashing**: Password verification uses `bcrypt.compare()` against a stored bcrypt hash. `bcrypt` is already declared in `apps/backend/package.json` and recorded in `docs/tech_stack.md`; no new installation needed.
 - **Cookie configuration**: The JWT is stored in an HTTP-only, secure session cookie using `cookie-parser` and explicit cookie options (`httpOnly`, `sameSite`, `secure` in production).
 - **Frontend protection**: The frontend checks auth state before rendering admin-only screens and redirects unauthenticated users to the login page.
 - **Responsive shell**: The dashboard uses the existing design system and mobile-first Tailwind utilities so desktop and mobile layouts stay consistent.
