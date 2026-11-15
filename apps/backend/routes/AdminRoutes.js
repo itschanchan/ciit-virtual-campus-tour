@@ -1,14 +1,11 @@
 import { Router } from 'express'
 // import verifyToken from '../middleware/verifyToken.js'
 // import { requireRole } from '../middleware/authorize.js'
-import AdminController from '../controllers/AdminController.js'
+import adminController from '../controllers/AdminController.js'
 
 const router = Router()
 
-// Public auth endpoints
-router.post('/login', adminController.login)
-router.post('/logout', adminController.logout)
-
+/*
     AdminRoute.js - serves as the map for all Admin-related API endpoints.
     It defines the routes and associates them with the corresponding controller functions in AdminController.js.
     The middleman between the View and Controller.
@@ -20,11 +17,11 @@ router.post('/logout', adminController.logout)
     - PATCH /admins/:id/activate - Activate a Admin account
 */
 
-router.get('/me', AdminController.getMyProfile)
-router.get('/:id', AdminController.getAdminDetails)
-router.post('/', AdminController.createAdmin)
-router.put('/:id', AdminController.updateAdmin)
-router.delete('/:id', AdminController.deleteAdmin)
-router.patch('/:id/activate', AdminController.changePassword)
+router.get('/me', adminController.getMyProfile)
+router.get('/:id', adminController.getAdminDetails)
+router.post('/', adminController.createAdmin)
+router.put('/:id', adminController.updateAdmin)
+router.delete('/:id', adminController.deleteAdmin)
+router.patch('/:id/activate', adminController.changePassword)
 
 export default router
