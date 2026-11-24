@@ -7,6 +7,7 @@ import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from '@mui/icons-material/Description';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { isCompactViewport } from "../lib/viewport";
+import NarrationTranscript from "./NarrationTranscript";
 
 const STATUS_LABELS = {
   idle: "Narration ready.",
@@ -91,6 +92,8 @@ export default function FloatingMenu({
   const activeImage = sortedImages[activeIndex] ?? null;
   const hasMultipleImages = imageCount > 1;
 
+  // A new recording replaces the previous one from the beginning and closes
+  // the transcript so it can never show another recording's text.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) {
@@ -100,6 +103,29 @@ export default function FloatingMenu({
     audio.currentTime = 0;
     setTranscriptOpen(false);
   }, [narration?.audioSrc]);
+
+  // Apply the requested status to the single audio element. The play click
+  // also calls play() directly so browsers keep the user activation.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !narration?.audioSrc) {
+      return;
+    }
+
+    if (["paused", "ended", "error"].includes(status)) {
+      audio.pause();
+      return;
+    }
+
+    if (["playing", "loading"].includes(status)) {
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          onStatusChange?.("blocked");
+        });
+      }
+    }
+  }, [status, narration?.audioSrc, onStatusChange]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -296,7 +322,8 @@ export default function FloatingMenu({
   };
 
   const playing = status === "playing";
-  const audioError = status === "error" || status === "blocked";
+  const unavailable = status === "error";
+  const blocked = status === "blocked";
   const buttonLabel = playing
     ? "Pause narration"
     : status === "paused"
@@ -305,11 +332,10 @@ export default function FloatingMenu({
         ? "Replay narration"
         : "Play narration";
 
-  // Hide the floating menu (gallery + narration) when the sidebar is open on a
-  // compact mobile viewport so the sidebar's tinted background is the sole focus.
-  if (sidebarOpen && isCompactViewport()) {
-    return null;
-  }
+  // Hide the visible menu (gallery + narration) when the sidebar is open on a
+  // compact mobile viewport. The audio element stays mounted above this flag
+  // so playback survives opening and closing the sidebar.
+  const hidePanel = sidebarOpen && isCompactViewport();
 
   function showPreviousImage() {
     setCurrentIndex((index) => (index - 1 + imageCount) % imageCount);
@@ -321,6 +347,21 @@ export default function FloatingMenu({
 
   return (
     <>
+      {/* Single hidden audio element. Always mounted, even when the compact
+          sidebar hides the visible panel, so narration keeps playing. */}
+      <audio
+        ref={audioRef}
+        src={narration?.audioSrc ?? undefined}
+        preload="metadata"
+        className="hidden"
+        aria-hidden="true"
+        onPlay={() => onStatusChange?.("playing")}
+        onEnded={() => onStatusChange?.("ended")}
+        onError={() => onStatusChange?.("error")}
+      />
+
+      {!hidePanel && (
+        <>
       {/* Room gallery modal (consolidated from RoomGallery). Always mounted so
           focus management and aria-hidden can toggle cleanly. */}
       <div
@@ -526,7 +567,7 @@ export default function FloatingMenu({
           {/* Play/Pause Button */}
           <button
             type="button"
-            className={`bg-accent text-accent-ink hover:bg-accent-hover focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-transparent px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none ${audioError ? "pointer-events-none opacity-50" : ""}`}
+            className={`bg-accent text-accent-ink hover:bg-accent-hover focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full border border-transparent px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none ${unavailable ? "pointer-events-none opacity-50" : ""}`}
             onClick={handlePlayPause}
             onKeyDown={(keyEvent) => {
               if (keyEvent.key === "p") {
@@ -534,8 +575,8 @@ export default function FloatingMenu({
                 handlePlayPause();
               }
             }}
-            disabled={audioError}
-            aria-label={audioError ? "Narration unavailable" : buttonLabel}
+            disabled={unavailable}
+            aria-label={unavailable ? "Narration unavailable" : buttonLabel}
           >
             {playing ? (
               <PauseIcon fontSize="small" />
@@ -570,6 +611,7 @@ export default function FloatingMenu({
               type="button"
               className="bg-surface-soft text-ink hover:text-accent focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
               onClick={() => setTranscriptOpen((current) => !current)}
+              aria-label={transcriptOpen ? "Hide transcript" : "Show transcript"}
               aria-expanded={transcriptOpen}
               aria-controls="floating-menu-transcript"
             >
@@ -606,13 +648,13 @@ export default function FloatingMenu({
           {STATUS_LABELS[status] ?? STATUS_LABELS.idle}
         </p>
 
-        {audioError && (
+        {blocked && (
           <p
             className="rounded-mark border-accent bg-accent-notice text-selected-ink mt-3 mb-0 border-l-[3px] px-3 py-[0.6rem] text-[0.86rem]"
             role="status"
           >
-            Playback was blocked by your browser. Open the transcript to read
-            the narration.
+            Playback was blocked by your browser. Press play to start the
+            narration, or open the transcript to read it.
           </p>
         )}
 
@@ -627,15 +669,18 @@ export default function FloatingMenu({
         )}
 
         {narration && transcriptOpen && (
-          <div className="mt-[0.8rem] max-h-44 overflow-y-auto pt-[0.8rem]">
+          <div
+            id="floating-menu-transcript"
+            className="mt-[0.8rem] max-h-44 overflow-y-auto pt-[0.8rem]"
+          >
             <h3 className="mb-[0.4rem] text-[0.95rem]">Transcript</h3>
-            <p className="text-muted mb-0 text-[0.9rem] leading-[1.55]">
-              {narration.transcript}
-            </p>
+            <NarrationTranscript src={narration.transcriptSrc} />
           </div>
         )}
 
       </section>
+        </>
+      )}
     </>
   );
 }

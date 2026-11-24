@@ -4,9 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import FloatingMenu from "../components/FloatingMenu"
 
 const narration = {
-  audioSrc: "/panoramas/placeholder/narration.wav",
-  transcript: "Welcome to the CIIT Virtual Campus Tour.",
-  durationSeconds: 2,
+  audioSrc: "/voice/CIIT_Glitch_Virtual_Campus_Recording_3.mp3",
+  transcriptSrc: "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_3.md",
 }
 
 const defaultProps = {
@@ -43,6 +42,8 @@ describe("FloatingMenu", () => {
 
   afterEach(() => {
     delete window.matchMedia
+    delete globalThis.fetch
+    vi.restoreAllMocks()
   })
 
   it("renders play/pause and mute/unmute controls", () => {
@@ -157,14 +158,167 @@ describe("FloatingMenu", () => {
     )
   })
 
-  it("renders transcript when opened and narration present", () => {
+  describe("Narration audio element", () => {
+    const narrationWithSrc = {
+      ...defaultProps.narration,
+      audioSrc: "/voice/CIIT_Glitch_Virtual_Campus_Recording_3.mp3",
+      transcriptSrc: "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_3.md",
+    }
+
+    it("mounts a hidden audio element with the narration source", () => {
+      render(<FloatingMenu {...defaultProps} narration={narrationWithSrc} />)
+
+      const audio = document.querySelector("audio")
+      expect(audio).toBeInTheDocument()
+      expect(audio).toHaveAttribute("src", narrationWithSrc.audioSrc)
+      expect(audio).toHaveAttribute("preload", "metadata")
+      expect(audio).toHaveAttribute("aria-hidden", "true")
+    })
+
+    it("calls onPlay and plays the audio when clicked while idle", () => {
+      const playSpy = vi.spyOn(HTMLMediaElement.prototype, "play")
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="idle"
+        />,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Play narration" }))
+      expect(defaultProps.onPlay).toHaveBeenCalledTimes(1)
+      expect(playSpy).toHaveBeenCalled()
+    })
+
+    it("calls onPause and pauses the audio when clicked while playing", () => {
+      const pauseSpy = vi.spyOn(HTMLMediaElement.prototype, "pause")
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="playing"
+        />,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Pause narration" }))
+      expect(defaultProps.onPause).toHaveBeenCalledTimes(1)
+      expect(pauseSpy).toHaveBeenCalled()
+    })
+
+    it("shows Replay narration when the status is ended", () => {
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="ended"
+        />,
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Replay narration" }),
+      ).toBeInTheDocument()
+    })
+
+    it("resets to position 0 and plays when Replay narration is clicked", () => {
+      const playSpy = vi.spyOn(HTMLMediaElement.prototype, "play")
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="ended"
+        />,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Replay narration" }))
+      expect(defaultProps.onPlay).toHaveBeenCalledTimes(1)
+      expect(playSpy).toHaveBeenCalled()
+    })
+
+    it("keeps the play control enabled when blocked", () => {
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="blocked"
+        />,
+      )
+
+      const playButton = screen.getByRole("button", { name: "Play narration" })
+      expect(playButton).not.toBeDisabled()
+    })
+
+    it("shows Narration unavailable and disables the play control on error", () => {
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="error"
+        />,
+      )
+
+      const playButton = screen.getByRole("button", {
+        name: "Narration unavailable",
+      })
+      expect(playButton).toBeDisabled()
+    })
+
+    it("reports blocked when the play promise rejects", async () => {
+      vi
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockRejectedValueOnce(new Error("Blocked"))
+      const onStatusChange = vi.fn()
+      render(
+        <FloatingMenu
+          {...defaultProps}
+          narration={narrationWithSrc}
+          status="idle"
+          onStatusChange={onStatusChange}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Play narration" }))
+      await vi.waitFor(() => expect(onStatusChange).toHaveBeenCalledWith("blocked"))
+    })
+  })
+
+  it("renders transcript when opened and narration present", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => "Welcome to the CIIT Virtual Campus Tour.",
+    })
+
     render(<FloatingMenu {...defaultProps} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Show transcript" }))
-    expect(screen.getByText(narration.transcript)).toBeInTheDocument()
+
+    await waitFor(() =>
+      expect(
+        screen.getByText("Welcome to the CIIT Virtual Campus Tour."),
+      ).toBeInTheDocument(),
+    )
     expect(screen.getByRole("button", { name: "Hide transcript" })).toHaveAttribute(
       "aria-expanded",
       "true",
+    )
+  })
+
+  it("shows the transcript fallback when content is missing", async () => {
+    render(
+      <FloatingMenu
+        {...defaultProps}
+        narration={{
+          ...defaultProps.narration,
+          transcriptSrc: "",
+        }}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Show transcript" }))
+
+    await waitFor(() =>
+      expect(
+        screen.getByText("Transcript not available yet."),
+      ).toBeInTheDocument(),
     )
   })
 

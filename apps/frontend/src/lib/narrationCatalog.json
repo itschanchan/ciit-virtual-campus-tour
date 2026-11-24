@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "floorDefaults": {
+    "LG": "voice-1",
+    "UG": "voice-3",
+    "4F": "voice-4",
+    "5F": "voice-5",
+    "5M": "voice-6",
+    "6F": "voice-7",
+    "7F": "voice-8",
+    "8F": "voice-9",
+    "9F": "voice-10"
+  },
+  "entries": [
+    {
+      "id": "voice-1",
+      "number": 1,
+      "floor": "LG",
+      "sceneId": "0-lg---1",
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_1.mp3",
+      "transcriptId": "transcript-1",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_1.md"
+    },
+    {
+      "id": "voice-2",
+      "number": 2,
+      "floor": "LG",
+      "sceneId": "1-lg---2",
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_2.mp3",
+      "transcriptId": "transcript-2",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_2.md"
+    },
+    {
+      "id": "voice-3",
+      "number": 3,
+      "floor": "UG",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_3.mp3",
+      "transcriptId": "transcript-3",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_3.md"
+    },
+    {
+      "id": "voice-4",
+      "number": 4,
+      "floor": "4F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_4.mp3",
+      "transcriptId": "transcript-4",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_4.md"
+    },
+    {
+      "id": "voice-5",
+      "number": 5,
+      "floor": "5F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_5.mp3",
+      "transcriptId": "transcript-5",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_5.md"
+    },
+    {
+      "id": "voice-6",
+      "number": 6,
+      "floor": "5M",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_6.mp3",
+      "transcriptId": "transcript-6",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_6.md"
+    },
+    {
+      "id": "voice-7",
+      "number": 7,
+      "floor": "6F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_7.mp3",
+      "transcriptId": "transcript-7",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_7.md"
+    },
+    {
+      "id": "voice-8",
+      "number": 8,
+      "floor": "7F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_8.mp3",
+      "transcriptId": "transcript-8",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_8.md"
+    },
+    {
+      "id": "voice-9",
+      "number": 9,
+      "floor": "8F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_9.mp3",
+      "transcriptId": "transcript-9",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_9.md"
+    },
+    {
+      "id": "voice-10",
+      "number": 10,
+      "floor": "9F",
+      "sceneId": null,
+      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_10.mp3",
+      "transcriptId": "transcript-10",
+      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_10.md"
+    }
+  ]
+}

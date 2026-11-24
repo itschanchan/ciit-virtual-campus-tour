@@ -1,21 +1,25 @@
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useTour } from "../context/useTour";
 import {
   getFloorForSceneId,
   getFloorIndex,
 } from "../lib/floorSceneMap";
-import { isCompactViewport } from "../lib/viewport";
 import PanoramaViewer from "../components/PanoramaViewer";
 
-export default function Panorama({ sidebarOpen = false }) {
+export default function Panorama() {
   const {
     contentStatus,
     currentLocation,
     locations,
     errorMessage,
     selectLocation,
+    setCurrentSceneId,
     retryContent,
+    activeNarration,
+    narrationStatus,
+    playNarration,
   } = useTour();
+  const [viewerReady, setViewerReady] = useState(false);
 
   useEffect(() => {
     if (!currentLocation) {
@@ -40,9 +44,27 @@ export default function Panorama({ sidebarOpen = false }) {
     }
   }, [currentLocation, locations]);
 
+  // Start the initial narration one second after the viewer is ready.
+  // Later floor changes play immediately through the scene resolution.
+  useEffect(() => {
+    if (!viewerReady || !activeNarration || narrationStatus !== "idle") {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      playNarration();
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [viewerReady, activeNarration, narrationStatus, playNarration]);
+
   // Sync the sidebar's active floor button when the displayed panorama
   // scene changes (Rule 1: Button Sync).
   const handleSceneChange = useCallback((sceneId) => {
+    setCurrentSceneId(sceneId);
+
     const floor = getFloorForSceneId(sceneId);
     if (!floor) {
       return;
@@ -56,7 +78,7 @@ export default function Panorama({ sidebarOpen = false }) {
     if (location && location.id !== currentLocation.id) {
       selectLocation(location.id);
     }
-  }, [locations, selectLocation, currentLocation]);
+  }, [locations, selectLocation, setCurrentSceneId, currentLocation]);
 
   if (contentStatus === "loading") {
     return (
@@ -124,17 +146,10 @@ export default function Panorama({ sidebarOpen = false }) {
           >
             <PanoramaViewer
               location={currentLocation}
+              onReady={() => setViewerReady(true)}
               onSceneChange={handleSceneChange}
             />
           </Suspense>
-
-          {currentLocation && !(
-            sidebarOpen && isCompactViewport()
-          ) && (
-            <>
-
-            </>
-          )}
         </>
       )}
     </>

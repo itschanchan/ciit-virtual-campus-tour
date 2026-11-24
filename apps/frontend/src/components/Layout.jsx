@@ -19,6 +19,7 @@ export default function Layout() {
     setSidebarOpen,
     narrationStatus,
     isMuted,
+    activeNarration,
     playNarration,
     pauseNarration,
     setNarrationStatus,
@@ -60,7 +61,7 @@ export default function Layout() {
 
       {/* FLOATING MENU - narration controls + room gallery at center bottom */}
       <FloatingMenu
-        narration={currentLocation?.narration ?? null}
+        narration={activeNarration}
         status={narrationStatus}
         muted={isMuted}
         onPlay={playNarration}

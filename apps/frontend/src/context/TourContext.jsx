@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { catalogData, getDefaultLocation, getSortedLocations, loadCatalog } from '../lib/catalog'
+import { getFloorForLocation, getFloorForSceneId, getFloorIndex } from '../lib/floorSceneMap'
+import {
+  getDefaultNarrationForFloor,
+  getNarrationById,
+  resolveNarration,
+} from '../lib/narrationCatalog'
+import { readNarrationState, writeNarrationState } from '../lib/narrationStorage'
 import { NARRATION_STATUSES, TourContext } from './tourContextValue'
 
 function getInitialSidebarOpen() {
@@ -10,17 +17,33 @@ function getInitialSidebarOpen() {
   return window.matchMedia('(min-width: 1024px)').matches
 }
 
-function createInitialState() {
+function createInitialState(restoredNarration) {
   return {
     catalog: null,
     currentLocationId: null,
+    currentSceneId: null,
+    activeNarrationId: null,
     contentStatus: 'loading',
     sidebarOpen: getInitialSidebarOpen(),
     galleryOpen: false,
-    narrationStatus: 'idle',
+    narrationStatus: restoredNarration?.isPaused ? 'paused' : 'idle',
     isMuted: false,
     errorMessage: null,
   }
+}
+
+function findLocationForFloor(catalog, floor) {
+  if (!floor) {
+    return null
+  }
+
+  const floorIndex = getFloorIndex(floor)
+
+  if (floorIndex < 0) {
+    return null
+  }
+
+  return catalog.locations.find((location) => location.order === floorIndex) ?? null
 }
 
 function reducer(state, action) {
@@ -30,6 +53,7 @@ function reducer(state, action) {
         ...state,
         catalog: action.catalog,
         currentLocationId: action.currentLocationId,
+        activeNarrationId: action.activeNarrationId,
         contentStatus: 'ready',
         errorMessage: null,
       }
@@ -45,17 +69,42 @@ function reducer(state, action) {
         contentStatus: 'loading',
         errorMessage: null,
       }
+    case 'SET_SCENE': {
+      const floor = getFloorForSceneId(action.sceneId)
+      const nextEntry = resolveNarration(
+        action.sceneId,
+        floor,
+        state.activeNarrationId,
+      )
+      const nextNarrationId = nextEntry?.id ?? null
+
+      return {
+        ...state,
+        currentSceneId: action.sceneId,
+        activeNarrationId: nextNarrationId,
+        narrationStatus: nextNarrationId ? state.narrationStatus : 'idle',
+      }
+    }
     case 'SELECT_LOCATION': {
-      const exists = state.catalog?.locations.some((location) => location.id === action.id)
-      if (!exists) {
+      const location = state.catalog?.locations.find(
+        (candidate) => candidate.id === action.id,
+      )
+      if (!location) {
         return state
       }
+
+      if (action.id === state.currentLocationId) {
+        return { ...state, galleryOpen: false }
+      }
+
+      const entry = getDefaultNarrationForFloor(getFloorForLocation(location))
 
       return {
         ...state,
         currentLocationId: action.id,
+        activeNarrationId: entry?.id ?? null,
+        narrationStatus: entry ? state.narrationStatus : 'idle',
         galleryOpen: false,
-        narrationStatus: 'idle',
       }
     }
     case 'TOGGLE_SIDEBAR':
@@ -98,7 +147,8 @@ function reducer(state, action) {
 }
 
 export function TourProvider({ children, catalogSource = catalogData }) {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
+  const [restoredNarration] = useState(readNarrationState)
+  const [state, dispatch] = useReducer(reducer, restoredNarration, createInitialState)
 
   const loadContent = useCallback(() => {
     dispatch({ type: 'RETRY_CONTENT' })
@@ -111,10 +161,20 @@ export function TourProvider({ children, catalogSource = catalogData }) {
         throw new Error('No default location is available.')
       }
 
+      const restoredLocation = findLocationForFloor(
+        catalog,
+        restoredNarration?.floor,
+      )
+      const currentLocation = restoredLocation ?? defaultLocation
+      const narration = getDefaultNarrationForFloor(
+        getFloorForLocation(currentLocation),
+      )
+
       dispatch({
         type: 'CONTENT_READY',
         catalog,
-        currentLocationId: defaultLocation.id,
+        currentLocationId: currentLocation.id,
+        activeNarrationId: narration?.id ?? null,
       })
     } catch {
       dispatch({
@@ -122,14 +182,31 @@ export function TourProvider({ children, catalogSource = catalogData }) {
         message: 'The tour content could not be loaded. Please try again.',
       })
     }
-  }, [catalogSource])
+  }, [catalogSource, restoredNarration])
 
   useEffect(() => {
     loadContent()
   }, [loadContent])
 
+  useEffect(() => {
+    const entry = getNarrationById(state.activeNarrationId)
+
+    if (!entry) {
+      return
+    }
+
+    writeNarrationState({
+      floor: entry.floor,
+      isPaused: ['paused', 'blocked', 'ended'].includes(state.narrationStatus),
+    })
+  }, [state.activeNarrationId, state.narrationStatus])
+
   const selectLocation = useCallback((id) => {
     dispatch({ type: 'SELECT_LOCATION', id })
+  }, [])
+
+  const setCurrentSceneId = useCallback((sceneId) => {
+    dispatch({ type: 'SET_SCENE', sceneId })
   }, [])
 
   const toggleSidebar = useCallback(() => {
@@ -173,6 +250,11 @@ export function TourProvider({ children, catalogSource = catalogData }) {
     [state.catalog, state.currentLocationId],
   )
 
+  const activeNarration = useMemo(
+    () => getNarrationById(state.activeNarrationId),
+    [state.activeNarrationId],
+  )
+
   const locations = useMemo(
     () => (state.catalog ? getSortedLocations(state.catalog) : []),
     [state.catalog],
@@ -184,7 +266,9 @@ export function TourProvider({ children, catalogSource = catalogData }) {
       catalog: state.catalog ?? { version: '1.0.0', defaultLocationId: '', locations: [] },
       locations,
       currentLocation,
+      activeNarration,
       selectLocation,
+      setCurrentSceneId,
       toggleSidebar,
       setSidebarOpen,
       toggleGallery,
@@ -200,7 +284,9 @@ export function TourProvider({ children, catalogSource = catalogData }) {
       state,
       locations,
       currentLocation,
+      activeNarration,
       selectLocation,
+      setCurrentSceneId,
       toggleSidebar,
       setSidebarOpen,
       toggleGallery,

@@ -105,32 +105,6 @@ function validateGallery(gallery, path, errors) {
   })
 }
 
-function validateNarration(narration, path, errors) {
-  if (narration === undefined) {
-    return
-  }
-
-  if (!narration || typeof narration !== 'object' || Array.isArray(narration)) {
-    errors.push(`${path} must be an object when provided.`)
-    return
-  }
-
-  if (!isNonEmptyString(narration.audioSrc)) {
-    errors.push(`${path}.audioSrc is required.`)
-  }
-
-  if (!isNonEmptyString(narration.transcript)) {
-    errors.push(`${path}.transcript is required.`)
-  }
-
-  if (
-    narration.durationSeconds !== undefined &&
-    (!isNumber(narration.durationSeconds) || narration.durationSeconds <= 0)
-  ) {
-    errors.push(`${path}.durationSeconds must be a positive number when provided.`)
-  }
-}
-
 function validateLocation(location, index, ids, orders, errors) {
   const path = `locations[${index}]`
 
@@ -165,7 +139,6 @@ function validateLocation(location, index, ids, orders, errors) {
 
   validatePanorama(location.panorama, `${path}.panorama`, errors)
   validateGallery(location.gallery, `${path}.gallery`, errors)
-  validateNarration(location.narration, `${path}.narration`, errors)
 }
 
 export function validateCatalog(catalog) {

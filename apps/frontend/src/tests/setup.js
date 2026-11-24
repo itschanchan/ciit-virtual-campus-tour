@@ -1,5 +1,22 @@
 import '@testing-library/jest-dom/vitest'
-import { vi } from 'vitest'
+import { beforeEach, vi } from 'vitest'
+
+// jsdom does not implement media playback. Stub once for every suite so
+// narration components can call play() and pause() without throwing.
+if (typeof HTMLMediaElement !== 'undefined') {
+  HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve())
+  HTMLMediaElement.prototype.pause = vi.fn()
+}
+
+// Each test starts with clean storage so restored narration state cannot
+// leak between suites.
+beforeEach(() => {
+  try {
+    window.localStorage?.clear()
+  } catch {
+    // Storage can be unavailable in restricted test environments.
+  }
+})
 
 if (typeof HTMLDialogElement !== 'undefined') {
   const dialogPrototype = HTMLDialogElement.prototype

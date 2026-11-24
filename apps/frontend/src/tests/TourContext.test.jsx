@@ -27,9 +27,11 @@ function Harness() {
     currentLocation,
     sidebarOpen,
     galleryOpen,
+    activeNarration,
     narrationStatus,
     errorMessage,
     selectLocation,
+    setCurrentSceneId,
     toggleSidebar,
     toggleGallery,
     playNarration,
@@ -43,10 +45,15 @@ function Harness() {
       <p>location:{currentLocation?.name ?? 'none'}</p>
       <p>sidebar:{String(sidebarOpen)}</p>
       <p>gallery:{String(galleryOpen)}</p>
+      <p>activeNarration:{activeNarration?.id ?? 'none'}</p>
       <p>narration:{narrationStatus}</p>
       <p>error:{errorMessage ?? 'none'}</p>
       <button onClick={() => selectLocation('glitch-tower-library')}>Select library</button>
+      <button onClick={() => selectLocation('ug-ground')}>Select UG</button>
       <button onClick={() => selectLocation('missing')}>Select missing</button>
+      <button onClick={() => setCurrentSceneId('1-lg---2')}>LG-2 scene</button>
+      <button onClick={() => setCurrentSceneId('2-lg---3')}>LG-3 scene</button>
+      <button onClick={() => setCurrentSceneId('0-lg---1')}>LG-1 scene</button>
       <button onClick={toggleSidebar}>Toggle sidebar</button>
       <button onClick={toggleGallery}>Toggle gallery</button>
       <button onClick={playNarration}>Play</button>
@@ -141,5 +148,45 @@ describe('TourContext', () => {
     expect(
       screen.getByText('error:The tour content could not be loaded. Please try again.'),
     ).toBeInTheDocument()
+  })
+
+  it('starts with the LG floor default narration voice-1', async () => {
+    await renderTour()
+
+    expect(screen.getByText('activeNarration:voice-1')).toBeInTheDocument()
+  })
+
+  it('switches to voice-2 on the LG-2 scene override', async () => {
+    await renderTour()
+
+    fireEvent.click(screen.getByText('LG-2 scene'))
+
+    expect(screen.getByText('activeNarration:voice-2')).toBeInTheDocument()
+  })
+
+  it('keeps voice-2 playing on same-floor continuity from LG-2 to LG-3', async () => {
+    await renderTour()
+
+    fireEvent.click(screen.getByText('LG-2 scene'))
+    fireEvent.click(screen.getByText('LG-3 scene'))
+
+    expect(screen.getByText('activeNarration:voice-2')).toBeInTheDocument()
+  })
+
+  it('switches back to voice-1 on the explicit LG-1 scene', async () => {
+    await renderTour()
+
+    fireEvent.click(screen.getByText('LG-2 scene'))
+    fireEvent.click(screen.getByText('LG-1 scene'))
+
+    expect(screen.getByText('activeNarration:voice-1')).toBeInTheDocument()
+  })
+
+  it('switches to the floor default voice-3 when selecting UG', async () => {
+    await renderTour()
+
+    fireEvent.click(screen.getByText('Select UG'))
+
+    expect(screen.getByText('activeNarration:voice-3')).toBeInTheDocument()
   })
 })
