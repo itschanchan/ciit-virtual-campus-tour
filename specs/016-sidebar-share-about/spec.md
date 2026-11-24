@@ -17,6 +17,10 @@
 - Q: How should the Share and About dialogs size and scroll on narrow mobile screens? → A: Full-width up to a comfortable desktop maximum (Material `fullWidth` with `maxWidth="sm"`), with scrollable content and the close control kept outside the scroll area.
 - Q: Where should the sidebar close button live when the sidebar body scrolls? → A: Absolutely positioned at the top-left of the non-scrolling sidebar shell, with body padding so content never sits behind it.
 
+### Session 2026-11-24
+
+- Q: Where should dividers be positioned in the About dialog? → A: A single MUI `<Divider sx={{ marginY: 3 }} />` sits after Row 3 (Photography / Voice Over row + Special thanks section) and before the CIIT website link at the bottom of the dialog content.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Share the tour with others (Priority: P1)

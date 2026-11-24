@@ -1,7 +1,6 @@
 export const dialogPaperSx = {
   backgroundColor: "var(--color-surface)",
   color: "var(--color-ink)",
-  border: "1px solid var(--color-line)",
   borderRadius: "var(--radius-panel)",
 };
 
