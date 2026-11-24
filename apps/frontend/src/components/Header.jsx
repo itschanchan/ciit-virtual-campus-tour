@@ -13,7 +13,7 @@ export default function Header({
         {!sidebarOpen && (
           <button
             type="button"
-            className="bg-surface text-ink hover:border-accent hover:text-accent narrow:inline-flex hidden size-10 items-center justify-center gap-1.5 text-xl leading-none transition-colors"
+            className="text-ink hover:border-accent hover:text-accent narrow:inline-flex hidden size-10 items-center justify-center gap-1.5 text-xl leading-none transition-colors narrow:bg-transparent"
             aria-label="Open location menu"
             aria-expanded={sidebarOpen}
             aria-controls="location-sidebar"

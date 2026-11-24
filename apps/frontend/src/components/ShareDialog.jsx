@@ -16,6 +16,8 @@ import ForumIcon from "@mui/icons-material/Forum";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import XIcon from "@mui/icons-material/X";
+// import CheckIcon from '@mui/icons-material/Check';
+
 import {
   DISCORD_URL,
   MESSENGER_URL,
@@ -163,7 +165,7 @@ export default function ShareDialog({ open, onClose }) {
       }}
     >
       <DialogTitle id="share-dialog-title" sx={dialogTitleSx}>
-        <span>Share this tour</span>
+        <span>Share This Tour</span>
         <IconButton
           size="small"
           aria-label="Close share dialog"
@@ -176,9 +178,10 @@ export default function ShareDialog({ open, onClose }) {
 
       <DialogContent data-testid="share-dialog-content" sx={{ paddingTop: 1 }}>
         <p className="text-muted mt-0 mb-3 text-sm">
-          Send the virtual campus tour to a friend, classmate, or community.
+          Send the virtual campus tour to a friend, classmate, or community!
         </p>
 
+        {/* Tour link field */}
         <TextField
           value={tourUrl}
           label="Tour link"
@@ -194,7 +197,7 @@ export default function ShareDialog({ open, onClose }) {
           </Alert>
         )}
 
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {/* <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {DESTINATIONS.map(({ key, label, text, Icon }) => (
             <Button
               key={key}
@@ -207,7 +210,7 @@ export default function ShareDialog({ open, onClose }) {
               {text}
             </Button>
           ))}
-        </div>
+        </div> */}
       </DialogContent>
 
       <DialogActions sx={{ paddingX: 3, paddingBottom: 2 }}>

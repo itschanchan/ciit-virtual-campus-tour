@@ -12,7 +12,7 @@ import AboutDialog from "./AboutDialog";
 import ShareDialog from "./ShareDialog";
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
-const POPOVER_DELAY_MS = 1500;
+const POPOVER_HIDE_DELAY_MS = 2000;
 const ACKNOWLEDGEMENT_MS = 320;
 
 const PAIRED_FLOORS = [["5F", "5M"]];
@@ -391,16 +391,13 @@ export default function Sidebar({
 
     acknowledgeActivation(event.currentTarget);
 
-    if (notice) {
-      setNotice(nextNotice);
-      return;
-    }
-
     clearPendingPopover();
+    setNotice(nextNotice);
+
     popoverTimerRef.current = window.setTimeout(() => {
       popoverTimerRef.current = null;
-      setNotice(nextNotice);
-    }, POPOVER_DELAY_MS);
+      setNotice(null);
+    }, POPOVER_HIDE_DELAY_MS);
   }
 
   function handleCloseNotice() {
@@ -418,7 +415,7 @@ export default function Sidebar({
     <>
       <aside
         id="location-sidebar"
-        className={`border-line bg-surface/86 narrow:bg-surface/86 compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r transition-all duration-300 ease-in-out ${shellState}`}
+        className={`border-line bg-surface/86 shadow-sidebar narrow:bg-surface/86 compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r transition-all duration-300 ease-in-out ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}
@@ -429,7 +426,7 @@ export default function Sidebar({
           {open && (
             <button
               type="button"
-              className="bg-surface/86 text-ink hover:border-accent hover:text-accent narrow:inline-flex absolute top-4 left-4 z-50 hidden size-10 items-center justify-center transition-colors"
+              className="text-ink hover:border-accent hover:text-accent narrow:inline-flex absolute top-4 left-4 z-50 hidden size-10 items-center justify-center transition-colors narrow:bg-transparent"
               aria-label="Close location menu"
               aria-controls="location-sidebar"
               onClick={onClose}
@@ -440,11 +437,11 @@ export default function Sidebar({
 
           <div
             data-testid="sidebar-scroll-body"
-            className="compact:pt-2 narrow:px-4 narrow:pt-16 narrow:pb-4 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 pt-5"
+            className="compact:pt-2 narrow:px-4 narrow:pt-4 narrow:pb-4 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 pt-5"
           >
             <SidebarLogo logoUrl={logoUrl} />
 
-            <div className="mb-4">
+            <div className="mb-5 compact:mb-4">
               <p className="text-accent compact:text-sm narrow:text-xs mb-1.5 text-xs font-extrabold tracking-[0.16em] uppercase">
                 Explore
               </p>
@@ -464,7 +461,7 @@ export default function Sidebar({
               data-testid="sidebar-action-row"
               className="narrow:gap-2 compact:pt-3 mt-auto flex flex-wrap items-center justify-center gap-3 pt-5"
             >
-              <a
+              {/* <a
                 href="https://www.ciit.edu.ph/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -473,7 +470,7 @@ export default function Sidebar({
               >
                 <LanguageIcon fontSize="small" />
                 <span>CIIT Website</span>
-              </a>
+              </a> */}
 
               <button
                 type="button"

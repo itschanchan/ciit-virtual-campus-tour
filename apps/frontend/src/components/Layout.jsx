@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTour } from "../context/useTour";
+import { getFloorForLocation } from "../lib/floorSceneMap";
+import { getFloorGalleryImages } from "../lib/floorGallery";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Panorama from "../pages/Panorama";
@@ -21,7 +23,18 @@ export default function Layout() {
     pauseNarration,
     setNarrationStatus,
     toggleMute,
+    setGalleryOpen,
   } = useTour();
+
+  const currentFloor = getFloorForLocation(currentLocation);
+  const floorGalleryImages = useMemo(
+    () => getFloorGalleryImages(currentFloor, currentLocation?.name),
+    [currentFloor, currentLocation?.name],
+  );
+  const galleryImages =
+    floorGalleryImages.length > 0
+      ? floorGalleryImages
+      : (currentLocation?.gallery ?? []);
 
   const [activeView] = useState("panorama");
 
@@ -45,7 +58,7 @@ export default function Layout() {
         onToggleSidebar={toggleSidebar}
       />
 
-      {/* FLOATING MENU - narration controls at center bottom */}
+      {/* FLOATING MENU - narration controls + room gallery at center bottom */}
       <FloatingMenu
         narration={currentLocation?.narration ?? null}
         status={narrationStatus}
@@ -54,7 +67,12 @@ export default function Layout() {
         onPause={pauseNarration}
         onStatusChange={setNarrationStatus}
         onMuteToggle={toggleMute}
+        images={galleryImages}
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onOpen={() => setGalleryOpen(true)}
         sidebarOpen={sidebarOpen}
+        floorLabel={currentFloor ?? ""}
       />
 
       {/* SIDEBAR */}
