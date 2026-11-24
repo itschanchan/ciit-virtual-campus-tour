@@ -35,11 +35,31 @@ import {
 } from "../lib/dialogStyles";
 
 const DESTINATIONS = [
-  { key: "facebook", label: "Share on Facebook", text: "Facebook", Icon: FacebookIcon },
-  { key: "messenger", label: "Share on Messenger", text: "Messenger", Icon: ChatBubbleIcon },
+  {
+    key: "facebook",
+    label: "Share on Facebook",
+    text: "Facebook",
+    Icon: FacebookIcon,
+  },
+  {
+    key: "messenger",
+    label: "Share on Messenger",
+    text: "Messenger",
+    Icon: ChatBubbleIcon,
+  },
   { key: "x", label: "Share on X", text: "X", Icon: XIcon },
-  { key: "discord", label: "Share on Discord", text: "Discord", Icon: ForumIcon },
-  { key: "whatsapp", label: "Share on WhatsApp", text: "WhatsApp", Icon: WhatsAppIcon },
+  {
+    key: "discord",
+    label: "Share on Discord",
+    text: "Discord",
+    Icon: ForumIcon,
+  },
+  {
+    key: "whatsapp",
+    label: "Share on WhatsApp",
+    text: "WhatsApp",
+    Icon: WhatsAppIcon,
+  },
   { key: "email", label: "Share by email", text: "Email", Icon: EmailIcon },
 ];
 
