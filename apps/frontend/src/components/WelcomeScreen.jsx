@@ -1,7 +1,7 @@
 export default function WelcomeScreen({ onStart }) {
   return (
     <main className="entry-screen welcome-screen" aria-labelledby="welcome-title">
-      <div className="entry-content welcome-content">
+      <div className="entry-content welcome-content px-4 sm:px-6 py-2 sm:py-4">
         <img
           className="welcome-logo"
           src="ciitlogo.png"
@@ -10,7 +10,7 @@ export default function WelcomeScreen({ onStart }) {
         <h1 id="welcome-title">GLITCH TOWER</h1>
         <div className="welcome-rule" />
         <p className="welcome-subtitle">360° VIRTUAL TOUR</p>
-        <button className="entry-button" type="button" onClick={onStart}>
+        <button className="entry-button w-full sm:w-auto" type="button" onClick={onStart}>
           START
         </button>
       </div>

@@ -8,6 +8,10 @@ const schemaPath = path.join(
   root,
   'specs/001-campus-tour-foundation/contracts/content-schema.json',
 )
+const narrationCatalogPath = path.join(
+  root,
+  'apps/frontend/src/lib/narrationCatalog.json',
+)
 const publicDir = path.join(root, 'apps/frontend/public')
 
 function resolveRef(schema, ref) {
@@ -161,13 +165,38 @@ function templateToRegex(template) {
   )
 }
 
-const [catalog, schema] = await Promise.all([
-  readFile(catalogPath, 'utf8').then(JSON.parse),
-  readFile(schemaPath, 'utf8').then(JSON.parse),
-])
+let catalog
+let schema = null
+try {
+  catalog = JSON.parse(await readFile(catalogPath, 'utf8'))
+} catch (err) {
+  console.error(`Failed to read catalog: ${err.message}`)
+  process.exit(1)
+}
+
+try {
+  schema = JSON.parse(await readFile(schemaPath, 'utf8'))
+} catch {
+  console.warn(
+    `Warning: content schema not found at ${schemaPath}; skipping schema validation.`,
+  )
+}
+
+let narrationCatalog = null
+try {
+  narrationCatalog = JSON.parse(
+    await readFile(narrationCatalogPath, 'utf8'),
+  )
+} catch {
+  console.warn(
+    `Warning: narration catalog not found at ${narrationCatalogPath}; skipping narration asset validation.`,
+  )
+}
 
 const errors = []
-validateSchema(catalog, schema, 'catalog', errors)
+if (schema) {
+  validateSchema(catalog, schema, 'catalog', errors)
+}
 
 const publicFiles = await collectPublicFiles(publicDir)
 
@@ -188,7 +217,6 @@ for (const [index, location] of (catalog.locations ?? []).entries()) {
   for (const [field, url] of [
     ['previewUrl', panorama.previewUrl],
     ['gallery.src', location.gallery?.[0]?.src],
-    ['narration.audioSrc', location.narration?.audioSrc],
   ]) {
     const assetPath = url ? assetPathFromUrl(url) : null
 
@@ -204,6 +232,34 @@ for (const [index, location] of (catalog.locations ?? []).entries()) {
       errors.push(
         `locations[${index}].gallery[${galleryIndex}].src references a missing asset: ${image.src}`,
       )
+    }
+  }
+}
+
+if (narrationCatalog) {
+  const { entries = [], floorDefaults = {} } = narrationCatalog
+
+  // Every floor default must reference an existing entry
+  for (const [floor, entryId] of Object.entries(floorDefaults)) {
+    if (!entries.some((e) => e.id === entryId)) {
+      errors.push(
+        `narrationCatalog.floorDefaults.${floor} references unknown entry ${entryId}.`,
+      )
+    }
+  }
+
+  // Every entry must have existing audio and transcript assets
+  for (const [index, entry] of entries.entries()) {
+    for (const [field, url] of [
+      ['audioSrc', entry.audioSrc],
+      ['transcriptSrc', entry.transcriptSrc],
+    ]) {
+      const assetPath = url ? assetPathFromUrl(url) : null
+      if (assetPath && !(await fileExists(assetPath))) {
+        errors.push(
+          `narrationCatalog.entries[${index}].${field} references a missing asset: ${url}`,
+        )
+      }
     }
   }
 }

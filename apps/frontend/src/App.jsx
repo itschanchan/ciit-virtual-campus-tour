@@ -4,6 +4,7 @@ import InstructionsScreen from './components/InstructionsScreen'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import WelcomeScreen from './components/WelcomeScreen'
+import { readFirstVisitState, writeFirstVisitState } from './lib/introduction'
 import { AuthProvider } from './context/AuthContext'
 import { TourProvider } from './context/TourContext'
 import AdminDashboardPage from './pages/AdminDashboardPage'
@@ -15,13 +16,24 @@ function normalizeRoute(pathname) {
 }
 
 function TourExperience() {
-  const [screen, setScreen] = useState('welcome')
+  const initialScreen = readFirstVisitState().hasSeenIntroduction
+    ? 'tour'
+    : 'welcome'
+  const [screen, setScreen] = useState(initialScreen)
+
+  function handleEnterTour() {
+    writeFirstVisitState({
+      hasSeenIntroduction: true,
+      firstVisitTimestamp: new Date().toISOString(),
+    })
+    setScreen('tour')
+  }
 
   return (
     <TourProvider>
       {screen === 'welcome' && <WelcomeScreen onStart={() => setScreen('instructions')} />}
       {screen === 'instructions' && (
-        <InstructionsScreen onContinue={() => setScreen('tour')} />
+        <InstructionsScreen onContinue={handleEnterTour} />
       )}
       {screen === 'tour' && <Layout />}
     </TourProvider>

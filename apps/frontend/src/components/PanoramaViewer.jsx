@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_DATA } from "../lib/data";
-import { getSceneIdForFloor } from "../lib/floorSceneMap";
+import { getFloorForLocation, getSceneIdForFloor } from "../lib/floorSceneMap";
 
 const MISSING_PANORAMA_MESSAGE = "No panorama available yet.";
 
@@ -83,6 +83,9 @@ export default function PanoramaViewer({
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
   const viewerStartedRef = useRef(false);
+  const initialSceneIdRef = useRef(
+    getSceneIdForFloor(getFloorForLocation(location)) ?? getSceneIdForFloor("LG"),
+  );
 
   // spec-004 (FR-001/FR-002): the viewer owns the missing-panorama empty
   // state. No location, no panorama, or no scene data means the alert shows
@@ -140,8 +143,8 @@ export default function PanoramaViewer({
       .then(() => import("../components/Marzipano"))
       .then(() => {
         // Marzipano.jsx initializes on import via window globals.
-        // Set the initial scene to the LG first scene `0-lg---1`.
-        const initialSceneId = getSceneIdForFloor("LG");
+        // Start on the restored floor's first scene, or the LG first scene.
+        const initialSceneId = initialSceneIdRef.current;
         setCurrentSceneId(initialSceneId);
 
         // Give the DOM a frame to render, then trigger initial scene switch.

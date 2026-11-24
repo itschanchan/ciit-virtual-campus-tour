@@ -33,13 +33,13 @@ export default function InstructionsScreen({ onContinue }) {
       onClick={onContinue}
       onKeyDown={handleKeyDown}
     >
-      <div className="entry-content instructions-content">
+      <div className="entry-content instructions-content px-4 sm:px-6 py-2 sm:py-4">
         <h1 id="instructions-title">How to Move Around</h1>
         <p className="instructions-lead">
           Use your mouse and keyboard to explore the area.
         </p>
 
-        <div className="instruction-grid">
+        <div className="instruction-grid grid-cols-1 sm:grid-cols-3">
           {instructions.map((instruction) => (
             <section className="instruction-card" key={instruction.title}>
               <div className="instruction-visual">
@@ -55,7 +55,7 @@ export default function InstructionsScreen({ onContinue }) {
           ))}
         </div>
 
-        <p className="continue-prompt">CLICK ANYWHERE TO START!</p>
+        <p className="continue-prompt mt-6 sm:mt-14">CLICK ANYWHERE TO START!</p>
       </div>
     </main>
   );

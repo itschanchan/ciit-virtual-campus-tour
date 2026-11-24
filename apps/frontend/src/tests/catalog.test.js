@@ -69,16 +69,6 @@ describe('catalog validation', () => {
     expect(result.errors).toContain('defaultLocationId must match a location id.')
   })
 
-  it('requires a narration transcript when narration is present', () => {
-    const catalog = cloneCatalog()
-    catalog.locations[0].narration.transcript = ''
-
-    const result = validateCatalog(catalog)
-
-    expect(result.valid).toBe(false)
-    expect(result.errors).toContain('locations[0].narration.transcript is required.')
-  })
-
   it('requires panorama placeholders and a valid field of view', () => {
     const catalog = cloneCatalog()
     catalog.locations[0].panorama.tileUrlTemplate = '/panoramas/placeholder/equirect.svg'

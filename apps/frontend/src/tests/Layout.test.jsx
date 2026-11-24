@@ -30,7 +30,7 @@ async function renderLayout(catalogSource = catalogData) {
     </TourProvider>,
   )
 
-  return screen.findByRole('button', { name: 'View gallery' })
+  return document.querySelector('button[aria-controls="room-gallery"]')
 }
 
 function getDialog() {
