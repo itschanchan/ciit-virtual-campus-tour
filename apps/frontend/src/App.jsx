@@ -1,76 +1,80 @@
-import { useCallback, useEffect, useState } from 'react'
-import ErrorBoundary from './components/ErrorBoundary'
-import InstructionsScreen from './components/InstructionsScreen'
-import Layout from './components/Layout'
-import ProtectedRoute from './components/ProtectedRoute'
-import WelcomeScreen from './components/WelcomeScreen'
-import { readFirstVisitState, writeFirstVisitState } from './lib/introduction'
-import { AuthProvider } from './context/AuthContext'
-import { TourProvider } from './context/TourContext'
-import AdminDashboardPage from './pages/AdminDashboardPage'
-import AdminLoginPage from './pages/AdminLoginPage'
+import { useCallback, useEffect, useState } from "react";
+import ErrorBoundary from "./components/ErrorBoundary";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import WelcomeScreen from "./components/WelcomeScreen";
+import InstructionsScreen from "./components/InstructionsScreen";
+import { readFirstVisitState, writeFirstVisitState } from "./lib/introduction";
+import { AuthProvider } from "./context/AuthContext";
+import { TourProvider } from "./context/TourContext";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
 
 function normalizeRoute(pathname) {
-  const value = pathname || '/'
-  return value.startsWith('/') ? value : `/${value}`
+  const value = pathname || "/";
+  return value.startsWith("/") ? value : `/${value}`;
 }
 
 function TourExperience() {
   const initialScreen = readFirstVisitState().hasSeenIntroduction
-    ? 'tour'
-    : 'welcome'
-  const [screen, setScreen] = useState(initialScreen)
+    ? "tour"
+    : "welcome";
+  const [screen, setScreen] = useState(initialScreen);
 
   function handleEnterTour() {
     writeFirstVisitState({
       hasSeenIntroduction: true,
       firstVisitTimestamp: new Date().toISOString(),
-    })
-    setScreen('tour')
+    });
+    setScreen("tour");
   }
 
   return (
     <TourProvider>
-      {screen === 'welcome' && <WelcomeScreen onStart={() => setScreen('instructions')} />}
-      {screen === 'instructions' && (
+      {screen === "welcome" && (
+        <WelcomeScreen onStart={() => setScreen("instructions")} />
+      )}
+      {screen === "instructions" && (
         <InstructionsScreen onContinue={handleEnterTour} />
       )}
-      {screen === 'tour' && <Layout />}
+      {screen === "tour" && <Layout />}
     </TourProvider>
-  )
+  );
 }
 
 function AppContent() {
-  const [route, setRoute] = useState(() => normalizeRoute(window.location.pathname))
+  const [route, setRoute] = useState(() =>
+    normalizeRoute(window.location.pathname),
+  );
 
   const navigate = useCallback((nextRoute) => {
-    const normalized = normalizeRoute(nextRoute)
-    window.history.pushState({}, '', normalized)
-    setRoute(normalized)
-  }, [])
+    const normalized = normalizeRoute(nextRoute);
+    window.history.pushState({}, "", normalized);
+    setRoute(normalized);
+  }, []);
 
   useEffect(() => {
     function handlePopState() {
-      setRoute(normalizeRoute(window.location.pathname))
+      setRoute(normalizeRoute(window.location.pathname));
     }
 
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
-  if (route === '/admin/login') {
-    return <AdminLoginPage onNavigate={navigate} />
+  if (route === "/admin/login") {
+    return <AdminLoginPage onNavigate={navigate} />;
   }
 
-  if (route.startsWith('/admin')) {
+  if (route.startsWith("/admin")) {
     return (
       <ProtectedRoute onRedirect={navigate}>
         <AdminDashboardPage onNavigate={navigate} />
       </ProtectedRoute>
-    )
+    );
   }
 
-  return <TourExperience />
+  return <TourExperience />;
 }
 
 export default function App() {
@@ -80,5 +84,5 @@ export default function App() {
         <AppContent />
       </AuthProvider>
     </ErrorBoundary>
-  )
+  );
 }
