@@ -144,10 +144,10 @@ export default function AboutDialog({ open, onClose }) {
               Special thanks to:
             </h3>
             <p className="mb-4 text-sm leading-relaxed">
-              Cecilia S. Mendoza, Software Engineering 1
+              Ms. Cecilia S. Mendoza, Software Engineering 1
             </p>
             <p className="mb-4 text-sm leading-relaxed">
-              Rizaldy Rapsing, Program Head
+              Mr. Rizaldy Rapsing, Program Head
             </p>
           </div>
         </div>

@@ -177,7 +177,7 @@ export default function ShareDialog({ open, onClose }) {
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="sm"
+      maxWidth="xs"
       aria-labelledby="share-dialog-title"
       slotProps={{
         paper: { sx: dialogPaperSx },
