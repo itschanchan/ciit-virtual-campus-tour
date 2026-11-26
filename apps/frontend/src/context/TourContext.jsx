@@ -7,9 +7,15 @@ import {
   resolveNarration,
 } from '../lib/narrationCatalog'
 import { readNarrationState, writeNarrationState } from '../lib/narrationStorage'
+import { readSidebarState, writeSidebarState } from '../lib/sidebarStorage'
 import { NARRATION_STATUSES, TourContext } from './tourContextValue'
 
 function getInitialSidebarOpen() {
+  const stored = readSidebarState()
+  if (stored !== null) {
+    return stored
+  }
+
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return true
   }
@@ -200,6 +206,10 @@ export function TourProvider({ children, catalogSource = catalogData }) {
       isPaused: ['paused', 'blocked', 'ended'].includes(state.narrationStatus),
     })
   }, [state.activeNarrationId, state.narrationStatus])
+
+  useEffect(() => {
+    writeSidebarState(state.sidebarOpen)
+  }, [state.sidebarOpen])
 
   const selectLocation = useCallback((id) => {
     dispatch({ type: 'SELECT_LOCATION', id })
