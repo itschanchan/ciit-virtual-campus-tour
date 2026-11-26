@@ -35,6 +35,10 @@
   --radius-gallery-item: 0.9rem;
   --radius-panel: 1rem;
   --radius-gallery-panel: 1.25rem;
+  /* Finite pill radius (>= half the collapsed menu height) so the transcript
+     accordion can animate border-radius smoothly; rounded-full is too large
+     for CSS to visibly interpolate. */
+  --radius-pill: 2.2rem;
 
   --shadow-sidebar: 1.5rem 0 4rem rgb(0 0 0 / 0.35);
   --shadow-narration: 0 1rem 3rem rgb(0 0 0 / 0.32);

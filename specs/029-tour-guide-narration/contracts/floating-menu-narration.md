@@ -1,81 +1,67 @@
-# Contract: Floating Menu Narration UI
+# Contract: Floating Menu Narration (Transcript Accordion)
 
-**Feature**: `029-tour-guide-narration` | **Owner**: `apps/frontend/src/components/FloatingMenu.jsx` and `NarrationTranscript.jsx`
+**Branch**: `029-tour-guide-narration` | **File**: `apps/frontend/src/components/FloatingMenu.jsx`
 
 ## Purpose
 
-Define the user-visible playback and transcript behavior of the floating menu, including accessible names and fallback states.
+Defines the UI contract for the Floating Menu narration controls and the transcript accordion reveal (FR-012 through FR-025, SC-005, SC-008).
 
-## Component inputs
+## Props
 
-| Prop | Type | Contract |
-| :--- | :--- | :--- |
-| `narration` | object or `null` | `{ id, audioSrc, transcriptId, transcriptSrc, floor }` from the narration catalog; `null` hides narration controls |
-| `status` | enum | `idle`, `loading`, `playing`, `paused`, `blocked`, `ended`, `error` |
-| `muted` | boolean | Mirrors the single audio element's `muted` property |
-| `onPlay` | function | Requests playback; does not perform storage or navigation work |
-| `onPause` | function | Requests pause |
-| `onStatusChange` | function | Reports `playing`, `paused`, `blocked`, `ended`, or `error` after media events |
-| `onMuteToggle` | function | Toggles mute on the active element |
-| `sidebarOpen` | boolean | Hides the visible panel on compact viewports; the audio element stays mounted |
+| Prop | Type | Required | Default | Description |
+|---|---|---|---|---|
+| images | array | No | `[]` | Gallery images for the room gallery modal |
+| open | boolean | No | `false` | Room gallery modal open state |
+| onClose | function | No | — | Gallery close handler |
+| narration | object | No | `null` | Active recording entry from catalog |
+| status | string | No | `"idle"` | Narration status (`idle`, `loading`, `playing`, `paused`, `ended`, `blocked`, `error`) |
+| onPlay | function | No | — | Play handler |
+| onPause | function | No | — | Pause handler |
+| onStatusChange | function | No | — | Status change handler |
+| muted | boolean | No | `false` | Mute state |
+| onMuteToggle | function | No | — | Mute toggle handler |
+| sidebarOpen | boolean | No | `false` | Sidebar open state |
+| floorLabel | string | No | `""` | Current floor label |
+| onOpen | function | No | — | Gallery open handler |
 
-## Audio element contract
+## Transcript control contract
 
-- Exactly one `<audio>` element exists while the tour is mounted.
-- It has no visible controls and is not focusable.
-- `src` is the active entry's `audioSrc`.
-- `preload="metadata"` is used so the source is known without downloading the whole file.
-- The element stays mounted when the compact sidebar hides the visible menu.
-- Source changes pause the element, reset `currentTime` to `0`, and then apply the current status.
-- `muted` follows the `muted` prop.
-- `onEnded` reports `ended`; `onError` reports `error`.
+- Rendered only when `narration` is truthy.
+- Button with `aria-label="Show transcript"` / `aria-label="Hide transcript"` toggling on click.
+- `aria-expanded` reflects transcript open state (`true`/`false`).
+- `aria-controls="floating-menu-transcript"` links the button to the transcript panel.
+- Keyboard operable with visible focus state (FR-019, FR-020, SC-008).
 
-## Play/pause contract
+## Transcript panel contract
 
-| Status | Button accessible name | Behavior |
-| :--- | :--- | :--- |
-| `idle`, `loading` | `Play narration` | Requests play and calls `play()` directly |
-| `playing` | `Pause narration` | Requests pause and calls `pause()` directly |
-| `paused` | `Resume narration` | Resumes from the paused position |
-| `ended` | `Replay narration` | Resets to `0` and plays |
-| `blocked` | `Play narration` | Remains enabled so the visitor can retry |
-| `error` | `Narration unavailable` | Disabled; the error message points to the transcript |
+- Element ID `floating-menu-transcript`.
+- Always rendered while `narration` exists so the accordion can animate both ways; hidden with `aria-hidden` and a zero-height row while the transcript is collapsed.
+- Heading "Transcript", then `NarrationTranscript` loaded from `narration.transcriptSrc`.
+- Fallback message "Transcript not available shown when transcript is missing or empty (FR-014, FR-024).
+- Panel updates when the active recording changes (FR-013).
 
-- Clicking play while the status is `ended` sets `currentTime = 0` before playing.
-- A rejected `play()` promise reports `blocked` and never leaves the UI stuck in `playing`.
-- The keyboard shortcut `p` on the focused play button performs the same action.
-- The mute button exposes `Mute narration` or `Unmute narration` and supports the `m` key.
+## Accordion reveal contract (FR-025)
 
-## Transcript contract
+| Viewport | Behavior |
+|---|---|
+| Tablet and desktop | Floating menu animates smoothly from pill shape (`rounded-pill`, a finite radius) to rounded rectangle (`rounded-xl`) while growing vertically to fit the transcript content when the transcript is revealed; returns to the pill shape and collapsed height when collapsed. The pill radius is a finite theme token (`--radius-pill`) so the corner change eases with the height; `rounded-full` is avoided because its very large value makes the corner change snap. The transcript panel stays mounted and animates its row height from `grid-rows-[0fr]` to `grid-rows-[1fr]` (with `opacity` fade and `overflow-hidden`) so the reveal and collapse are symmetric. Transitions use `transition-all duration-300 ease-in-out` matching the sidebar's pattern. Respects `prefers-reduced-motion` (animation disabled, instant toggle). Includes a 320ms toggle guard to prevent rapid-toggle conflicts. |
+| Compact mobile | Menu keeps existing shape (full-width, bottom-anchored, `narrow:rounded-t-panel` / `narrow:rounded-b-none`). No accordion reveal; transcript panel reveals without changing menu shape. |
 
-- The transcript control is rendered only when `narration` is not `null`.
-- Accessible name: `Show transcript` when closed, `Hide transcript` when open.
-- The control has `aria-expanded` matching the open state and `aria-controls="floating-menu-transcript"`.
-- The panel is keyboard operable and appears inside the floating menu without hiding playback controls.
-- The panel fetches `transcriptSrc` on first open and caches the result for the session.
-- The rendered content is the transcript text split into paragraphs on blank lines.
-- Loading state: `Loading transcript...` with a polite live region.
-- Missing, empty, or failed fetch: `Transcript not available yet.`
-- The transcript updates when `narration` changes; opening a new floor shows that floor's transcript.
-- The panel never shows another recording's transcript.
+## Existing controls (must remain usable, FR-021)
 
-## Blocked and error messages
+- Play/pause button (accessible name reflects status: "Play narration", "Pause narration", "Resume narration", "Replay narration", "Narration unavailable").
+- Mute/unmute button ("Mute narration" / "Unmute narration").
+- Map button ("Open map").
+- View Gallery button ("View gallery", icon-only with `PhotoCameraIcon`).
+- Audio visualization (`audio-viz`) shown only when playing, hidden on narrow mobile (`narrow:hidden`).
 
-| Status | Message | Role |
-| :--- | :--- | :--- |
-| `blocked` | `Playback was blocked by your browser. Press play to start the narration, or open the transcript to read it.` | `status` |
-| `error` | `The narration could not be played. Open the transcript to read it instead.` | `alert` |
+## Hidden audio element
 
-## Responsive behavior
+- Always mounted (`<audio ref={audioRef} ... className="hidden" aria-hidden="true">`), even when the mobile sidebar hides the visible panel, so playback survives sidebar toggles.
+- `src` bound to `narration.audioSrc`.
+- Events: `onPlay` → `onStatusChange("playing")`, `onEnded` → `onStatusChange("ended")`, `onError` → `onStatusChange("error")`.
 
-- Desktop and tablet: the existing bottom-centered floating pill remains unchanged.
-- Mobile: the existing compact behavior remains; the audio visualization is hidden and controls stay tappable.
-- When the compact sidebar is open, the visible panel is hidden but narration keeps playing and the transcript state is preserved.
-- Controls keep a minimum 40 px touch target and a visible focus ring.
+## Related contracts
 
-## Accessibility guarantees
-
-- Every control has an accessible name.
-- The transcript control is reachable in the tab order.
-- Status changes are announced through the existing polite live region.
-- The gallery, map, mute, and transcript controls remain usable while narration plays.
+- `narration-catalog.md` — catalog data contract
+- `playback-persistence.md` — localStorage state contract

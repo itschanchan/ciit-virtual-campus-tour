@@ -46,7 +46,7 @@ The recording-to-floor mapping is sequential and uses all ten files: LG initial 
 
 **Baseline note**: The frontend suite currently has 9 pre-existing failures. The 3 `FloatingMenu` transcript-accessibility failures are resolved by this feature. The 6 `Sidebar` failures predate this feature and remain a separate merge blocker; this plan must not introduce new failures.
 
-**Post-design re-check**: PASS. Phase 1 introduces no new principles, projects, dependencies, or backend surface. See `research.md` for resolved decisions.
+**Post-design re-check**: PASS. Phase 1 design artifacts generated (`research.md`, `data-model.md`, `contracts/narration-catalog.md`, `contracts/playback-persistence.md`, `contracts/floating-menu-narration.md`, `quickstart.md`). No new principles, projects, dependencies, or backend surface introduced. All NEEDS CLARIFICATION items resolved in `research.md`. FR-025 (tablet/desktop accordion reveal with height expansion, compact mobile unchanged) added to the design scope.
 
 ## Project Structure
 

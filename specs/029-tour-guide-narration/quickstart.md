@@ -1,151 +1,117 @@
 # Quickstart: Tour Guide Narration
 
-**Feature**: `029-tour-guide-narration` | **Date**: 2026-11-24
+**Branch**: `029-tour-guide-narration` | **Spec**: `specs/029-tour-guide-narration/spec.md`
 
-This guide validates the feature end to end. It does not replace `tasks.md`; it proves the behavior after implementation.
+## Purpose
+
+Runnable validation scenarios that prove the tour guide narration feature works end-to-end. This is a validation/run guide; implementation details belong in `tasks.md` and the implementation phase.
 
 ## Prerequisites
 
-- Node.js 24 LTS and npm available.
-- Frontend dependencies installed: `npm install` then `npm run setup`.
-- The ten recordings are in `apps/frontend/public/voice/`.
-- The ten transcripts are in `apps/frontend/public/transcripts/`.
-- Reference: [data-model.md](./data-model.md), [narration catalog contract](./contracts/narration-catalog.md), [persistence contract](./contracts/playback-persistence.md), [floating menu contract](./contracts/floating-menu-narration.md).
+- Repository cloned at branch `029-tour-guide-narration`.
+- Node.js 24 LTS installed.
+- Dependencies installed: `npm install` at repo root, then `npm run setup`.
+- Backend `.env` configured with `MONGODB_URI`, `MONGODB_NAME`, and a non-empty `JWT_SECRET` (required only if starting the backend; this feature is frontend-only).
+- 10 MP3 recordings present in `apps/frontend/public/voice/`.
+- 10 Markdown transcripts present in `apps/frontend/public/transcripts/`.
 
-## Automated checks
+## Setup commands
 
-```powershell
+```bash
+# From repo root
+npm install
+npm run setup
+# Copy backend environment (backend not required for this frontend-only feature)
+Copy-Item apps/backend/.env.example apps/backend/.env
+```
+
+## Test commands
+
+```bash
+# Frontend tests (Vitest + Supertest)
 npm --prefix apps/frontend run test
+
+# Lint
 npm run lint
+
+# Build
 npm run build
+
+# Validate catalog content and assets
 npm run verify:content
 ```
 
-Expected results:
+## Validation scenarios
 
-- All new and updated narration tests pass.
-- No new lint errors.
-- The production build succeeds.
-- Content verification reports the ten recordings and ten transcripts as present.
+### Scenario 1: Assigned recording starts on each narrated floor (SC-001, FR-004, FR-005)
 
-Known baseline: six `Sidebar` tests fail before this feature and are outside its scope. The three `FloatingMenu` transcript-accessibility failures are fixed by this feature.
+1. Start the dev server: `npm run dev`.
+2. Complete the instructions screen and continue to the Lower Ground panorama.
+3. Confirm Recording_1 starts automatically about one second after the panorama renders.
+4. Navigate to each narrated floor (LG-2, UG, 4F, 5F, 5M, 6F, 7F, 8F, 9F).
+5. Confirm the assigned recording starts on each floor without an added delay.
+6. Move between panoramas on the same floor and confirm the recording does not restart.
 
-## Run the tour
+Expected: The correct recording plays on each floor; no unintended restarts within a floor.
 
-```powershell
-npm run dev
-```
+### Scenario 2: Play/pause and floor-change state preservation (SC-003, SC-004, SC-011, FR-007, FR-008, FR-010)
 
-Open the frontend URL printed by Vite. Clear site data once before starting so the first-visit flow runs.
+1. Play narration on a floor.
+2. Pause it, then navigate to another floor.
+3. Confirm narration remains paused and the new floor's recording is selected.
+4. Resume playback on the new floor.
+5. Change floors while playing; confirm the destination recording replaces the current one.
 
-## Scenario 1 - Lower Ground entry
+Expected: Paused state preserved across floors; playing state replaced by destination recording.
 
-1. Clear site data and reload.
-2. Complete the welcome and instructions screens.
-3. Wait for the Lower Ground panorama.
+### Scenario 3: Transcript matches active recording (SC-005, FR-012, FR-013, FR-022)
 
-Expected:
+1. Open the transcript in the Floating Menu on any narrated floor.
+2. Confirm the transcript with the matching numeric suffix is displayed.
+3. Change floors and confirm the transcript updates to match the new recording.
+4. Temporarily remove a transcript file and confirm the fallback "Transcript not available yet." appears while the tour remains usable.
 
-- Recording_1 starts about one second after the panorama is ready.
-- The play control shows `Pause narration`.
-- The transcript control shows `Show transcript`.
+Expected: Transcript ID always matches recording ID; fallback shown when missing.
 
-## Scenario 2 - LG-2 and same-floor continuity
+### Scenario 4: Accordion reveal on tablet and desktop (FR-025)
 
-1. From the LG initial view, navigate to the LG-2 panorama.
-2. Move to LG-3 and LG-4.
-3. Return to LG-1.
+1. Open the transcript on a tablet or desktop viewport.
+2. Confirm the Floating Menu animates smoothly from pill shape to rounded rectangle.
+3. Collapse the transcript and confirm the menu returns to its original pill shape.
+4. Repeat on a compact mobile viewport; confirm the menu keeps its existing shape without the accordion reveal.
 
-Expected:
+Expected: Pill → rounded rectangle → pill animation on tablet/desktop; no shape change on compact mobile.
 
-- LG-2 starts Recording_2.
-- LG-3 and LG-4 keep Recording_2 playing without restarting.
-- Returning to LG-1 starts Recording_1.
+### Scenario 5: Blocked autoplay fallback (SC-012, FR-015)
 
-## Scenario 3 - Floor replacement
+1. Load a narrated floor with browser autoplay blocked.
+2. Confirm playback remains paused and a manual play control is offered.
+3. Press play and confirm narration starts.
 
-1. While playing, use the sidebar to open UG, then 4F, 5F, 5M, 6F, 7F, 8F, and 9F.
+Expected: Tour remains usable with manual play path.
 
-Expected:
+### Scenario 6: Refresh restores floor and state (SC-006, FR-011)
 
-- Each floor starts its assigned recording: 3, 4, 5, 6, 7, 8, 9, 10.
-- The previous recording stops; only one plays at a time.
-- Moving between panoramas on the same floor does not restart.
-
-## Scenario 4 - Pause, floor change, refresh
-
-1. Pause narration on 6F.
-2. Navigate to 7F.
-3. Refresh the page.
-4. Press the play control.
-
-Expected:
-
-- The 6F recording pauses.
-- 7F loads with narration paused; the control reads `Resume narration`.
-- Refresh returns to 7F with narration still paused.
-- Pressing play starts Recording_8 from the beginning.
-
-## Scenario 5 - Refresh while playing
-
-1. Play Recording_3 on UG.
+1. Play narration on a floor.
 2. Refresh the page.
+3. Confirm the same floor is restored and the recording restarts from the beginning.
+4. Pause narration, change floors, refresh, and confirm the restored floor remains paused.
 
-Expected:
+Expected: Floor and paused/playing state restored; active playback restarts from beginning.
 
-- The tour returns to UG.
-- Playback restarts from the beginning within two seconds, or the browser blocks it and shows the manual play prompt.
+## Expected outcomes
 
-## Scenario 6 - Transcript matching
+- All 10 recordings and 10 transcripts accounted for by the catalog (SC-009).
+- 0 unintended restarts between panoramas on the same floor (SC-002).
+- All narration and transcript controls keyboard operable with accessible names (SC-008).
+- 0 tour-blocking failures when a recording or transcript is missing (SC-007).
+- Panorama viewer remains interactive while narration plays (SC-010).
 
-1. Open the transcript on UG, then 5F, then 9F.
+## Related artifacts
 
-Expected:
-
-- The panel shows the transcript with the same numeric suffix as the active recording.
-- The panel updates immediately when the floor changes.
-- `Show transcript` becomes `Hide transcript` while open.
-
-## Scenario 7 - Blocked autoplay
-
-1. Use a browser profile that blocks sound autoplay, or disable autoplay for the site.
-2. Reload on a narrated floor.
-
-Expected:
-
-- The page does not throw or stall.
-- The message explains that playback was blocked.
-- The play control stays enabled and starts the recording when pressed.
-
-## Scenario 8 - Missing transcript fallback
-
-1. Temporarily rename one transcript file.
-2. Open that floor's transcript.
-
-Expected:
-
-- The panel shows `Transcript not available yet.`
-- Playback and navigation remain usable.
-3. Restore the file.
-
-## Scenario 9 - Responsive and keyboard
-
-1. Check desktop, tablet, and mobile widths.
-2. On mobile, open and close the sidebar while narration plays.
-3. Tab through the floating menu and press `p` and `m` on their controls.
-
-Expected:
-
-- No horizontal scrolling or overlapping controls.
-- Narration continues while the compact sidebar is open.
-- All controls have visible focus and accessible names.
-- `p` toggles play/pause and `m` toggles mute.
-
-## Scenario 10 - No narration on locked floors
-
-1. Inspect the sidebar.
-
-Expected:
-
-- 1F, 2F, 3F, 10F, and 11F remain locked.
-- Selecting them shows the existing notice and never starts audio.
+- Data model: `data-model.md`
+- Catalog contract: `contracts/narration-catalog.md`
+- Persistence contract: `contracts/playback-persistence.md`
+- Floating Menu UI contract: `contracts/floating-menu-narration.md`
+- Research decisions: `research.md`
+- Implementation tasks: `tasks.md` (Phase 2 output, not created here)
