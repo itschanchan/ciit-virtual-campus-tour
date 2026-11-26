@@ -1,3 +1,8 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/AdminLoginPage.jsx" }]
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/apps/frontend/src/pages/AdminLoginPage.jsx"
+    }
+  ]
 }
