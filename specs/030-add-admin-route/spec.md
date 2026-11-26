@@ -72,6 +72,7 @@ A visitor who goes to the main URL (without "/admin") continues to see the campu
 ### Session 2026-11-26
 
 - Q: Should the vercel.json rewrite be scoped to /admin paths and point to the SPA entry point (index.html) so the existing client router renders the login page? → A: Scope the rewrite to /admin and /admin/*, destination = SPA entry (index.html)
+- Q: Why does /admin still return 404 on Vercel after adding the rewrite, and what is the correct deployment fix? → A: The rewrite destination must be the built SPA entry `/index.html` (Vercel serves the built `dist/` at the site root, so a source path like `/apps/frontend/index.html` does not exist). Also, `vercel.json` is only read from the Vercel project's Root Directory: add `apps/frontend/vercel.json` when Root Directory = `apps/frontend`, or fix the root `vercel.json` when Root Directory = repo root.
 
 ## Success Criteria *(mandatory)*
 
@@ -84,4 +85,4 @@ A visitor who goes to the main URL (without "/admin") continues to see the campu
 
 ## vercel.json Note (context for planning)
 
-The current `vercel.json` rewrites `"/(.*)"` to the raw `AdminLoginPage.jsx` file path. This rewrites every path to the login page and points browsers at a source file that cannot be executed. Confirmed resolution: scope the rewrite to `/admin` and `/admin/*` with destination = SPA entry (`index.html`), so the existing client-side router in `App.jsx` renders the login page.
+The original `vercel.json` rewrote `"/(.*)"` to the raw `AdminLoginPage.jsx` file path. That rewrites every path to the login page and points browsers at a source file that cannot be executed. Confirmed resolution: scope the rewrite to `/admin` and `/admin/*` with destination = `/index.html` (the built SPA entry served at the site root). Vercel only reads `vercel.json` from the project's Root Directory, so the file must exist there: `apps/frontend/vercel.json` when Root Directory = `apps/frontend`, or the root `vercel.json` when Root Directory = the repo root. The existing client-side router in `App.jsx` then renders the login page.
