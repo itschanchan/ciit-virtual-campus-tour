@@ -1,37 +1,29 @@
-# CIIT Virtual Campus Tour - .gitignore
-
-# Dependencies
+# Node.js / JavaScript
 node_modules/
-
-# Build outputs
 dist/
 build/
 *.log
-
-# Environment files (secrets - must never be committed)
-.env
+.env*
 .env.local
-.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+client.rest
 
-# Backend client REST client file (secrets)
-apps/backend/client.rest
+# Vitest
+.vitest/
+coverage/
 
-# Spec Kit feature state (generated per feature)
-.specify/feature.json
-
-# Spec Kit extension local config (machine-local)
-.specify/extensions/example/local-config.yml
-
-# OS
+# OS / Editor
 .DS_Store
 Thumbs.db
 *.tmp
 *.swp
-
-# Editor
 .vscode/
 .idea/
 
-# Test coverage
-coverage/
-.vitest/
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

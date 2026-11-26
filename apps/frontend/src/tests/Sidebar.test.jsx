@@ -35,8 +35,7 @@ function mockMatchMedia(matches) {
   }))
 }
 
-describe('Sidebar', () => {
-  beforeEach(() => {
+describe('Sidebar', () => {  beforeEach(() => {
     vi.useFakeTimers()
   })
 
@@ -127,7 +126,7 @@ describe('Sidebar', () => {
     expect(screen.queryByText('No panorama available yet.')).not.toBeInTheDocument()
   })
 
-  it('waits 1.5 seconds before showing a locked-floor popover', () => {
+  it('shows a locked-floor popover immediately and keeps it for two seconds', () => {
     render(
       <Sidebar
         locations={[firstLocation]}
@@ -139,54 +138,58 @@ describe('Sidebar', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
-    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
 
     act(() => {
-      vi.advanceTimersByTime(1499)
+      vi.advanceTimersByTime(1999)
     })
 
-    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
 
     act(() => {
       vi.advanceTimersByTime(1)
     })
-
-    expect(screen.getByText('1F is coming soon.')).toBeInTheDocument()
-  })
-
-  it('restarts the delay and shows only the latest locked floor', () => {
-    render(
-      <Sidebar
-        locations={[firstLocation]}
-        currentLocationId={firstLocation.id}
-        open
-        onSelect={vi.fn()}
-      />,
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
-
-    act(() => {
-      vi.advanceTimersByTime(1000)
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: /2F OFF LIMITS/ }))
 
     act(() => {
       vi.advanceTimersByTime(1000)
     })
 
     expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
-
-    act(() => {
-      vi.advanceTimersByTime(500)
-    })
-
-    expect(screen.getByText('2F is coming soon.')).toBeInTheDocument()
-    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
   })
 
-  it('keeps a visible popover until Escape dismisses it', () => {
+  it('keeps a single complete message while hiding without a blank duplicate', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
+
+    expect(screen.getAllByRole('status')).toHaveLength(1)
+    expect(screen.queryByText('is coming soon.')).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+
+    // The popover is exiting; the floor label must survive the transition.
+    const messages = screen.getAllByText(/is coming soon\./)
+    expect(messages).toHaveLength(1)
+    expect(messages[0]).toHaveTextContent('1F is coming soon.')
+    expect(screen.queryByText('is coming soon.')).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+  })
+
+  it('replaces the message with the latest locked floor and restarts the hide timer', () => {
     render(
       <Sidebar
         locations={[firstLocation]}
@@ -199,10 +202,85 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
     act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /2F OFF LIMITS/, hidden: true }))
+
+    expect(screen.getAllByRole('status')).toHaveLength(1)
+    expect(screen.getByRole('status')).toHaveTextContent('2F is coming soon.')
+    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+
+    // The first timer would have fired here; the restarted timer must not.
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.getByRole('status')).toHaveTextContent('2F is coming soon.')
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+  })
+
+  it('restarts the hide timer without stacking when the same floor is selected twice', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    const floorButton = screen.getByRole('button', { name: /^1F OFF LIMITS$/ })
+
+    fireEvent.click(floorButton)
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    fireEvent.click(floorButton)
+
+    expect(screen.getAllByRole('status')).toHaveLength(1)
+
+    act(() => {
       vi.advanceTimersByTime(1500)
     })
 
-    expect(screen.getByText('1F is coming soon.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
+
+    act(() => {
+      vi.advanceTimersByTime(500)
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+  })
+
+  it('keeps the popover until Escape dismisses it without reappearing', () => {
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
 
     // Escape must bubble from inside the MUI modal root to reach onClose.
     fireEvent.keyDown(screen.getByRole('status'), { key: 'Escape' })
@@ -212,10 +290,16 @@ describe('Sidebar', () => {
       vi.advanceTimersByTime(1000)
     })
 
-    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
   })
 
-  it('cancels a pending popover when the sidebar closes', () => {
+  it('cancels the popover when the sidebar closes and does not re-show it', () => {
     const { rerender } = render(
       <Sidebar
         locations={[firstLocation]}
@@ -227,6 +311,8 @@ describe('Sidebar', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
 
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
+
     rerender(
       <Sidebar
         locations={[firstLocation]}
@@ -237,10 +323,41 @@ describe('Sidebar', () => {
     )
 
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(1000)
     })
 
-    expect(screen.queryByText('1F is coming soon.')).not.toBeInTheDocument()
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
+  })
+
+  it('dismisses a single complete popover with reduced motion preferred', () => {
+    mockMatchMedia(true)
+    render(
+      <Sidebar
+        locations={[firstLocation]}
+        currentLocationId={firstLocation.id}
+        open
+        onSelect={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /^1F OFF LIMITS$/ }))
+
+    expect(screen.getAllByRole('status')).toHaveLength(1)
+    expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
+
+    fireEvent.keyDown(screen.getByRole('status'), { key: 'Escape' })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.queryByText(/coming soon/)).not.toBeInTheDocument()
   })
 
   it('acknowledges a locked floor without motion when reduced motion is preferred', () => {

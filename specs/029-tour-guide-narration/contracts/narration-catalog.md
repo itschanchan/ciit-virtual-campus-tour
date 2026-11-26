@@ -1,12 +1,16 @@
-# Contract: Narration Catalog
+# Contract: Tour Guide Catalog
 
-**Feature**: `029-tour-guide-narration` | **Owner**: `apps/frontend/src/lib/narrationCatalog.json` + `narrationCatalog.js`
+**Branch**: `029-tour-guide-narration` | **File**: `apps/frontend/src/lib/narrationCatalog.json` | **Resolver**: `apps/frontend/src/lib/narrationCatalog.js`
 
 ## Purpose
 
-Define the data shape and lookup behavior that pairs every official recording with its transcript and assigns it to a floor or scene.
+Authoritative data source that pairs each official recording and transcript by a shared numeric ID (`voice-N` / `transcript-N`) and assigns each pair to a narrated floor. Consumed by `TourContext`, `FloatingMenu`, and tests.
 
-## Data shape
+## Format
+
+JSON file at `apps/frontend/src/lib/narrationCatalog.json`.
+
+### Top-level shape
 
 ```json
 {
@@ -22,54 +26,48 @@ Define the data shape and lookup behavior that pairs every official recording wi
     "8F": "voice-9",
     "9F": "voice-10"
   },
-  "entries": [
-    {
-      "id": "voice-1",
-      "number": 1,
-      "floor": "LG",
-      "sceneId": "0-lg---1",
-      "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_1.mp3",
-      "transcriptId": "transcript-1",
-      "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_1.md"
-    }
-  ]
+  "entries": [ ... ]
 }
 ```
 
-The example shows one entry; the real file contains all ten. `voice-2` is the only entry with `sceneId: "1-lg---2"` and is not referenced by `floorDefaults`.
+### Entry shape
 
-## Required invariants
+Each entry in `entries`:
 
-- `entries` contains exactly the ten recordings `voice-1` through `voice-10`.
-- `floorDefaults` covers every narrated floor: `LG`, `UG`, `4F`, `5F`, `5M`, `6F`, `7F`, `8F`, `9F`.
-- Locked floors `1F`, `2F`, `3F`, `10F`, and `11F` never appear.
-- Each `number` equals the numeric suffix of `id`, `transcriptId`, `audioSrc`, and `transcriptSrc`.
-- Each `floor` matches the floor code embedded in `sceneId` when `sceneId` is not `null`.
-- `audioSrc` and `transcriptSrc` resolve to files under `apps/frontend/public`.
-- No entry references `/panoramas/placeholder/narration.wav`.
+```json
+{
+  "id": "voice-1",
+  "number": 1,
+  "floor": "LG",
+  "sceneId": "0-lg---1",
+  "audioSrc": "/voice/CIIT_Glitch_Virtual_Campus_Recording_1.mp3",
+  "transcriptId": "transcript-1",
+  "transcriptSrc": "/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_1.md"
+}
+```
 
-## Module interface
+| Field | Type | Required | Constraint |
+|---|---|---|---|
+| id | string | Yes | Pattern `voice-N`, N positive integer |
+| number | integer | Yes | Must equal N from id |
+| floor | string | Yes | One of narrated floor labels |
+| sceneId | string \| null | No | Scene override; null means use floor default |
+| audioSrc | string | Yes | Path under `public/voice/` |
+| transcriptId | string | Yes | Pattern `transcript-N`, N matches number |
+| transcriptSrc | string | Yes | Path under `public/transcripts/` |
 
-| Function | Input | Output | Contract |
-| :--- | :--- | :--- | :--- |
-| `getNarrationById(id)` | entry ID or `null` | entry or `null` | Returns the exact entry; unknown IDs return `null` |
-| `getNarrationForScene(sceneId)` | scene ID or `null` | entry or `null` | Returns the entry whose `sceneId` matches exactly; no floor fallback |
-| `getDefaultNarrationForFloor(floor)` | floor label or `null` | entry or `null` | Resolves `floorDefaults[floor]`; unknown floors return `null` |
-| `resolveNarration(sceneId, floor, currentEntryId)` | scene ID, floor label, current entry ID | entry or `null` | Exact scene match wins; same-floor continuity next; floor default last |
+### Resolver functions (`narrationCatalog.js`)
 
-## Resolution examples
+- `getNarrationById(id: string): entry \| null` — lookup by recording ID.
+- `getNarrationForScene(sceneId: string): entry \| null` — lookup by scene override ID.
+- `getDefaultNarrationForFloor(floor: string): entry \| null` — lookup by floor default.
+- `resolveNarration(sceneId, floor, currentEntryId): entry \| null` — scene override wins, then current entry if same floor, then floor default.
 
-| Current | New scene | New floor | Result |
-| :--- | :--- | :--- | :--- |
-| `voice-1` | `1-lg---2` | `LG` | `voice-2` |
-| `voice-2` | `2-lg---3` | `LG` | `voice-2` (same-floor continuity) |
-| `voice-2` | `0-lg---1` | `LG` | `voice-1` (explicit scene) |
-| `voice-2` | `6-ug---2` | `UG` | `voice-3` (floor default) |
-| `voice-5` | `27-5m---1` | `5M` | `voice-6` (floor default) |
-| `voice-10` | `48-9f---1` | `9F` | `voice-10` (same floor) |
+## Validation
 
-## Failure behavior
+Validated by `scripts/verify-content.mjs`: every `audioSrc` and `transcriptSrc` must resolve to an existing file under `apps/frontend/public`; missing files produce a warning, not a hard failure (content dependency, not a blocking schema error).
 
-- A missing entry returns `null`; the UI hides the transcript control and plays nothing.
-- A missing file is a content-verification failure and is reported by `npm run verify:content`.
-- A malformed catalog is a build/test failure; the resolver does not invent fallbacks.
+## Related contracts
+
+- `playback-persistence.md` — localStorage state contract
+- `floating-menu-narration.md` — FloatingMenu transcript accordion UI contract

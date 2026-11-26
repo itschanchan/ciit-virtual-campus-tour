@@ -35,6 +35,7 @@ These are the core dependencies needed in the CIIT Virtual Campus Tour web-appli
 | Frontend | @mui/icons-material  | Approved | Material icon components used with MUI controls.                      |
 | Frontend | @mui/material        | Approved | Accessible React component library for future interface surfaces.     |
 | Frontend | marzipano     | Approved | Renders the 360-degree panorama viewer.                               |
+| Frontend | react-zoom-pan-pinch | Approved | Photo-style zoom and pan for the floor directory viewer.       |
 | Frontend | react         | Approved | ReactJS components.                                                   |
 | Frontend | react-dom     | Approved | The Document Object Model of React.                                   |
 | Frontend | @mui/material | Approved | Material UI components such as the sidebar popover.                   |

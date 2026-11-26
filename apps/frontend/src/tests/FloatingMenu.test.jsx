@@ -302,6 +302,30 @@ describe("FloatingMenu", () => {
     )
   })
 
+  it("keeps the transcript mounted so it can animate open and closed", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => "Welcome to the CIIT Virtual Campus Tour.",
+    })
+
+    render(<FloatingMenu {...defaultProps} />)
+
+    const transcript = document.getElementById("floating-menu-transcript")
+    expect(transcript).toBeInTheDocument()
+
+    const panel = transcript.parentElement.parentElement
+    expect(panel).toHaveAttribute("aria-hidden", "true")
+    expect(panel).toHaveClass("grid-rows-[0fr]", "opacity-0")
+
+    fireEvent.click(screen.getByRole("button", { name: "Show transcript" }))
+    expect(panel).toHaveAttribute("aria-hidden", "false")
+    expect(panel).toHaveClass("grid-rows-[1fr]", "opacity-100")
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide transcript" }))
+    expect(panel).toHaveAttribute("aria-hidden", "true")
+    expect(panel).toHaveClass("grid-rows-[0fr]", "opacity-0")
+  })
+
   it("shows the transcript fallback when content is missing", async () => {
     render(
       <FloatingMenu
@@ -729,9 +753,8 @@ describe("FloatingMenu", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
 
-      const dialog = getMapDialog()
-      expect(dialog).toBeInTheDocument()
-      expect(dialog).toHaveAttribute("role", "dialog")
+      const dialog = screen.getByRole("dialog", { name: "Floor Directory" })
+      expect(dialog).toHaveAttribute("id", "floor-directory")
       expect(dialog).toHaveAttribute("aria-modal", "true")
     })
 
@@ -740,19 +763,18 @@ describe("FloatingMenu", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
 
-      expect(
-        screen.getByAltText("Floor Directory"),
-      ).toBeInTheDocument()
+      expect(screen.getByAltText("Floor Directory")).toBeInTheDocument()
     })
 
     it("closes the modal through the close button", () => {
       render(<FloatingMenu {...defaultProps} />)
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-      fireEvent.click(screen.getByRole("button", { name: "Close floor directory" }))
+      fireEvent.click(
+        screen.getByRole("button", { name: "Close floor directory" }),
+      )
 
-      const backdrop = getMapBackdrop()
-      expect(backdrop).toHaveAttribute("aria-hidden", "true")
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "true")
     })
 
     it("closes the modal through the backdrop", () => {
@@ -761,8 +783,7 @@ describe("FloatingMenu", () => {
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
       fireEvent.mouseDown(getMapBackdrop())
 
-      const backdrop = getMapBackdrop()
-      expect(backdrop).toHaveAttribute("aria-hidden", "true")
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "true")
     })
 
     it("closes the modal through Escape", () => {
@@ -771,8 +792,7 @@ describe("FloatingMenu", () => {
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
       fireEvent.keyDown(document, { key: "Escape" })
 
-      const backdrop = getMapBackdrop()
-      expect(backdrop).toHaveAttribute("aria-hidden", "true")
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "true")
     })
 
     it("does not enable vertical scrolling on the floor directory panel", () => {
@@ -780,8 +800,7 @@ describe("FloatingMenu", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
 
-      const dialog = getMapDialog()
-      expect(dialog).not.toHaveClass("overflow-y-auto")
+      expect(getMapDialog()).not.toHaveClass("overflow-y-auto")
     })
 
     it("renders all modal elements on a narrow mobile viewport", () => {
@@ -802,142 +821,32 @@ describe("FloatingMenu", () => {
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
 
       expect(screen.getByAltText("Floor Directory")).toBeInTheDocument()
-      expect(
-        screen.getByRole("button", { name: "Close floor directory" }),
-      ).toBeInTheDocument()
-
-      const dialog = getMapDialog()
-      expect(dialog).not.toHaveClass("overflow-y-auto")
+      expect(getMapDialog()).not.toHaveClass("overflow-y-auto")
     })
 
-    it("zooms in with scroll wheel on desktop", () => {
-      render(<FloatingMenu {...defaultProps} />)
+    it("closes the directory when the gallery opens", () => {
+      const onClose = vi.fn()
+      const { rerender } = render(
+        <FloatingMenu {...defaultProps} open={false} onClose={onClose} />,
+      )
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "false")
 
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1)")
+      rerender(<FloatingMenu {...defaultProps} open onClose={onClose} />)
 
-      fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "true")
     })
 
-    it("zooms out with scroll wheel on desktop", () => {
-      render(<FloatingMenu {...defaultProps} />)
+    it("closes the directory when the sidebar opens", () => {
+      const { rerender } = render(<FloatingMenu {...defaultProps} />)
 
       fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-      fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-      fireEvent.wheel(getMapBackdrop(), { deltaY: 100 })
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "false")
 
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1)")
-    })
+      rerender(<FloatingMenu {...defaultProps} sidebarOpen />)
 
-    it("clamps zoom at minimum fit-to-viewport", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      fireEvent.wheel(getMapBackdrop(), { deltaY: 1000 })
-
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1)")
-    })
-
-    it("clamps zoom at maximum readable level", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      for (let i = 0; i < 100; i++) {
-        fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-      }
-
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(3)")
-    })
-
-    it("zooms with pinch gesture on touch screens", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1)")
-
-      fireEvent.touchStart(getMapBackdrop(), {
-        touches: [
-          { clientX: 100, clientY: 100 },
-          { clientX: 200, clientY: 100 },
-        ],
-      })
-
-      fireEvent.touchMove(getMapBackdrop(), {
-        touches: [
-          { clientX: 100, clientY: 100 },
-          { clientX: 300, clientY: 100 },
-        ],
-      })
-
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(2)")
-    })
-
-    it("pans the zoomed image with mouse drag on desktop", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
-
-      fireEvent.mouseDown(image.parentElement, { clientX: 100, clientY: 100 })
-      fireEvent.mouseMove(getMapBackdrop(), { clientX: 200, clientY: 200 })
-
-      expect(image).not.toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
-    })
-
-    it("pans the zoomed image with single-finger drag on touch screens", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-
-      const image = screen.getByAltText("Floor Directory")
-      expect(image).toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
-
-      fireEvent.touchStart(getMapBackdrop(), {
-        touches: [{ clientX: 100, clientY: 100 }],
-      })
-
-      fireEvent.touchMove(getMapBackdrop(), {
-        touches: [{ clientX: 250, clientY: 150 }],
-      })
-
-      expect(image).not.toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
-    })
-
-    it("resets pan and zoom when the modal is reopened", () => {
-      render(<FloatingMenu {...defaultProps} />)
-
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      fireEvent.wheel(getMapBackdrop(), { deltaY: -100 })
-
-      const image = screen.getByAltText("Floor Directory")
-      fireEvent.mouseDown(image.parentElement, { clientX: 100, clientY: 100 })
-      fireEvent.mouseMove(getMapBackdrop(), { clientX: 200, clientY: 200 })
-
-      expect(image).not.toHaveStyle("transform: translate(0px, 0px) scale(1.1)")
-
-      fireEvent.click(screen.getByRole("button", { name: "Close floor directory" }))
-      fireEvent.click(screen.getByRole("button", { name: "Open map" }))
-
-      const resetImage = screen.getByAltText("Floor Directory")
-      expect(resetImage).toHaveStyle("transform: translate(0px, 0px) scale(1)")
+      expect(getMapBackdrop()).toHaveAttribute("aria-hidden", "true")
     })
   })
 })

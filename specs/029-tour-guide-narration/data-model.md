@@ -1,159 +1,112 @@
-# Phase 1 Data Model: Tour Guide Narration
+# Data Model: Tour Guide Narration
 
-**Feature**: `029-tour-guide-narration` | **Date**: 2026-11-24
+**Branch**: `029-tour-guide-narration` | **Spec**: `specs/029-tour-guide-narration/spec.md`
 
-## Entity Overview
+## Entities
 
-```text
-NarrationCatalog 1 ─── * NarrationEntry
-       │                      │
-       │ floorDefaults        │ transcriptId / transcriptSrc
-       ▼                      ▼
-    Floor label          TranscriptDocument
-       │
-       ▼
-PersistedNarrationState ──► PlaybackState (runtime)
-```
+### Tour guide recording
 
-## 1. NarrationCatalog
+An official MP3 voice-over file associated with a narrated floor.
 
-The single authoritative narration data file: `apps/frontend/src/lib/narrationCatalog.json`.
+| Field | Type | Required | Description |
+|---|---|---|---|
+| id | string | Yes | Stable identifier, e.g. `voice-1` |
+| number | integer | Yes | Numeric suffix `N` in `voice-N` / `transcript-N`, unique across entries |
+| floor | string | Yes | Floor label from `FLOOR_SEQUENCE` (`LG`, `UG`, `4F`, `5F`, `5M`, `6F`, `7F`, `8F`, `9F`) |
+| sceneId | string \| null | No | Scene ID that overrides the floor default for this entry (`0-lg---1` for voice-1, `1-lg---2` for voice-2) |
+| audioSrc | string | Yes | URL under `public/voice/`, e.g. `/voice/CIIT_Glitch_Virtual_Campus_Recording_1.mp3` |
+| transcriptId | string | Yes | Matching transcript identifier, e.g. `transcript-1` |
+| transcriptSrc | string | Yes | URL under `public/transcripts/`, e.g. `/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_1.md` |
 
-| Field | Type | Required | Rules |
-| :--- | :--- | :--- | :--- |
-| `version` | string | Yes | Semantic version, currently `1.0.0` |
-| `floorDefaults` | object | Yes | Maps every narrated floor label to exactly one entry ID |
-| `entries` | array | Yes | Exactly 10 entries in this feature |
+**Validation rules**:
+- `id` must match the pattern `voice-N` where `N` is a positive integer.
+- `number` must equal `N` extracted from `id`.
+- `transcriptId` must be `transcript-N` where `N` matches `number`.
+- `floor` must be a narrated floor with an assigned recording.
+- `audioSrc` and `transcriptSrc` must resolve to existing files under `public/voice/` and `public/transcripts/` respectively (validated by `verify-content.mjs`).
+- Every narrated floor has exactly one recording entry.
 
-### Floor defaults
+### Transcript
 
-| Floor label | Entry ID | Recording |
-| :--- | :--- | :--- |
-| `LG` | `voice-1` | `CIIT_Glitch_Virtual_Campus_Recording_1.mp3` |
-| `UG` | `voice-3` | `CIIT_Glitch_Virtual_Campus_Recording_3.mp3` |
-| `4F` | `voice-4` | `CIIT_Glitch_Virtual_Campus_Recording_4.mp3` |
-| `5F` | `voice-5` | `CIIT_Glitch_Virtual_Campus_Recording_5.mp3` |
-| `5M` | `voice-6` | `CIIT_Glitch_Virtual_Campus_Recording_6.mp3` |
-| `6F` | `voice-7` | `CIIT_Glitch_Virtual_Campus_Recording_7.mp3` |
-| `7F` | `voice-8` | `CIIT_Glitch_Virtual_Campus_Recording_8.mp3` |
-| `8F` | `voice-9` | `CIIT_Glitch_Virtual_Campus_Recording_9.mp3` |
-| `9F` | `voice-10` | `CIIT_Glitch_Virtual_Campus_Recording_10.mp3` |
+The text alternative paired with a recording by the same numeric suffix.
 
-`voice-2` and `voice-1` are both LG entries; `voice-2` is an explicit scene override rather than a floor default.
+| Field | Type | Required | Description |
+|---|---|---|---|
+| id | string | Yes | Stable identifier, e.g. `transcript-1` |
+| number | integer | Yes | Numeric suffix `N` in `transcript-N`, matches recording `number` |
+| src | string | Yes | URL under `public/transcripts/`, e.g. `/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_1.md` |
+| text | string | No | Loaded Markdown content; `null` if missing or empty |
 
-## 2. NarrationEntry
+**Validation rules**:
+- `id` must match the pattern `transcript-N` where `N` matches a recording's `number`.
+- `text` may be null/empty; the UI shows a fallback in that case (FR-014, FR-024).
+- Content is plain Markdown paragraphs, split on double newlines for rendering.
 
-One recording paired with one transcript.
+### Floor narration assignment
 
-| Field | Type | Required | Rules |
-| :--- | :--- | :--- | :--- |
-| `id` | string | Yes | `voice-<number>` pattern |
-| `number` | integer | Yes | 1-10, unique; must match the `id` suffix |
-| `floor` | string | Yes | One of `FLOOR_SEQUENCE`; must match the floor code of `sceneId` when present |
-| `sceneId` | string or null | Yes | `null` for floor defaults with no explicit scene; `0-lg---1` for `voice-1`; `1-lg---2` for `voice-2` |
-| `audioSrc` | string | Yes | `/voice/CIIT_Glitch_Virtual_Campus_Recording_<number>.mp3`; file must exist in `public` |
-| `transcriptId` | string | Yes | `transcript-<number>`; unique |
-| `transcriptSrc` | string | Yes | `/transcripts/CIIT_Glitch_Virtual_Campus_Transcript_<number>.md`; file must exist in `public` |
+The rule that connects a narrated floor or view to exactly one recording/transcript pair.
 
-### Entry assignments
+| Field | Type | Required | Description |
+|---|---|---|---|
+| floor | string | Yes | Floor label from `FLOOR_SEQUENCE` |
+| recordingId | string | Yes | ID of the assigned recording (`voice-N`) |
+| transcriptId | string | Yes | ID of the assigned transcript (`transcript-N`) |
+| sceneOverride | string \| null | No | Optional scene ID that resolves to this narration instead of the floor default |
 
-| Entry | Floor | Scene override | Recording | Transcript |
-| :--- | :--- | :--- | :--- | :--- |
-| `voice-1` | `LG` | `0-lg---1` | Recording_1 | `transcript-1` |
-| `voice-2` | `LG` | `1-lg---2` | Recording_2 | `transcript-2` |
-| `voice-3` | `UG` | none | Recording_3 | `transcript-3` |
-| `voice-4` | `4F` | none | Recording_4 | `transcript-4` |
-| `voice-5` | `5F` | none | Recording_5 | `transcript-5` |
-| `voice-6` | `5M` | none | Recording_6 | `transcript-6` |
-| `voice-7` | `6F` | none | Recording_7 | `transcript-7` |
-| `voice-8` | `7F` | none | Recording_8 | `transcript-8` |
-| `voice-9` | `8F` | none | Recording_9 | `transcript-9` |
-| `voice-10` | `9F` | none | Recording_10 | `transcript-10` |
+**Validation rules**:
+- Each narrated floor maps to exactly one recording/transcript pair (FR-002).
+- Locked floors (`1F`, `2F`, `3F`, `10F`, `11F`) have no assignment.
+- `sceneOverride` must match a scene whose floor code resolves to `floor` via `getFloorForSceneId`.
 
-## 3. TranscriptDocument
+### Tour guide catalog
 
-A Markdown file loaded from `public/transcripts/` and cached in memory.
+The data file in the frontend `lib` folder that lists recordings, transcripts, and floor assignments by ID. Lives at `apps/frontend/src/lib/narrationCatalog.json`.
 
-| Field | Type | Rules |
-| :--- | :--- | :--- |
-| `src` | string | Absolute public path from the catalog |
-| `text` | string | Raw file text, trimmed |
-| `paragraphs` | string[] | Text split on one or more blank lines; empty paragraphs removed |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| version | string | Yes | Semantic version, e.g. `1.0.0` |
+| floorDefaults | object | Yes | Map of floor label → recording ID (`voice-N`) |
+| entries | array | Yes | Array of recording entry objects |
 
-**Fallback**: If `src` is empty, the request fails, the response is not OK, or the text is empty, the UI renders "Transcript not available yet." The tour remains usable.
+**Validation rules**:
+- `version` must match semver pattern.
+- Every key in `floorDefaults` must have a corresponding entry in `entries`.
+- Every entry's `floor` must have exactly one entry assigned (no duplicates per floor).
+- Every `transcriptSrc` in `entries` must reference a transcript with matching `N`.
 
-## 4. PersistedNarrationState
+### Playback state
 
-Stored in `localStorage` under `ciit_narration_state`.
+The active floor, whether narration is playing or paused, the mute state, and the restart-from-beginning behavior used on refresh. Persisted in `localStorage` key `ciit_narration_state`.
 
-| Field | Type | Rules |
-| :--- | :--- | :--- |
-| `floor` | string | A floor label that exists in `FLOOR_SEQUENCE` and has a catalog location; unknown values fall back to the default location |
-| `isPaused` | boolean | `true` when the last status was `paused`, `blocked`, or `ended`; `false` when it was `playing`, `loading`, or `idle` |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| floor | string | Yes | Last active floor label |
+| isPaused | boolean | Yes | Whether narration was paused when state was written |
 
-**Write timing**: Write on every active narration change and every narration status change.
+**Validation rules**:
+- `floor` must be a non-empty string.
+- `isPaused` must be a boolean.
+- Persistence is best-effort; blocked storage degrades to session-only state without breaking the tour.
 
-**Read failure**: Invalid JSON, blocked storage, or a missing key is treated as "no saved state"; the tour starts at the default location in `idle`.
+### Narrated floor
 
-**Restore behavior**:
-- Find the location whose `order` equals `FLOOR_SEQUENCE.indexOf(floor)`.
-- Fall back to `catalog.defaultLocationId` when no match exists.
-- Show the restored floor's first scene from `FLOOR_SCENE_MAP`.
-- Set `narrationStatus` to `paused` when `isPaused` is true, otherwise `idle`.
-- Let the initial autoplay path restart the recording from the beginning.
+A floor or view with an assigned recording: Lower Ground initial view, LG-2, Upper Ground, 4F, 5F, 5M, 6F, 7F, 8F, and 9F.
 
-## 5. PlaybackState (runtime)
+**State transitions**:
+- `idle` → `loading`: play initiated (user click or one-second initial autoplay).
+- `loading` → `playing`: audio element `onPlay` fires.
+- `playing` → `paused`: user pause click or `PAUSE_NARRATION` dispatch.
+- `playing` → `ended`: audio element `onEnded` fires.
+- `playing`/`paused` → `blocked`: play promise rejects (browser autoplay block).
+- `playing`/`paused` → `error`: audio element `onError` fires.
+- `ended` → `playing`: user replay click.
+- `blocked` → `loading`: user manual play click.
+- Floor change while playing → destination floor recording replaces current; `narrationStatus` preserved.
+- Floor change while paused → destination floor recording selected; `narrationStatus` remains `paused`.
+- Refresh → floor restored from `localStorage`; if playing, recording restarts from beginning; `narrationStatus` restored.
 
-Owned by `TourContext`.
-
-| Field | Type | Initial | Rules |
-| :--- | :--- | :--- | :--- |
-| `currentSceneId` | string or null | `null` | Updated by `Panorama` on every scene change |
-| `activeNarrationId` | string or null | Resolved floor default after content load | Must match a catalog entry or be `null` |
-| `narrationStatus` | enum | `idle` or `paused` from storage | `idle`, `loading`, `playing`, `paused`, `blocked`, `ended`, `error` |
-| `isMuted` | boolean | `false` | Applies to the single audio element |
-| `currentLocationId` | string | Default or restored location | Drives the sidebar and gallery |
-
-### Resolution function
-
-`resolveNarration(sceneId, floor, currentEntryId)` returns the active entry:
-
-1. Return the entry whose `sceneId` exactly matches `sceneId`.
-2. Else, if the entry with `currentEntryId` has `floor === floor`, return it.
-3. Else, return `floorDefaults[floor]`, or `null` when the floor has no narration.
-
-### Status transitions
-
-| From | Event | To |
-| :--- | :--- | :--- |
-| `idle` | Play requested | `loading` |
-| `blocked`, `error` | Play requested | `loading` |
-| `paused`, `ended` | Play requested | `playing` |
-| `loading`, `playing` | Pause requested | `paused` |
-| `loading` | Media `play()` resolved | `playing` |
-| `loading`, `playing` | Media `play()` rejected | `blocked` |
-| `playing` | Media ended | `ended` |
-| Any | Media error | `error` |
-| Any | Floor changed, destination has narration | Same status; new source at position 0 |
-| Any | Floor changed, destination has no narration | `idle`; no source |
-
-`narrationStatus` is never reset to `idle` merely because the visitor selected a different location.
-
-## 6. Validation Rules
-
-- Every `floorDefaults` value references an existing `entries[].id`.
-- Every narrated floor appears in `floorDefaults`; locked floors (`1F`, `2F`, `3F`, `10F`, `11F`) do not.
-- `entries` has exactly 10 items; `id`, `number`, `transcriptId`, `audioSrc`, and `transcriptSrc` are unique.
-- `number` matches both the `voice-` and `transcript-` suffixes and the file numbering.
-- `floor` is in `FLOOR_SEQUENCE` and matches the floor code of `sceneId` when `sceneId` is not null.
-- `audioSrc` and `transcriptSrc` files exist under `apps/frontend/public`.
-- No entry uses the obsolete `/panoramas/placeholder/narration.wav` asset.
-- LG has exactly one scene override (`voice-2` at `1-lg---2`) plus its floor default (`voice-1`).
-
-## 7. Relationships and Constraints
-
-- One `NarrationCatalog` owns all entries and floor defaults.
-- One floor has exactly one default entry; zero or more scene overrides.
-- One entry has exactly one transcript by shared numeric suffix.
-- One runtime session has at most one active entry and one audio element.
-- One persisted state references at most one floor.
+**Relationships**:
+- One recording belongs to exactly one floor.
+- One transcript pairs with exactly one recording (shared `N`).
+- One playback state references one active floor and one active recording.
+- Floor narration assignment links floor → recording → transcript.

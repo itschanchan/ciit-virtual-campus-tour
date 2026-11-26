@@ -1,72 +1,58 @@
 # Contract: Playback Persistence
 
-**Feature**: `029-tour-guide-narration` | **Owner**: `apps/frontend/src/lib/narrationStorage.js` and `TourContext`
+**Branch**: `029-tour-guide-narration` | **File**: `apps/frontend/src/lib/narrationStorage.js` | **Consumer**: `apps/frontend/src/context/TourContext.jsx`
 
-## Storage key
+## Purpose
 
-```text
-ciit_narration_state
-```
+Persists the active floor and paused/playing flag across page refresh so narration state survives reload. Degrades gracefully when `localStorage` is unavailable or blocked.
 
-## Stored value
+## Storage shape
+
+Key: `ciit_narration_state`
+
+Value (JSON):
 
 ```json
 {
-  "floor": "UG",
-  "isPaused": false
+  "floor": "5F",
+  "isPaused": true
 }
 ```
 
-| Field | Type | Allowed values | Meaning |
-| :--- | :--- | :--- | :--- |
-| `floor` | string | Any label in `FLOOR_SEQUENCE` that has a catalog location | The floor to restore |
-| `isPaused` | boolean | `true` or `false` | Whether playback should remain paused after refresh |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| floor | string | Yes | Last active floor label |
+| isPaused | boolean | Yes | Whether narration was paused when state was written |
 
-Only these two fields are stored. Playback position, mute state, transcript-open state, and gallery state are not persisted.
+## Functions (`narrationStorage.js`)
 
-## Write contract
+- `readNarrationState(): { floor, isPaused } \| null` — reads and validates `localStorage`; returns `null` on missing, invalid JSON, or missing `floor` string.
+- `writeNarrationState({ floor, isPaused }): void` — best-effort write; silently no-ops if storage is blocked.
+- `clearNarrationState(): void` — best-effort removal; silently no-ops if storage is blocked.
 
-The provider writes the state when the active narration or narration status changes.
+## Write trigger (`TourContext.jsx`)
 
-| Current status | Stored `isPaused` |
-| :--- | :--- |
-| `idle` | `false` |
-| `loading` | `false` |
-| `playing` | `false` |
-| `paused` | `true` |
-| `blocked` | `true` |
-| `ended` | `true` |
-| `error` | `true` |
+State is written whenever `activeNarrationId` or `narrationStatus` changes:
 
-The stored `floor` is the `floor` of the active narration entry, not the floor of an unrelated location.
+```js
+writeNarrationState({
+  floor: entry.floor,
+  isPaused: ['paused', 'blocked', 'ended'].includes(state.narrationStatus),
+})
+```
 
-## Read contract
+## Read trigger (`TourContext.jsx`)
 
-| Situation | Result |
-| :--- | :--- |
-| Key absent | `null`; default location, `idle` |
-| Invalid JSON | `null`; default location, `idle` |
-| Storage throws | `null`; default location, `idle` |
-| `floor` unknown or has no location | Default location, `idle` |
-| Valid `floor`, `isPaused: true` | Restored location, `paused` |
-| Valid `floor`, `isPaused: false` | Restored location, `idle`, then autoplay path |
+State is read during provider initialization via `useState(readNarrationState)` and used to set the initial `narrationStatus` (`paused` if restored `isPaused`, otherwise `idle`) and to restore the floor location on content load.
 
-## Restore contract
+## Rules
 
-1. Resolve the floor index with `FLOOR_SEQUENCE.indexOf(floor)`.
-2. Select the catalog location whose `order` equals that index.
-3. Fall back to `catalog.defaultLocationId` when no location matches.
-4. Initialize the panorama at `FLOOR_SCENE_MAP[floor]` or the LG first scene when unavailable.
-5. Never restore a saved playback time; any active recording restarts at `0`.
+- Only `floor` and `isPaused` are persisted; no secrets, credentials, or transcript text (FR-004, IV).
+- If storage is blocked, the tour continues without persistence (session-only state).
+- On refresh while playing, the restored floor's recording restarts from the beginning (FR-011).
+- On refresh while paused, narration remains paused (FR-008).
 
-## Clear contract
+## Related contracts
 
-`clearNarrationState()` removes the key. It is used by tests and any future reset control. Clearing must not throw when storage is unavailable.
-
-## Guarantees
-
-- No personal data is stored.
-- Storage failure never blocks the tour.
-- Refresh while paused keeps the same floor and stays paused.
-- Refresh while playing keeps the same floor and restarts the recording from the beginning.
-- Refresh after a blocked autoplay attempt restores a paused state and leaves the manual play control available.
+- `narration-catalog.md` — catalog data contract
+- `floating-menu-narration.md` — FloatingMenu transcript accordion UI contract
