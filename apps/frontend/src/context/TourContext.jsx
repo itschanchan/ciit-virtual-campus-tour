@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { catalogData, getDefaultLocation, getSortedLocations, loadCatalog } from '../lib/catalog'
+import { applyAdminContent } from '../lib/adminContent'
 import { getFloorForLocation, getFloorForSceneId, getFloorIndex } from '../lib/floorSceneMap'
 import {
   getDefaultNarrationForFloor,
@@ -154,7 +155,7 @@ export function TourProvider({ children, catalogSource = catalogData }) {
     dispatch({ type: 'RETRY_CONTENT' })
 
     try {
-      const catalog = loadCatalog(catalogSource)
+      const catalog = applyAdminContent(loadCatalog(catalogSource))
       const defaultLocation = getDefaultLocation(catalog)
 
       if (!defaultLocation) {
