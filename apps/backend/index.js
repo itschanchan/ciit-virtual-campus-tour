@@ -3,7 +3,9 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import connectDB, { isDatabaseReady } from './config/db.js'
+import AnalyticsEvent from './models/AnalyticsEvents.js'
 import AdminRoutes from './routes/AdminRoutes.js'
+import AnalyticsRoutes from './routes/AnalyticsRoutes.js'
 import AuthRoutes from './routes/AuthRoutes.js'
 import { errorHandler, notFoundHandler } from './utils/errors.js'
 
@@ -44,6 +46,7 @@ app.use(
 )
 app.use('/api/admins', AdminRoutes)
 app.use('/api/admin', AuthRoutes)
+app.use('/api/analytics', AnalyticsRoutes)
 
 app.get("/api/admins", verifyToken, (req, res) => {
   res.json({ message: "Success" });
@@ -79,6 +82,12 @@ if (process.env.NODE_ENV !== "test") {
       dbName: process.env.MONGODB_NAME,
     })
     console.log('MongoDB connection established.')
+
+    // Analytics duplicates are prevented by the unique eventId index, so the
+    // server must not accept traffic until that index exists. A failure here
+    // stops startup instead of silently allowing duplicate events.
+    await AnalyticsEvent.init()
+    console.log('Analytics indexes ensured.')
   } catch (error) {
     console.error(error.message)
     process.exit(1)
