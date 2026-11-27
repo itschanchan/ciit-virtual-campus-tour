@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WelcomeScreen from "./components/WelcomeScreen";
 import InstructionsScreen from "./components/InstructionsScreen";
+import { trackPageView, trackTourStart } from "./lib/analytics";
 import { readFirstVisitState, writeFirstVisitState } from "./lib/introduction";
 import { AuthProvider } from "./context/AuthContext";
 import { TourProvider } from "./context/TourContext";
@@ -20,6 +21,16 @@ function TourExperience() {
     ? "tour"
     : "welcome";
   const [screen, setScreen] = useState(initialScreen);
+  const tourStartTracked = useRef(false);
+
+  useEffect(() => {
+    if (screen !== "tour" || tourStartTracked.current) {
+      return;
+    }
+
+    tourStartTracked.current = true;
+    trackTourStart();
+  }, [screen]);
 
   function handleEnterTour() {
     writeFirstVisitState({
@@ -46,12 +57,29 @@ function AppContent() {
   const [route, setRoute] = useState(() =>
     normalizeRoute(window.location.pathname),
   );
+  const lastTrackedPath = useRef(null);
 
   const navigate = useCallback((nextRoute) => {
     const normalized = normalizeRoute(nextRoute);
     window.history.pushState({}, "", normalized);
     setRoute(normalized);
   }, []);
+
+  useEffect(() => {
+    if (lastTrackedPath.current === route) {
+      return;
+    }
+
+    // Record every visited path so returning from an admin route counts as a
+    // new public page view, but never send events for admin routes.
+    lastTrackedPath.current = route;
+
+    if (route.startsWith("/admin")) {
+      return;
+    }
+
+    trackPageView(route);
+  }, [route]);
 
   useEffect(() => {
     function handlePopState() {
