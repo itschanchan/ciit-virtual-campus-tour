@@ -295,12 +295,28 @@ export default function Sidebar({
   logoUrl,
 }) {
   const [notice, setNotice] = useState(null);
+  const [noticeOpen, setNoticeOpen] = useState(false);
+  const [sidebarWasOpen, setSidebarWasOpen] = useState(open);
   const [shareOpen, setShareOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const popoverTimerRef = useRef(null);
   const acknowledgementTimerRef = useRef(null);
   const acknowledgedElementRef = useRef(null);
+  const noticeOpenRef = useRef(false);
   const floorItems = buildFloorItems(locations);
+
+  // Closing the sidebar must cancel the notice so it cannot reappear on reopen.
+  if (sidebarWasOpen !== open) {
+    setSidebarWasOpen(open);
+
+    if (!open) {
+      setNoticeOpen(false);
+    }
+  }
+
+  useEffect(() => {
+    noticeOpenRef.current = noticeOpen;
+  }, [noticeOpen]);
 
   useEffect(() => {
     return () => {
@@ -371,6 +387,7 @@ export default function Sidebar({
       return;
     }
 
+    setNoticeOpen(false);
     setNotice(null);
     onOpen?.();
   }
@@ -393,15 +410,24 @@ export default function Sidebar({
 
     clearPendingPopover();
     setNotice(nextNotice);
+    setNoticeOpen(true);
 
     popoverTimerRef.current = window.setTimeout(() => {
       popoverTimerRef.current = null;
-      setNotice(null);
+      setNoticeOpen(false);
     }, POPOVER_HIDE_DELAY_MS);
   }
 
   function handleCloseNotice() {
     clearPendingPopover();
+    setNoticeOpen(false);
+  }
+
+  function handleNoticeExited() {
+    if (noticeOpenRef.current) {
+      return;
+    }
+
     setNotice(null);
   }
 
@@ -531,15 +557,13 @@ export default function Sidebar({
       </button>
 
       <Popover
-        open={open && Boolean(notice)}
+        open={open && noticeOpen}
         anchorEl={notice?.anchorEl ?? null}
         onClose={handleCloseNotice}
         anchorOrigin={{ vertical: "center", horizontal: "right" }}
         transformOrigin={{ vertical: "center", horizontal: "left" }}
         slotProps={{
-          transition: {
-            onExited: handleCloseNotice,
-          },
+          transition: { onExited: handleNoticeExited },
           paper: {
             role: "status",
             "aria-live": "polite",

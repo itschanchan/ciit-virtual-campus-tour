@@ -7,6 +7,8 @@ import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from '@mui/icons-material/Description';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { isCompactViewport } from "../lib/viewport";
+import { usePrefersReducedMotion } from "../lib/motion";
+import FloorDirectoryDialog from "./FloorDirectoryDialog";
 import NarrationTranscript from "./NarrationTranscript";
 
 const STATUS_LABELS = {
@@ -76,16 +78,13 @@ export default function FloatingMenu({
   );
 
   // Floor directory modal state (maps button)
-  const [mapModalOpen, setMapModalOpen] = useState(false);
-  const [mapZoomLevel, setMapZoomLevel] = useState(1);
-  const [mapPanX, setMapPanX] = useState(0);
-  const [mapPanY, setMapPanY] = useState(0);
-  const [isPanning, setIsPanning] = useState(false);
-  const MAP_ZOOM_MIN = 1;
-  const MAP_ZOOM_MAX = 3;
-  const MAP_ZOOM_STEP = 0.1;
+  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const mapButtonRef = useRef(null);
 
-  const mapImageRef = useRef(null);
+  // Only one overlay is interactive at a time: the directory stays closed
+  // while the gallery or the compact sidebar is open so focus can follow the
+  // active surface. Derived during render so no setState runs inside an effect.
+  const mapModalOpen = directoryOpen && !open && !sidebarOpen;
 
   const imageCount = sortedImages.length;
   const activeIndex = currentIndex < imageCount ? currentIndex : 0;
@@ -175,114 +174,12 @@ export default function FloatingMenu({
     };
   }, [open, onClose, hasMultipleImages, imageCount]);
 
-  // Floor directory modal open/close and Escape handling
-  useEffect(() => {
-    if (!mapModalOpen) {
-      return undefined;
-    }
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") {
-        setMapModalOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [mapModalOpen]);
-
   function handleMapOpen() {
-    setMapModalOpen(true);
-    setMapZoomLevel(MAP_ZOOM_MIN);
-    setMapPanX(0);
-    setMapPanY(0);
+    setDirectoryOpen(true);
   }
 
   function handleMapClose() {
-    setMapModalOpen(false);
-  }
-
-  function handleMapWheel(event) {
-    if (!mapModalOpen) {
-      return;
-    }
-    event.preventDefault();
-    const delta = event.deltaY > 0 ? -MAP_ZOOM_STEP : MAP_ZOOM_STEP;
-    setMapZoomLevel((current) =>
-      Math.min(MAP_ZOOM_MAX, Math.max(MAP_ZOOM_MIN, current + delta)),
-    );
-    setMapPanX(0);
-    setMapPanY(0);
-  }
-
-  const touchStartDistance = useRef(0);
-  function handleMapTouchStart(event) {
-    if (!mapModalOpen) {
-      return;
-    }
-    if (event.touches.length === 2) {
-      touchStartDistance.current = getTouchDistance(event.touches);
-      return;
-    }
-    if (event.touches.length === 1 && mapZoomLevel > MAP_ZOOM_MIN) {
-      setIsPanning(true);
-    }
-  }
-
-  function handleMapTouchMove(event) {
-    if (!mapModalOpen) {
-      return;
-    }
-    if (event.touches.length === 2) {
-      event.preventDefault();
-      const currentDistance = getTouchDistance(event.touches);
-      const ratio = currentDistance / touchStartDistance.current;
-      setMapZoomLevel((current) =>
-        Math.min(MAP_ZOOM_MAX, Math.max(MAP_ZOOM_MIN, current * ratio)),
-      );
-      touchStartDistance.current = currentDistance;
-      return;
-    }
-    if (event.touches.length === 1 && isPanning) {
-      event.preventDefault();
-      setMapPanX(50);
-      setMapPanY(50);
-    }
-  }
-
-  function handleMapTouchEnd() {
-    setIsPanning(false);
-  }
-
-  function getTouchDistance(touches) {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  function handleMapMouseDown() {
-    if (!mapModalOpen || mapZoomLevel <= MAP_ZOOM_MIN) {
-      return;
-    }
-    setIsPanning(true);
-  }
-
-  function handleMapMouseMove() {
-    if (!mapModalOpen || !isPanning) {
-      return;
-    }
-    setMapPanX(50);
-    setMapPanY(50);
-  }
-
-  function handleMapMouseUp() {
-    if (!isPanning) {
-      return;
-    }
-    setIsPanning(false);
+    setDirectoryOpen(false);
   }
 
   const handlePlayPause = () => {
@@ -336,6 +233,7 @@ export default function FloatingMenu({
   // compact mobile viewport. The audio element stays mounted above this flag
   // so playback survives opening and closing the sidebar.
   const hidePanel = sidebarOpen && isCompactViewport();
+  const reduceMotion = usePrefersReducedMotion();
 
   function showPreviousImage() {
     setCurrentIndex((index) => (index - 1 + imageCount) % imageCount);
@@ -358,6 +256,14 @@ export default function FloatingMenu({
         onPlay={() => onStatusChange?.("playing")}
         onEnded={() => onStatusChange?.("ended")}
         onError={() => onStatusChange?.("error")}
+      />
+
+      {/* Floor directory dialog (maps button). Always mounted so focus
+      management and aria-hidden can toggle cleanly. */}
+      <FloorDirectoryDialog
+        open={mapModalOpen}
+        onClose={handleMapClose}
+        returnFocusRef={mapButtonRef}
       />
 
       {!hidePanel && (
@@ -446,73 +352,8 @@ export default function FloatingMenu({
           )}
         </section>
       </div>
-
-      {/* Floor directory modal (maps button). Always mounted so
-          focus management and aria-hidden can toggle cleanly. */}
-      <div
-        className={`bg-canvas/78 backdrop-blur-gallery tiny:p-0 fixed inset-0 z-60 grid place-items-center p-5 transition-opacity duration-300 ${mapModalOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        inert={!mapModalOpen}
-        aria-hidden={!mapModalOpen}
-        onMouseDown={(event) => {
-          if (event.target === event.currentTarget) {
-            handleMapClose();
-          }
-        }}
-        onMouseMove={handleMapMouseMove}
-        onMouseUp={handleMapMouseUp}
-        onWheel={handleMapWheel}
-        onTouchStart={handleMapTouchStart}
-        onTouchMove={handleMapTouchMove}
-        onTouchEnd={handleMapTouchEnd}
-        style={{ touchAction: "none" }}
-      >
-        <section
-          id="floor-directory"
-          className={`rounded-gallery-panel bg-surface shadow-gallery tiny:min-h-dvh tiny:w-full tiny:max-h-dvh tiny:rounded-none max-h-[min(90dvh,52rem)] w-[min(68rem,100%)] tiny:p-3 sm:p-5 transition-all duration-300 ease-out ${mapModalOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-4 scale-95 opacity-0"}`}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="floor-directory-title"
-        >
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <div>
-              <p className="text-accent mb-1.5 text-[0.72rem] font-extrabold tracking-[0.16em] uppercase">
-                Floor directory
-              </p>
-              <h2 id="floor-directory-title" className="mb-0 text-[clamp(1.4rem,3vw,2rem)]">
-                Floor Directory
-              </h2>
-            </div>
-            <button
-              type="button"
-              className="bg-surface text-ink hover:text-accent inline-flex size-11 shrink-0 items-center justify-center gap-1.5 rounded-full text-xl leading-none transition-colors"
-              aria-label="Close floor directory"
-              onClick={handleMapClose}
-            >
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-
-          <div className="relative w-full" onMouseDown={handleMapMouseDown}>
-            <img
-              ref={mapImageRef}
-              src="/img/glitch_directory.png"
-              alt="Floor Directory"
-              className="block w-full max-w-full max-h-[calc(90dvh-10rem)] object-contain"
-              style={{
-                transform: `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoomLevel})`,
-                transformOrigin: "center",
-                cursor:
-                  mapZoomLevel > MAP_ZOOM_MIN || isPanning
-                    ? "grabbing"
-                    : "grab",
-              }}
-              onError={(event) => {
-                event.target.src = "";
-              }}
-            />
-          </div>
-        </section>
-      </div>
+        </>
+      )}
 
       <style>{`
         @keyframes oscillate {
@@ -550,8 +391,10 @@ export default function FloatingMenu({
         }
       `}</style>
 
+      {/* Narration controls - always mounted so playback controls remain
+      accessible even when the sidebar is open on mobile. */}
       <section
-        className="bg-surface/90 shadow-narration backdrop-blur-narration narrow:bottom-0 narrow:w-full narrow:rounded-t-panel narrow:rounded-b-none fixed bottom-4 left-1/2 z-7 w-[min(44rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-full px-4 py-[0.9rem]"
+        className={`bg-surface/90 shadow-narration backdrop-blur-narration narrow:bottom-0 narrow:w-full narrow:rounded-t-panel narrow:rounded-b-none fixed bottom-4 left-1/2 z-7 w-[min(44rem,calc(100%-1.5rem))] -translate-x-1/2 ${transcriptOpen ? "rounded-xl" : "rounded-pill"} overflow-hidden px-4 py-[0.9rem] ${reduceMotion ? "transition-none" : "transition-all duration-300 ease-in-out"}`}
         aria-label="Tour narration controls"
       >
         <div className="flex items-center justify-center gap-[0.6rem]">
@@ -622,10 +465,13 @@ export default function FloatingMenu({
 
           {/* Map Button */}
           <button
+            ref={mapButtonRef}
             type="button"
             className="bg-surface-soft text-ink hover:text-accent focus-visible:ring-accent inline-flex min-h-10 items-center justify-center gap-[0.45rem] rounded-full px-4 py-[0.55rem] font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
             aria-label="Open map"
             aria-expanded={mapModalOpen}
+            aria-controls="floor-directory"
+            aria-haspopup="dialog"
             onClick={handleMapOpen}
           >
             <MapIcon></MapIcon>
@@ -668,19 +514,27 @@ export default function FloatingMenu({
           </p>
         )}
 
-        {narration && transcriptOpen && (
+        {/* Kept mounted like the sidebar content so opening and closing both
+        animate instead of the transcript popping in and out. */}
+        {narration && (
           <div
-            id="floating-menu-transcript"
-            className="mt-[0.8rem] max-h-44 overflow-y-auto pt-[0.8rem]"
+            className={`grid transition-all duration-300 ease-in-out ${transcriptOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"} ${reduceMotion ? "transition-none" : ""}`}
+            aria-hidden={!transcriptOpen}
+            inert={!transcriptOpen}
           >
-            <h3 className="mb-[0.4rem] text-[0.95rem]">Transcript</h3>
-            <NarrationTranscript src={narration.transcriptSrc} />
+            <div className="overflow-hidden">
+              <div
+                id="floating-menu-transcript"
+                className="mt-[0.8rem] max-h-44 overflow-y-auto pt-[0.8rem]"
+              >
+                <h3 className="mb-[0.4rem] text-[0.95rem]">Transcript</h3>
+                <NarrationTranscript src={narration.transcriptSrc} />
+              </div>
+            </div>
           </div>
         )}
 
       </section>
-        </>
-      )}
-    </>
+    </>  // closes outer fragment from line 248
   );
 }

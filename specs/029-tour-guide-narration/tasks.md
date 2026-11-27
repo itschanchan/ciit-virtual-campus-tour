@@ -1,161 +1,157 @@
 ---
-description: "Task list for Tour Guide Narration"
+description: "Task list for Tour Guide Narration feature implementation"
 ---
 
 # Tasks: Tour Guide Narration
 
 **Input**: Design documents from `specs/029-tour-guide-narration/`
 
-**Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: REQUIRED. The project constitution mandates test-first work for narration behavior, and `plan.md` Phase A lists the required suites. Write each test task first and confirm it fails before implementing the matching task.
+**Tests**: Test tasks ARE included — Constitution III in spec.md declares Test-First Quality Gate (NON-NEGOTIABLE); plan.md Phase A requires tests written before implementation.
 
-**Organization**: Tasks are grouped by user story. Setup and Foundational phases unblock every story; each story phase then delivers an independently testable increment.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: Can run in parallel (different files, no dependency on an incomplete task)
-- **[Story]**: `US1`, `US2`, `US3`, or `US4`
-- Every task names the exact file path it changes
-
-## Path Conventions
-
-This is the existing web application. All feature work is in `apps/frontend/`; documentation is in `specs/029-tour-guide-narration/` and `docs/`.
+- **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
+- **[Story]**: Which user story this task belongs to (US1, US2, US3, US4) — required for user story phase tasks only
+- Include exact file paths in descriptions
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Prepare the shared assets and test environment.
+**Purpose**: Project initialization and basic structure
 
-- [X] T001 [P] Stage the ten recordings under `apps/frontend/public/voice/` and the ten transcripts under `apps/frontend/public/transcripts/` so both directories are tracked by git; confirm the filenames match `Recording_1` through `Recording_10` and `Transcript_1` through `Transcript_10`
-- [X] T002 [P] Add `HTMLMediaElement.prototype.play` and `HTMLMediaElement.prototype.pause` stubs plus a `localStorage.clear()` reset helper in `apps/frontend/src/tests/setup.js`
+- [x] T001 Verify project structure per implementation plan at `apps/frontend/src/`
+- [x] T002 Confirm no new dependencies are needed (React 19.2, Vite 8, `@mui/icons-material` 9.5, Marzipano 0.10 all existing)
+- [x] T003 [P] Verify linting and formatting configuration is in place
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared catalog, storage, transcript, and scene-state infrastructure that every user story depends on.
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete.
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-### Tests first
+- [x] T004 Create or verify narration catalog with 10 entries (voice-1 to voice-10) paired with transcripts at `apps/frontend/src/lib/narrationCatalog.json`
+- [x] T005 [P] Create or verify narration catalog resolver functions at `apps/frontend/src/lib/narrationCatalog.js`
+- [x] T006 [P] Create or verify localStorage persistence helpers at `apps/frontend/src/lib/narrationStorage.js`
+- [x] T007 [P] Create or verify transcript fetch and cache helper at `apps/frontend/src/lib/transcripts.js`
+- [x] T008 Extend TourContext with scene-aware narration state (currentSceneId, activeNarrationId, setCurrentSceneId, persistence effect) at `apps/frontend/src/context/TourContext.jsx`
+- [x] T009 Wire Layout to pass `activeNarration` to FloatingMenu at `apps/frontend/src/components/Layout.jsx`
+- [x] T010 Wire Panorama to report scene changes via `setCurrentSceneId` and start one-second initial autoplay at `apps/frontend/src/pages/Panorama.jsx`
 
-- [X] T003 [P] Write `apps/frontend/src/tests/narrationCatalog.test.js` covering the ten entries, unique IDs and numbers, floor defaults, the LG-2 scene override, and the `voice-N`/`transcript-N` suffix pairing
-- [X] T004 [P] Write `apps/frontend/src/tests/narrationStorage.test.js` covering valid read/write/clear, missing key, invalid JSON, and storage exceptions
-- [X] T005 [P] Write `apps/frontend/src/tests/transcripts.test.js` covering successful fetch, empty text, failed response, network rejection, and cache reuse
-- [X] T011 [P] Add scene-resolution tests to `apps/frontend/src/tests/TourContext.test.jsx` for LG-2, same-floor continuity, and floor-default changes
-
-### Implementation
-
-- [X] T006 Create `apps/frontend/src/lib/narrationCatalog.json` with `version`, the nine `floorDefaults`, and all ten entries defined in `data-model.md` (depends on T003)
-- [X] T007 Create `apps/frontend/src/lib/narrationCatalog.js` with `getNarrationById`, `getNarrationForScene`, `getDefaultNarrationForFloor`, and `resolveNarration` (depends on T006)
-- [X] T008 Create `apps/frontend/src/lib/narrationStorage.js` with `readNarrationState`, `writeNarrationState`, and `clearNarrationState` using key `ciit_narration_state` (depends on T004)
-- [X] T009 Create `apps/frontend/src/lib/transcripts.js` with a cached `loadTranscript(src)` helper that returns `null` on missing or failed content (depends on T005)
-- [X] T010 Remove the obsolete `narration` blocks from `apps/frontend/src/lib/catalog.json`, remove `validateNarration` from `apps/frontend/src/lib/catalog.js`, and update `apps/frontend/src/tests/catalog.test.js`
-- [X] T012 Add `currentSceneId`, `activeNarrationId`, `SET_SCENE`, `setCurrentSceneId`, and the `activeNarration` memo to `apps/frontend/src/context/TourContext.jsx` (depends on T007, T011)
-- [X] T013 Call `setCurrentSceneId(sceneId)` on every scene change in `apps/frontend/src/pages/Panorama.jsx` before the location guard (depends on T012)
-- [X] T014 Read `activeNarration` from `useTour()` in `apps/frontend/src/components/Layout.jsx` and pass it to `FloatingMenu` instead of `currentLocation.narration` (depends on T012)
-
-**Checkpoint**: Catalog resolution, storage, transcript loading, and scene tracking are ready. User stories can begin.
+**Checkpoint**: Foundation ready — user story implementation can now begin
 
 ---
 
 ## Phase 3: User Story 1 - Floor narration starts automatically (Priority: P1) 🎯 MVP
 
-**Goal**: The assigned official recording starts automatically on each narrated floor and does not restart while moving between non-assigned panoramas on the same floor.
+**Goal**: A visitor enters the tour and hears the official tour guide recording for the floor they are viewing. The Lower Ground recording starts after the instructions screen; the destination floor's recording starts when navigating to another narrated floor; moving between panoramas on the same floor does not restart the recording.
 
-**Independent Test**: Complete the instructions screen and confirm Recording_1 starts about one second after the Lower Ground panorama is ready; visit each narrated floor and confirm its assigned recording; move between LG-3 and LG-4 and confirm no restart.
+**Independent Test**: Complete the instructions screen, confirm the Lower Ground recording starts after one second, then visit each narrated floor and confirm the assigned recording starts. Move between panoramas on one floor and confirm the recording does not restart.
 
-### Tests for User Story 1
+### Tests for User Story 1 (required — Constitution III test-first gate)
 
-- [X] T015 [P] [US1] Add tests to `apps/frontend/src/tests/FloatingMenu.test.jsx` for the hidden `<audio>` source, play on `loading`/`playing`, `ended`, media error, and blocked promise rejection
-- [X] T016 [P] [US1] Create `apps/frontend/src/tests/Panorama.test.jsx` with fake timers that asserts playback starts 1000 ms after `PanoramaViewer` reports ready and only once per mount
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [x] T011 [P] [US1] Add catalog test asserting all 10 IDs, floor defaults, unique numbers, and transcript-N pairing at `apps/frontend/src/tests/narrationCatalog.test.js`
+- [x] T012 [P] [US1] Add resolver test for same-floor continuity, explicit scene changes, floor changes, and floors without narration at `apps/frontend/src/tests/narrationCatalog.test.js`
 
 ### Implementation for User Story 1
 
-- [X] T017 [US1] Render the hidden `<audio>` element with `src`, `preload="metadata"`, `onEnded`, `onError`, and the muted binding in `apps/frontend/src/components/FloatingMenu.jsx` (depends on T014, T015)
-- [X] T018 [US1] Add the source-change reset and status effects that play or pause the element in `apps/frontend/src/components/FloatingMenu.jsx` (depends on T017)
-- [X] T019 [US1] Keep the `<audio>` element mounted when the compact sidebar hides the visible panel in `apps/frontend/src/components/FloatingMenu.jsx` (depends on T017)
-- [X] T020 [US1] Wire `PanoramaViewer`'s `onReady` callback and schedule the one-second initial playback in `apps/frontend/src/pages/Panorama.jsx` (depends on T012, T016)
+- [x] T013 [US1] Implement one-second initial autoplay delay for Lower Ground recording after viewer ready at `apps/frontend/src/pages/Panorama.jsx`
+- [x] T014 [US1] Implement destination floor recording start on floor change without added delay at `apps/frontend/src/context/TourContext.jsx`
+- [x] T015 [US1] Implement same-floor continuity so moving between panoramas does not restart the recording at `apps/frontend/src/context/TourContext.jsx`
 
-**Checkpoint**: User Story 1 is fully functional and testable without pause persistence or transcripts.
+**Checkpoint**: User Story 1 should be fully functional and testable independently
 
 ---
 
 ## Phase 4: User Story 2 - Control and retain playback state (Priority: P1)
 
-**Goal**: Play and pause work; floor changes replace the recording unless paused; refresh restores the floor and pause state; blocked autoplay falls back to an enabled manual play control.
+**Goal**: A visitor can pause and resume the tour guide at any time. Paused state persists across floor changes and refresh. Playing narration continues within a floor but is replaced by the destination floor's recording on floor change. Refresh restores the floor and state; active playback restarts from the beginning.
 
-**Independent Test**: Pause on 6F, move to 7F, refresh, and confirm 7F stays paused; resume and confirm Recording_8 restarts; play on UG, refresh, and confirm UG restarts from the beginning or shows the blocked prompt.
+**Independent Test**: Play narration, pause it, change floors, refresh, and confirm it remains paused on the same floor. Resume, navigate within the same floor, and confirm playback continues. Change floors while playing and confirm the destination recording replaces the old one. Refresh while playing and confirm the same floor is restored and the recording restarts.
 
-### Tests for User Story 2
+### Tests for User Story 2 (required — Constitution III test-first gate)
 
-- [ ] T021 [P] [US2] Add tests to `apps/frontend/src/tests/FloatingMenu.test.jsx` for pause, resume, replay from `ended`, the blocked state keeping the play control enabled, and the `p` keyboard shortcut
-- [ ] T022 [P] [US2] Add tests to `apps/frontend/src/tests/TourContext.test.jsx` for preserving `paused` across location changes, replacing the entry on floor change while playing, restoring a saved floor, and restoring the paused state
-- [ ] T023 [P] [US2] Add a restored-floor test to `apps/frontend/src/tests/PanoramaViewer.test.jsx` asserting the first scene comes from the restored location's floor
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [x] T016 [P] [US2] Add storage test for valid reads, invalid JSON, blocked storage, and clearing at `apps/frontend/src/tests/narrationStorage.test.js`
+- [x] T017 [P] [US2] Add TourContext test for floor change preserving paused state, scene change selecting the right entry, and refresh restoring floor and pause state at `apps/frontend/src/tests/TourContext.test.jsx`
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Stop resetting `narrationStatus` in `SELECT_LOCATION` and clear it only when `SET_SCENE` resolves no entry in `apps/frontend/src/context/TourContext.jsx` (depends on T012, T022)
-- [ ] T025 [US2] Add the persistence effect that writes `{ floor, isPaused }` on active-entry and status changes in `apps/frontend/src/context/TourContext.jsx` (depends on T008, T024)
-- [ ] T026 [US2] Restore the saved floor, paused state, and active entry during initial content load in `apps/frontend/src/context/TourContext.jsx` (depends on T025)
-- [ ] T027 [US2] Use `FLOOR_SCENE_MAP` for the restored location's first scene instead of the hardcoded LG scene in `apps/frontend/src/components/PanoramaViewer.jsx` (depends on T023, T026)
-- [ ] T028 [US2] Keep the play control enabled in the `blocked` state and show the manual play prompt in `apps/frontend/src/components/FloatingMenu.jsx` (depends on T018, T021)
+- [x] T018 [US2] Implement play/pause controls with status transitions (idle→loading→playing→paused→ended→blocked→error) at `apps/frontend/src/context/TourContext.jsx`
+- [x] T019 [US2] Implement persistence effect saving floor and isPaused to localStorage on narration state changes at `apps/frontend/src/context/TourContext.jsx`
+- [x] T020 [US2] Implement refresh restore: restore floor from localStorage; if playing, restart recording from beginning at `apps/frontend/src/context/TourContext.jsx`
+- [x] T021 [US2] Implement blocked autoplay fallback: keep play control enabled and show manual play prompt at `apps/frontend/src/components/FloatingMenu.jsx`
+- [x] T022 [US2] Implement recording replacement on floor change while playing; preserve paused state when changing floors while paused at `apps/frontend/src/context/TourContext.jsx`
 
-**Checkpoint**: User Stories 1 and 2 work together; refresh and pause behavior match the specification.
+**Checkpoint**: User Stories 1 AND 2 should both work independently
 
 ---
 
 ## Phase 5: User Story 3 - Transcript matches the active recording (Priority: P2)
 
-**Goal**: The Floating Menu shows the transcript whose numeric suffix matches the active recording, updates on floor changes, and shows a clear fallback when content is unavailable.
+**Goal**: A visitor opens the transcript in the Floating Menu and reads the text that corresponds to the recording currently selected for the floor. When the floor changes, the transcript changes with it. On tablet and desktop, the Floating Menu animates smoothly from pill shape to rounded rectangle when the transcript is revealed, and back to pill shape when collapsed. Compact mobile keeps the existing menu shape without the accordion reveal.
 
-**Independent Test**: Open the transcript on UG, 5F, and 9F and confirm the displayed text matches `transcript-3`, `transcript-5`, and `transcript-10`; rename one file and confirm the fallback appears.
+**Independent Test**: Open the transcript on each narrated floor and compare the displayed transcript with the active recording's ID. Change floors and confirm the transcript updates. Temporarily remove a transcript and confirm the fallback appears. Verify the accordion reveal animation on tablet/desktop and no shape change on compact mobile.
 
-### Tests for User Story 3
+### Tests for User Story 3 (required — Constitution III test-first gate)
 
-- [X] T029 [P] [US3] Create `apps/frontend/src/tests/NarrationTranscript.test.jsx` covering the loading state, paragraph rendering, empty file, and fetch failure fallback
-- [X] T030 [P] [US3] Update the transcript tests in `apps/frontend/src/tests/FloatingMenu.test.jsx` for the mocked fetch, the `Show transcript`/`Hide transcript` accessible names, `aria-expanded`, and updating after a narration change
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [x] T023 [P] [US3] Add transcript loading, success, empty file, and fetch failure tests at `apps/frontend/src/tests/NarrationTranscript.test.jsx`
+- [x] T024 [P] [US3] Add FloatingMenu transcript accessibility tests: Show/Hide transcript aria-label, aria-expanded, aria-controls, keyboard operation at `apps/frontend/src/tests/FloatingMenu.test.jsx`
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Create `apps/frontend/src/components/NarrationTranscript.jsx` using `loadTranscript` from `apps/frontend/src/lib/transcripts.js` with `Loading transcript...` and `Transcript not available yet.` states (depends on T009, T029)
-- [ ] T032 [US3] Replace the inline transcript text in `apps/frontend/src/components/FloatingMenu.jsx` with `NarrationTranscript` and add the `Show transcript`/`Hide transcript` `aria-label` while keeping `aria-expanded` and `aria-controls` (depends on T030, T031)
-- [ ] T033 [US3] Reset the transcript panel when the active narration changes in `apps/frontend/src/components/FloatingMenu.jsx` (depends on T032)
+- [x] T025 [US3] Implement NarrationTranscript component: fetch transcriptSrc, cache result, render paragraphs, show fallback "Transcript not available yet." at `apps/frontend/src/components/NarrationTranscript.jsx`
+- [x] T026 [US3] Add transcript control button with aria-label "Show transcript"/"Hide transcript", aria-expanded, aria-controls="floating-menu-transcript" at `apps/frontend/src/components/FloatingMenu.jsx`
+- [x] T027 [US3] Implement transcript panel rendering with id="floating-menu-transcript", heading "Transcript", and NarrationTranscript child; show fallback when transcript unavailable at `apps/frontend/src/components/FloatingMenu.jsx`
+- [x] T028 [P] [US3] Implement accordion reveal animation: on tablet and desktop, animate Floating Menu from pill shape (rounded-full) to rounded rectangle when transcript is revealed, and back to pill shape when collapsed, using transition-all duration-300 ease-out at `apps/frontend/src/components/FloatingMenu.jsx`
+- [x] T029 [US3] Ensure compact mobile viewport keeps existing menu shape (narrow:rounded-t-panel / narrow:rounded-b-none) without accordion reveal when transcript is shown or hidden at `apps/frontend/src/components/FloatingMenu.jsx`
 
-**Checkpoint**: Transcripts always match the active recording and degrade safely.
+**Checkpoint**: User Story 3 should be fully functional and testable independently
 
 ---
 
 ## Phase 6: User Story 4 - Content maintainer can pair recordings and transcripts (Priority: P2)
 
-**Goal**: One catalog visibly pairs each recording and transcript by ID, assigns it to exactly one floor or view, and is validated by the content script.
+**Goal**: A content maintainer can open a single tour guide catalog and see which recording and transcript belong together by their shared ID, and which floor each pair belongs to. Every narrated floor has exactly one recording/transcript pair.
 
-**Independent Test**: Inspect `apps/frontend/src/lib/narrationCatalog.json` and confirm every `voice-N` has `transcript-N` and a floor assignment; run `npm run verify:content` and confirm all ten pairs are found.
+**Independent Test**: Inspect the catalog and verify every recording has a matching transcript ID and a floor assignment, and every narrated floor has exactly one pair. Add a new recording/transcript pair and confirm the tour uses it without changing playback logic.
 
-### Tests for User Story 4
+### Tests for User Story 4 (required — Constitution III test-first gate)
 
-- [X] T034 [P] [US4] Extend `apps/frontend/src/tests/narrationCatalog.test.js` with file-existence checks for every `audioSrc` and `transcriptSrc`, uniqueness of all ten pairs, and rejection of locked-floor entries (depends on T003)
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [x] T030 [P] [US4] Add catalog pairing verification test: every recording ID (voice-N) matches transcript ID (transcript-N) with same N; every narrated floor has exactly one pair at `apps/frontend/src/tests/narrationCatalog.test.js`
 
 ### Implementation for User Story 4
 
-- [X] T035 [US4] Extend `scripts/verify-content.mjs` to read `apps/frontend/src/lib/narrationCatalog.json`, verify every `audioSrc` and `transcriptSrc` under `apps/frontend/public`, and warn instead of crashing when `specs/001-campus-tour-foundation/contracts/content-schema.json` is absent (depends on T006)
-- [X] T036 [US4] Update the ID section of `docs/prompts/frontend-prompts/tour_guide.md` to name `apps/frontend/src/lib/narrationCatalog.json` and describe how to add a new recording/transcript pair (depends on T006)
+- [x] T031 [US4] Verify catalog has exactly one recording/transcript pair per narrated floor (LG, LG-2, UG, 4F, 5F, 5M, 6F, 7F, 8F, 9F) at `apps/frontend/src/lib/narrationCatalog.json`
+- [x] T032 [US4] Update verify-content.mjs to validate every catalog audioSrc and transcriptSrc against `apps/frontend/public`; skip schema validation with warning when legacy schema is absent at `scripts/verify-content.mjs`
 
-**Checkpoint**: Content can be extended without changing playback logic.
+**Checkpoint**: User Story 4 should be fully functional and testable independently
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-**Purpose**: Validate the whole feature and the documented workflows.
+**Purpose**: Improvements and verification that affect multiple user stories
 
-- [X] T037 [P] Run `npm --prefix apps/frontend run test` and fix any narration regressions; confirm the three `FloatingMenu` transcript-accessibility failures are gone and no new failures were introduced
-- [X] T038 [P] Run `npm run lint` and `npm run build` and fix any errors in `apps/frontend/src/`
-- [X] T039 [P] Run `npm run verify:content` against `scripts/verify-content.mjs` and confirm it reports all ten recordings and ten transcripts without crashing
-- [X] T040 [P] Execute every scenario in `specs/029-tour-guide-narration/quickstart.md` at desktop, tablet, and mobile widths, including keyboard-only operation and the compact-sidebar playback check
-- [X] T041 [P] Confirm `apps/frontend/package.json` has no new dependencies and that `git status` shows the narration assets, transcripts, source changes, and documentation staged for the feature
+- [x] T033 [P] Run frontend test suite and confirm no new failures introduced at `npm --prefix apps/frontend run test`
+- [x] T034 [P] Run lint and fix any linting errors at `npm run lint`
+- [x] T035 [P] Run production build at `npm run build`
+- [x] T036 [P] Run content verification to confirm all 10 MP3 and 10 transcript files are accounted for at `npm run verify:content`
+- [x] T037 Manually verify mobile, tablet, and desktop layouts plus keyboard-only operation for all narration and transcript controls
+- [x] T038 Track recording assets (`public/voice/`) and transcripts (`public/transcripts/`) in version control as part of the feature change
 
 ---
 
@@ -163,73 +159,49 @@ This is the existing web application. All feature work is in `apps/frontend/`; d
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: No dependencies.
-- **Foundational (Phase 2)**: Depends on Setup. Blocks all user stories.
-- **User Stories (Phases 3-6)**: All depend on Foundational.
-  - US1 (P1) is the MVP and should be completed first.
-  - US2 (P1) depends on US1's audio element.
-  - US3 (P2) depends on US1/US2's active narration and the foundational transcript loader.
-  - US4 (P2) depends only on the foundational catalog and can run alongside US1-US3.
-- **Polish (Phase 7)**: Depends on all desired stories.
+- **Setup (Phase 1)**: No dependencies — can start immediately
+- **Foundational (Phase 2)**: Depends on Setup completion — BLOCKS all user stories
+- **User Stories (Phase 3–6)**: All depend on Foundational phase completion
+  - User stories can proceed in parallel (if staffed) or sequentially in priority order (P1 → P2)
+  - Each story is independently testable
+- **Polish (Phase 7)**: Depends on all user stories being complete
 
 ### User Story Dependencies
 
-- **US1**: Needs T003-T014. No dependency on other stories.
-- **US2**: Needs US1 (T017-T020) for the audio element and status effects; adds pause, persistence, and restore behavior.
-- **US3**: Needs US1/US2 for the active narration prop; can start once T014 and T032 are unblocked.
-- **US4**: Needs only T006 and T007; independent of playback work.
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) — No dependencies on other stories
+- **User Story 2 (P1)**: Can start after Foundational (Phase 2) — May integrate with US1 but independently testable
+- **User Story 3 (P2)**: Can start after Foundational (Phase 2) — Depends on US1/US2 for active narration; independently testable
+- **User Story 4 (P2)**: Can start after Foundational (Phase 2) — Depends on catalog existing; independently testable
 
-### Within Each Story
+### Within Each User Story
 
-- Tests are written and observed failing before implementation.
-- Catalog data precedes the resolver.
-- Resolver precedes `TourContext` scene state.
-- Scene state precedes playback UI.
-- Persistence precedes restore behavior.
-- Transcript component precedes the Floating Menu integration.
+- Tests MUST be written and FAIL before implementation (Constitution III)
+- Foundational infrastructure before story-specific implementation
+- Core implementation before integration
+- Story complete before moving to next priority
 
 ### Parallel Opportunities
 
-- T001 and T002.
-- T003, T004, T005, and T011.
-- T006, T008, T009, and T010 after their test tasks.
-- T015 and T016.
-- T021, T022, and T023.
-- T029 and T030.
-- T034.
-- T037, T038, T039, T040, and T041.
+- All Setup tasks marked [P] can run in parallel
+- All Foundational tasks marked [P] can run in parallel (within Phase 2)
+- Once Foundational phase completes, all user stories can start in parallel (if team capacity allows)
+- All tests for a user story marked [P] can run in parallel
+- T028 and T029 (accordion reveal + compact mobile guard) are related but touch different class conditions; T028 can proceed while T029 is planned
+- Different user stories can be worked on in parallel by different team members
 
 ---
-
-## Parallel Example: Foundational Tests
-
-```bash
-Task: "Write narrationCatalog tests in apps/frontend/src/tests/narrationCatalog.test.js"
-Task: "Write narrationStorage tests in apps/frontend/src/tests/narrationStorage.test.js"
-Task: "Write transcripts tests in apps/frontend/src/tests/transcripts.test.js"
-Task: "Add scene-resolution tests to apps/frontend/src/tests/TourContext.test.jsx"
-```
 
 ## Parallel Example: User Story 1
 
 ```bash
-Task: "Add audio element and status tests to apps/frontend/src/tests/FloatingMenu.test.jsx"
-Task: "Create autoplay timing test in apps/frontend/src/tests/Panorama.test.jsx"
-```
+# Launch all tests for User Story 1 together:
+Task: "Add catalog test asserting all 10 IDs, floor defaults, unique numbers, and transcript-N pairing at apps/frontend/src/tests/narrationCatalog.test.js"
+Task: "Add resolver test for same-floor continuity, explicit scene changes, floor changes, and floors without narration at apps/frontend/src/tests/narrationCatalog.test.js"
 
-## Parallel Example: User Story 2
-
-```bash
-Task: "Add pause/resume/replay tests to apps/frontend/src/tests/FloatingMenu.test.jsx"
-Task: "Add pause and restore tests to apps/frontend/src/tests/TourContext.test.jsx"
-Task: "Add restored-floor test to apps/frontend/src/tests/PanoramaViewer.test.jsx"
-```
-
-## Parallel Example: User Story 3
-
-```bash
-Task: "Create NarrationTranscript tests in apps/frontend/src/tests/NarrationTranscript.test.jsx"
-Task: "Update transcript tests in apps/frontend/src/tests/FloatingMenu.test.jsx"
+# Launch implementation for User Story 1 together (independent files):
+Task: "Implement one-second initial autoplay delay for Lower Ground recording after viewer ready at apps/frontend/src/pages/Panorama.jsx"
+Task: "Implement destination floor recording start on floor change without added delay at apps/frontend/src/context/TourContext.jsx"
+Task: "Implement same-floor continuity so moving between panoramas does not restart the recording at apps/frontend/src/context/TourContext.jsx"
 ```
 
 ---
@@ -238,36 +210,45 @@ Task: "Update transcript tests in apps/frontend/src/tests/FloatingMenu.test.jsx"
 
 ### MVP First (User Story 1 Only)
 
-1. Complete Phase 1: Setup.
-2. Complete Phase 2: Foundational.
-3. Complete Phase 3: User Story 1.
-4. **STOP and VALIDATE**: Complete the instructions screen, confirm Recording_1 starts after one second, visit each floor, and confirm same-floor continuity.
-5. Demo the automatic narration before adding pause persistence or transcripts.
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational (CRITICAL — blocks all stories)
+3. Complete Phase 3: User Story 1
+4. **STOP and VALIDATE**: Test User Story 1 independently
+5. Deploy/demo if ready
 
 ### Incremental Delivery
 
-1. Setup + Foundational → catalog, storage, and scene tracking ready.
-2. US1 → automatic per-floor narration (MVP).
-3. US2 → pause, floor replacement, refresh restore, and blocked autoplay fallback.
-4. US3 → matching transcripts and accessible transcript control.
-5. US4 → verified catalog and maintainer documentation.
-6. Polish → full suite, lint, build, content verification, and quickstart validation.
+1. Complete Setup + Foundational → Foundation ready
+2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
+3. Add User Story 2 → Test independently → Deploy/Demo
+4. Add User Story 3 → Test independently → Deploy/Demo (includes FR-025 accordion reveal)
+5. Add User Story 4 → Test independently → Deploy/Demo
+6. Each story adds value without breaking previous stories
 
 ### Parallel Team Strategy
 
-After Foundational:
+With multiple developers:
 
-- Developer A: US1 playback element and autoplay.
-- Developer B: US2 persistence and restore behavior after US1's audio element lands.
-- Developer C: US3 transcript component and Floating Menu integration.
-- Developer D: US4 content verification and documentation.
+1. Team completes Setup + Foundational together
+2. Once Foundational is done:
+   - Developer A: User Story 1
+   - Developer B: User Story 2
+   - Developer C: User Story 3
+   - Developer D: User Story 4
+3. Stories complete and integrate independently
 
 ---
 
 ## Notes
 
-- `[P]` tasks touch different files and can run together.
-- `[USx]` labels map tasks to `spec.md` user stories.
-- The six pre-existing `Sidebar` test failures are outside this feature; do not fix them here unless they block the narration suites.
-- `npm run verify:content` must stop crashing on the missing legacy schema before it can validate the narration assets.
-- Commit after each task or logical group, and keep the assets out of the ignore list.
+- [P] tasks = different files, no dependencies on incomplete tasks
+- [Story] label maps task to specific user story for traceability
+- Setup and Foundational phases carry NO story label
+- User Story phases (US1–US4) MUST carry the corresponding [USx] label
+- Polish phase carries NO story label
+- Each user story should be independently completable and testable
+- Verify tests fail before implementing
+- Commit after each task or logical group
+- Stop at any checkpoint to validate story independently
+- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+- FR-025 (accordion reveal) is implemented in T028 (tablet/desktop) and T029 (compact mobile guard)

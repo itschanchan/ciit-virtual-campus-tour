@@ -16,6 +16,12 @@
 - Q: Should the feature keep the current flat `public/voice/` layout, and how should it handle missing transcripts? → A: Keep the flat layout; treat transcripts as a content dependency, with a catalog pairing and a clear fallback until transcript text is supplied.
 - Q: When the visitor changes floors, should the old recording keep playing or be replaced? What should refresh restore? → A: Per-floor replacement with global pause; changing floors replaces the recording unless paused; refresh restores the current floor and paused/playing state; active playback restarts the floor recording from the beginning; blocked autoplay falls back to a manual play prompt.
 
+### Session 2026-11-25
+
+- Q: Should the transcript accordion reveal — where the floating menu animates from its pill shape to a rounded rectangle — apply on every viewport, or only on viewports where the menu keeps its pill shape (tablet and desktop), leaving compact mobile unchanged? → A: Tablet and desktop only; compact mobile keeps the existing menu shape and behavior without the accordion reveal.
+- Q: Should the accordion animation include vertical height expansion (the menu panel growing to fit the transcript content) in addition to the pill-to-rounded-rectangle shape transition, or should it be shape-transition only? → A: Shape + height expansion — the menu grows vertically to fit the transcript content, combined with the pill-to-rounded-rectangle shape transition.
+- Q: Should the floating menu's vertical accordion animation replicate the sidebar's exact CSS transition pattern (`duration-300 ease-in-out`), or should it keep the current `max-height` approach but with adjusted timing and conflict guards? → A: Replicate sidebar timing pattern — `max-h-[4rem]` → `max-h-[40rem]` with `transition-all duration-300 ease-in-out`, `overflow-hidden`, `prefers-reduced-motion` support, and a 320ms toggle guard to prevent rapid-toggle conflicts.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Floor narration starts automatically (Priority: P1)
@@ -135,6 +141,7 @@ A content maintainer can open a single tour guide catalog and see which recordin
 - **FR-022**: The system MUST select the transcript whose numeric suffix matches the active recording's numeric suffix.
 - **FR-023**: The system MUST keep the one-second delay only for the initial Lower Ground recording; later floor changes start without an added delay.
 - **FR-024**: The system MUST treat transcript text as a content dependency: the catalog MUST pair each `voice-N` with `transcript-N`, and the Floating Menu MUST show a fallback until the transcript text is supplied.
+- **FR-025**: When the transcript is revealed on tablet and desktop viewports, the Floating Menu MUST animate smoothly from its pill shape to a rounded rectangle while expanding vertically to fit the transcript content; when the transcript is collapsed, it MUST return to its original pill shape and height. The animation MUST use `duration-300 ease-in-out` matching the sidebar's transition pattern. Compact mobile viewports keep the existing menu shape and behavior without the accordion reveal.
 
 ### Key Entities *(include if feature involves data)*
 
