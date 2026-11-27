@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import AdminLayout from '../components/AdminLayout'
 import OverviewPanel from '../components/admin/OverviewPanel'
+import AnalyticsPanel from '../components/admin/AnalyticsPanel'
 import GalleryManagerPanel from '../components/admin/GalleryManagerPanel'
 import LocationsPanel from '../components/admin/LocationsPanel'
 import SettingsPanel from '../components/admin/SettingsPanel'
@@ -18,6 +19,7 @@ const SECTIONS = [
   { id: 'gallery', label: 'Gallery Manager' },
   { id: 'locations', label: 'Locations' },
   { id: 'settings', label: 'Settings' },
+  { id: 'analytics', label: 'Analytics' },
 ]
 
 function DashboardSection({ section, user, content, commit, onNavigate, onResetAll }) {
@@ -39,6 +41,10 @@ function DashboardSection({ section, user, content, commit, onNavigate, onResetA
         onResetAll={onResetAll}
       />
     )
+  }
+
+  if (section === 'analytics') {
+    return <AnalyticsPanel content={content} />
   }
 
   return (
