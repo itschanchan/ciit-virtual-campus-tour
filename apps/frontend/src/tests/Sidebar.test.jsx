@@ -126,7 +126,7 @@ describe('Sidebar', () => {  beforeEach(() => {
     expect(screen.queryByText('No panorama available yet.')).not.toBeInTheDocument()
   })
 
-  it('shows a locked-floor popover immediately and keeps it for two seconds', () => {
+  it('shows a locked-floor popover immediately and keeps it for 1500ms', () => {
     render(
       <Sidebar
         locations={[firstLocation]}
@@ -141,7 +141,7 @@ describe('Sidebar', () => {  beforeEach(() => {
     expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
 
     act(() => {
-      vi.advanceTimersByTime(1999)
+      vi.advanceTimersByTime(1499)
     })
 
     expect(screen.getByRole('status')).toHaveTextContent('1F is coming soon.')
@@ -173,7 +173,7 @@ describe('Sidebar', () => {  beforeEach(() => {
     expect(screen.queryByText('is coming soon.')).not.toBeInTheDocument()
 
     act(() => {
-      vi.advanceTimersByTime(2000)
+      vi.advanceTimersByTime(1500)
     })
 
     // The popover is exiting; the floor label must survive the transition.
@@ -213,7 +213,7 @@ describe('Sidebar', () => {  beforeEach(() => {
 
     // The first timer would have fired here; the restarted timer must not.
     act(() => {
-      vi.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(500)
     })
 
     expect(screen.getByRole('status')).toHaveTextContent('2F is coming soon.')
