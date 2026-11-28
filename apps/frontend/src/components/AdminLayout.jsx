@@ -1,4 +1,18 @@
-export default function AdminLayout({ user, onLogout, children }) {
+const DEFAULT_SECTIONS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'gallery', label: 'Gallery Manager' },
+  { id: 'locations', label: 'Locations' },
+  { id: 'settings', label: 'Settings' },
+]
+
+export default function AdminLayout({
+  user,
+  onLogout,
+  children,
+  sections = DEFAULT_SECTIONS,
+  activeSection = 'overview',
+  onSelect,
+}) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col md:flex-row">
@@ -12,25 +26,22 @@ export default function AdminLayout({ user, onLogout, children }) {
                 </div>
               </div>
 
-              <nav className="space-y-2">
-                <button
-                  type="button"
-                  className="w-full rounded-lg bg-cyan-500/20 px-3 py-2 text-left text-sm text-cyan-200 ring-1 ring-cyan-400/40"
-                >
-                  Overview
-                </button>
-                <button
-                  type="button"
-                  className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800"
-                >
-                  Gallery Manager
-                </button>
-                <button
-                  type="button"
-                  className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800"
-                >
-                  Settings
-                </button>
+              <nav className="grid gap-2 sm:grid-cols-2 md:grid-cols-1" aria-label="Admin sections">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    type="button"
+                    onClick={() => onSelect?.(section.id)}
+                    aria-current={activeSection === section.id ? 'page' : undefined}
+                    className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+                      activeSection === section.id
+                        ? 'bg-cyan-500/20 text-cyan-200 ring-1 ring-cyan-400/40'
+                        : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    {section.label}
+                  </button>
+                ))}
               </nav>
 
               <div className="mt-8 rounded-xl border border-slate-700 bg-slate-950/60 p-3">
