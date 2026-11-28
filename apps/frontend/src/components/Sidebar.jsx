@@ -6,13 +6,12 @@ import { FLOOR_SEQUENCE, FLOOR_SCENE_MAP } from "../lib/floorSceneMap";
 import { isCompactViewport } from "../lib/viewport";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
-import LanguageIcon from "@mui/icons-material/Language";
 import ReplyIcon from "@mui/icons-material/Reply";
 import AboutDialog from "./AboutDialog";
 import ShareDialog from "./ShareDialog";
 
 const LOCKED_FLOORS = new Set(["1F", "2F", "3F", "10F", "11F"]);
-const POPOVER_HIDE_DELAY_MS = 2000;
+const POPOVER_HIDE_DELAY_MS = 1500;
 const ACKNOWLEDGEMENT_MS = 320;
 
 const PAIRED_FLOORS = [["5F", "5M"]];
@@ -434,20 +433,20 @@ export default function Sidebar({
   const shellState = open ? "w-80 translate-x-0" : "w-0 -translate-x-full";
   const contentState = open ? "opacity-100" : "opacity-0";
   const togglePosition = open
-    ? "left-80 compact:left-[min(20rem,86vw)]"
+    ? "left-80 compact:left-[min(18rem,80vw)]"
     : "left-0";
 
   return (
     <>
       <aside
         id="location-sidebar"
-        className={`border-line bg-surface/86 shadow-sidebar narrow:bg-surface/86 compact:w-[min(20rem,86vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r transition-all duration-300 ease-in-out ${shellState}`}
+        className={`border-line bg-surface/86 shadow-sidebar narrow:bg-surface/86 compact:w-[min(18rem,80vw)] narrow:w-full compact:shadow-sidebar narrow:shadow-sidebar narrow:z-50 absolute top-0 bottom-0 left-0 z-30 overflow-hidden border-r transition-all duration-300 ease-in-out ${shellState}`}
         aria-label="Campus floors"
         aria-hidden={!open}
         inert={!open}
       >
         <div
-          className={`compact:w-[min(20rem,86vw)] narrow:w-full relative flex h-full w-80 flex-col transition-opacity duration-200 ${contentState}`}
+          className={`compact:w-[min(18rem,80vw)] narrow:w-full relative flex h-full w-80 flex-col transition-opacity duration-200 ${contentState}`}
         >
           {open && (
             <button

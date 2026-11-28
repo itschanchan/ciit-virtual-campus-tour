@@ -74,6 +74,7 @@ A visitor who has already read the message dismisses it early using an on-screen
 - **FR-003**: The notification MUST auto-hide after its configured display period without showing any additional or repeated message before disappearing.
 - **FR-004**: When a visitor selects a different off-limits floor while a notification is visible, the system MUST replace the notification content with the latest floor and MUST keep only one notification visible.
 - **FR-005**: When a visitor activates the same off-limits floor repeatedly, the system MUST restart the display period without creating a second notification.
+- **FR-010**: When multiple off-limits floor selections occur in rapid succession, the system MUST honor the first selection and ignore subsequent selections until the current notification hides or is dismissed.
 - **FR-006**: When the visitor dismisses the notification (via close action or keyboard), the system MUST remove it immediately and cancel any pending auto-hide.
 - **FR-007**: When the floor list is closed, the system MUST dismiss any visible notification and cancel any pending notification.
 - **FR-008**: The notification MUST be announced to assistive technology exactly once per activation, with the full floor label included.
@@ -91,14 +92,25 @@ A visitor who has already read the message dismisses it early using an on-screen
 
 - **SC-001**: 100% of off-limits floor selections display exactly one complete notification.
 - **SC-002**: 0 occurrences of placeholder, blank, or duplicate notification text observed from appearance to disappearance across all tested selections.
-- **SC-003**: The notification disappears on its own within 2.5 seconds of being shown, unless the visitor dismisses or replaces it first.
+- **SC-003**: The notification disappears on its own after 1500ms (1.5 seconds) of being shown, unless the visitor dismisses or replaces it first.
 - **SC-004**: 100% of rapid multi-floor selections show only the most recently selected floor's label.
 - **SC-005**: 100% of deliberate dismissals and floor-list closures result in no notification reappearing.
+
+## Clarifications
+
+### Session 2026-11-27
+
+- Q: How should the system enforce "exactly one notification" at a time — should the notification component be a singleton that updates in place, or should a new notification replace the old one by unmounting the previous? → A: Replace pattern — unmount previous notification, mount new one (cleaner React lifecycle)
+- Q: What should happen if the selected off-limits floor has a missing or empty label — should the notification show a generic fallback like "Floor is coming soon" or should the selection be ignored? → A: Retain the floor identifier (data integrity: all off-limits floors must have valid labels)
+- Q: What specific accessibility implementation should the notification use for screen reader announcements — a polite live region, assertive live region, or a toast-like role with aria-live? → A: Retain its current behavior (no accessibility changes; fix only the duplicate message)
+- Q: What is the exact display period for the off-limits notification — the spec says "approximately two seconds" and "within 2.5 seconds"; should this be a precise value like 2000ms? → A: 1500ms (1.5 seconds) — shorter, feels snappier for mobile
+- Q: How should simultaneous rapid selections (race conditions) be handled — if two selection events fire in the same event loop tick, should the last one win, first one win, or should they be debounced? → A: First selection wins — ignore subsequent selections until current notification hides
 
 ## Assumptions
 
 - The defect is limited to the transient "coming soon" notification shown for off-limits floors; floor selection and the rest of the tour are unchanged.
-- The existing display period of approximately two seconds remains the intended behavior.
+- The display period is 1500ms (1.5 seconds), shorter than the previous approximate two seconds for a snappier mobile experience.
 - The set of off-limits floors (currently 1F, 2F, 3F, 10F, and 11F) and the message wording remain unchanged; only the duplicate/placeholder presentation is fixed.
 - Visitors have a standard modern browser with an accessible name and live-region support for screen readers.
 - The existing floor list and notification component are reused rather than redesigned.
+- The notification follows a replace pattern: when a new selection occurs, the previous notification unmounts and a new one mounts, ensuring only one exists at a time.
