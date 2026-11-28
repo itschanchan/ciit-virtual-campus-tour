@@ -1,5 +1,6 @@
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useTour } from "../context/useTour";
+import { trackFloorView, trackLocationView } from "../lib/analytics";
 import {
   getFloorForSceneId,
   getFloorIndex,
@@ -20,6 +21,8 @@ export default function Panorama() {
     playNarration,
   } = useTour();
   const [viewerReady, setViewerReady] = useState(false);
+  const lastTrackedFloor = useRef(null);
+  const lastTrackedLocation = useRef(null);
 
   useEffect(() => {
     if (!currentLocation) {
@@ -72,6 +75,16 @@ export default function Panorama() {
 
     const floorIndex = getFloorIndex(floor);
     const location = locations.find((loc) => loc.order === floorIndex);
+
+    if (lastTrackedFloor.current !== floor) {
+      lastTrackedFloor.current = floor;
+      trackFloorView({ floor, locationId: location?.id, sceneId });
+    }
+
+    if (location && lastTrackedLocation.current !== location.id) {
+      lastTrackedLocation.current = location.id;
+      trackLocationView({ locationId: location.id, floor, sceneId });
+    }
 
     // Guard: skip if already at the target location to prevent
     // selectLocation → re-render → handleSceneChange → selectLocation loops.

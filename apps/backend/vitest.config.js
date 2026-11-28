@@ -9,6 +9,7 @@ export default defineConfig({
       NODE_ENV: 'test',
       JWT_SECRET: 'test-only-jwt-secret',
       ACCESS_TOKEN_SECRET: 'test-only-access-token-secret',
+      REFRESH_TOKEN_SECRET: 'test-only-refresh-token-secret',
     },
   },
 })
